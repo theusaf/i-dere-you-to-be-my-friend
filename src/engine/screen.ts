@@ -27,7 +27,7 @@ export abstract class GameScreen {
    */
   dispose(): void {
     this.app?.stage.removeChild(this.container!);
-  };
+  }
 
   /**
    * Called when the screen becomes active
@@ -35,10 +35,14 @@ export abstract class GameScreen {
    * @param app - The PixiJS application
    * @param gameManager - The game manager
    */
-  initialize(app: PIXI.Application, gameManager: GameManager): void {
+  initialize(
+    app: PIXI.Application,
+    gameManager: GameManager,
+    container?: RenderLayer
+  ): void {
     this.app = app;
     this.gameManager = gameManager;
-    this.container = new RenderLayer(app, 1920, 1080);
+    this.container = container ?? new RenderLayer(app, 1920, 1080);
     this.app.stage.addChild(this.container);
   }
 
