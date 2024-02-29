@@ -1,0 +1,1 @@
+POWERSHELL .\entry.ps1

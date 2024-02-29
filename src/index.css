@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+/* Credits to https://stackoverflow.com/a/20593342/5844241 */
+#pixi-engine > canvas,
+#pixi-ui > .above-canvas {
+  width: 100vw !important;
+  height: 56.25vw !important; /* height:width ratio = 9/16 = .5625  */
+  max-height: 100vh !important;
+  max-width: 177.78vh !important; /* 16/9 = 1.778 */
+  margin: auto;
+  position: absolute;
+  top: 0;
+  bottom: 0; /* vertical center */
+  left: 0;
+  right: 0; /* horizontal center */
+}
