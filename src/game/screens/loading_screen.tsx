@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { GameManager, GameScreen } from "../../engine/screen";
+import { GameManager, GameScreen, UIOutput } from "../../engine/screen";
 import RenderLayer from "../../engine/render_layer";
 
 export class LoadingScreen extends GameScreen {
@@ -22,10 +22,18 @@ export class LoadingScreen extends GameScreen {
   }
 
   update(_: number): void {
-    // TODO: render stuff
+    // TODO: render stuff?
   }
 
-  getUI(): JSX.Element | null {
-    return null;
+  getUI(): UIOutput | null {
+    return {
+      main: (
+        <div className="pointer-events-auto h-full flex flex-col items-center">
+          <div className="m-auto flex-1 flex flex-row items-center">
+            <span className="text-white text-center text-6xl">Loading...</span>
+          </div>
+        </div>
+      ),
+    };
   }
 }

@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "Pixelify Sans";
+  src: url("/public/assets/fonts/PixelifySansVariable.ttf");
+}
+
 html,
 body,
 #root {

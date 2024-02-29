@@ -1,5 +1,16 @@
 import * as PIXI from "pixi.js";
 
+export interface UIOutput {
+  /**
+   * What to render above the main canvas.
+   */
+  main?: JSX.Element;
+  /**
+   * What to render above the entire screen.
+   */
+  screen?: JSX.Element;
+}
+
 /**
  * Represents a screen in the game.
  *
@@ -38,7 +49,7 @@ export abstract class GameScreen {
    * This is useful for things like menus, and other UI elements.
    * This UI is overlaid on top of the PixiJS canvas.
    */
-  abstract getUI(): JSX.Element | null;
+  abstract getUI(): UIOutput | null;
 }
 
 /**
