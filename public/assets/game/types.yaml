@@ -1,36 +1,88 @@
 # TODO: In the future, make these things translatable
 # List from https://the-dere-types.fandom.com/wiki/Category:Dere
 
+# Type weaknesses somewhat made up arbitrarily. I just put down whatever I thought felt right.
+
 bakadere:
   name: Bakadere
   resists:
-    -
+    - tsundere
+    - yandere
   weak_to:
-    -
+    - kuudere
+    - gandere
 
 tsundere:
   name: Tsundere
+  resists:
+    - deredere
+    - sdere
+  weak_to:
+    - mdere
+    - bakadere
 
 yandere:
   name: Yandere
+  resists:
+    - sdere
+    - bokodere
+  weak_to:
+    - kuudere
+    - mdere
 
 sdere:
   name: S Dere
+  resists:
+    - mdere
+    - kuudere
+  weak_to:
+    - yandere
+    - bakadere
 
 kuudere:
   name: Kuudere
+  resists:
+    - yandere
+    - tsundere
+  weak_to:
+    - gandere
+    - bokodere
 
 mdere:
   name: M Dere
+  resists:
+    - bokodere
+    - sdere
+  weak_to:
+    - deredere
+    - bakadere
 
 gandere:
   name: Gandere
+  resists:
+    - kuudere
+    - tsundere
+  weak_to:
+    - sdere
+    - deredere
 
 bokodere:
   name: Bokodere
+  resists:
+    - yandere
+  weak_to:
+    - gandere
+    - sdere
+    - kuudere
 
-derere:
+deredere:
   name: Deredere
+  resists:
+    - bakadere
+    - tsundere
+  weak_to:
+    - yandere
+    - kuudere
 
 # The following are not planned to be implemented for the basic game
 # (dere are too many of them!)
