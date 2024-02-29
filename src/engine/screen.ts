@@ -50,9 +50,10 @@ export abstract class GameScreen {
   /**
    * Called every frame - should be used for rendering and time-based logic
    *
-   * @param delta - The time since the last frame in milliseconds
+   * @param deltaMs - The time since the last frame in milliseconds
+   * @param delta - The delta in terms of speed (fps)
    */
-  abstract update(delta: number): void;
+  abstract update(deltaMs: number, delta?: number): void;
 
   /**
    * Returns the React UI for the screen.
@@ -76,7 +77,7 @@ export class GameManager {
   }
 
   executeGameLoop(delta: number): void {
-    this.currentScreen?.update(delta);
+    this.currentScreen?.update(this.app.ticker.deltaMS, delta);
   }
 
   /**
