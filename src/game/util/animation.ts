@@ -21,18 +21,20 @@ type AnimationValues = Record<string, number>;
 /**
  * A class for creating animations.
  */
-export class GameAnimation<T extends AnimationValues> extends EventTarget {
+export class GameAnimation<
+  T extends AnimationValues = AnimationValues,
+> extends EventTarget {
   /**
    * The current progress of the animation as a percentage (0-1)
    */
   progress: number = 0;
   currentTime: number = 0;
 
-  startValues: AnimationValues;
-  endValues: AnimationValues;
-  currentValues: AnimationValues;
+  startValues: T;
+  endValues: T;
+  currentValues: T;
   duration: number;
-  easing: (t: number) => number = (n) => n;
+  easing: (t: number) => number = easeMethod.linear;
 
   /**
    * @param startValues The initial values for the animation
@@ -42,7 +44,7 @@ export class GameAnimation<T extends AnimationValues> extends EventTarget {
    */
   constructor(
     startValues: T,
-    endValues: Record<keyof typeof startValues, number>,
+    endValues: T,
     duration: number,
     easing?: (t: number) => number
   ) {
@@ -63,16 +65,16 @@ export class GameAnimation<T extends AnimationValues> extends EventTarget {
    *
    * @param delta - The time since the last frame in milliseconds
    */
-  update(delta: number): AnimationValues {
+  update(delta: number): T {
     this.currentTime += delta;
     this.progress = Math.min(this.currentTime / this.duration, 1);
     const easedProgress = this.easing(this.progress);
-    this.currentValues = {};
+    this.currentValues = {} as T;
     for (const key in this.startValues) {
       const startValue = this.startValues[key],
         endValue = this.endValues[key];
-      this.currentValues[key] =
-        startValue + (endValue - startValue) * easedProgress;
+      this.currentValues[key] = (startValue +
+        (endValue - startValue) * easedProgress) as T[Extract<keyof T, string>];
     }
     this.dispatchEvent(
       new CustomEvent(GameAnimationEvents.onUpdate, {
@@ -92,7 +94,16 @@ export class GameAnimation<T extends AnimationValues> extends EventTarget {
    * Resets/starts the animation.
    */
   reset(): void {
-    this.currentTime = Date.now();
+    this.currentTime = 0;
     this.dispatchEvent(new CustomEvent(GameAnimationEvents.onStart));
   }
 }
+
+export const easeMethod = {
+  linear(x: number): number {
+    return x;
+  },
+  easeInQuart(x: number): number {
+    return x * x * x * x;
+  },
+};
