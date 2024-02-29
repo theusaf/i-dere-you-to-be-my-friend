@@ -13,8 +13,8 @@ const enum BattleScreenState {
 export class BattleScreen extends GameScreen {
   state: BattleScreenState = BattleScreenState.loadingIn;
 
-  transitionGraphicsTop: PIXI.Graphics | null = null;
-  transitionGraphicsBottom: PIXI.Graphics | null = null;
+  transitionGraphicsTop?: PIXI.Graphics;
+  transitionGraphicsBottom?: PIXI.Graphics;
   transitionAnimation: GameAnimation<{
     distance: number;
   }> = new GameAnimation(
@@ -23,9 +23,10 @@ export class BattleScreen extends GameScreen {
     2000,
     easeMethod.easeInQuart
   );
+  battleGraphicsCharacterShadow?: PIXI.Graphics;
+  battleGraphicsEnemyShadow?: PIXI.Graphics;
 
-  initialize(app: PIXI.Application, gameManager: GameManager): void {
-    super.initialize(app, gameManager, new RenderLayer(app, 40));
+  private initializeTransitionGraphics() {
     this.transitionGraphicsTop = new PIXI.Graphics()
       .beginFill(ColorScheme.dark)
       .drawPolygon(
@@ -53,6 +54,33 @@ export class BattleScreen extends GameScreen {
     // add all graphics to screen
     this.container!.addChild(this.transitionGraphicsTop);
     this.container!.addChild(this.transitionGraphicsBottom);
+  }
+
+  private initializeBattleGraphics() {
+    const ellipse = new PIXI.Ellipse(0, 0, 3, 1);
+    this.battleGraphicsCharacterShadow = new PIXI.Graphics()
+      .beginFill(ColorScheme.dark, 0.3)
+      .drawShape(ellipse)
+      .endFill();
+    this.battleGraphicsEnemyShadow = new PIXI.Graphics()
+      .beginFill(ColorScheme.dark, 0.3)
+      .drawShape(ellipse)
+      .endFill();
+    this.battleGraphicsCharacterShadow.x = 10;
+    this.battleGraphicsCharacterShadow.y = 17;
+    this.battleGraphicsCharacterShadow.scale.set(1.5);
+    this.battleGraphicsEnemyShadow.x = 30;
+    this.battleGraphicsEnemyShadow.y = 7;
+
+    // add to screen
+    this.container!.addChild(this.battleGraphicsCharacterShadow);
+    this.container!.addChild(this.battleGraphicsEnemyShadow);
+  }
+
+  initialize(app: PIXI.Application, gameManager: GameManager): void {
+    super.initialize(app, gameManager, new RenderLayer(app, 40));
+    this.initializeTransitionGraphics();
+    this.initializeBattleGraphics();
   }
 
   update(delta: number): void {
