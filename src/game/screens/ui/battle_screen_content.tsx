@@ -4,6 +4,7 @@ import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { BattleScreen, BattleScreenState } from "../battle_screen";
 import { HealthBar } from "../../../engine/components/health_bar";
 import { TextActionButton } from "../../../engine/components/action_button";
+import { AnimatedTextController } from "../../../engine/components/animated_text_container";
 
 export interface BattleScreenContentProps {
   state: BattleScreen;
@@ -71,27 +72,43 @@ function UserViewButtonController(): JSX.Element {
   const className = "align-middle flex flex-col place-content-center";
 
   let buttons: JSX.Element;
+  let message: string;
   switch (state) {
     case UserViewControllerState.index:
       buttons = <FightButtons className={className} setState={setState} />;
+      message = "What do you want to do?";
       break;
     case UserViewControllerState.fight:
       buttons = <div>Fight</div>;
+      message = "Fight";
       break;
     case UserViewControllerState.friends:
       buttons = <div>Friends</div>;
+      message = "Friends";
       break;
     case UserViewControllerState.actions:
       buttons = <div>Actions</div>;
+      message = "Actions";
       break;
     case UserViewControllerState.run:
-      buttons = <></>;
+      message = "";
+      buttons = (
+        <AnimatedTextController
+          className="w-full"
+          onCompleteAction={() => {
+            // TODO: Navigate to the correct place
+            setState(UserViewControllerState.index);
+          }}
+        >
+          Your power of friendship is too weak.
+        </AnimatedTextController>
+      );
       break;
   }
 
   return (
     <div
-      className="pl-2 flex flex-col h-full pointer-events-auto"
+      className="pl-2 flex flex-col h-full pointer-events-auto text-2xl"
       style={{
         flex: 4,
       }}
@@ -109,12 +126,10 @@ function UserViewButtonController(): JSX.Element {
           </>
         )}
         {state !== UserViewControllerState.run && (
-          <span className="text-xl">What do you want to do?</span>
+          <span className="text-xl">{message}</span>
         )}
       </span>
-      <div className="grid grid-cols-2 grid-rows-2 gap-2 pointer-events-auto text-2xl text-center h-full">
-        {buttons}
-      </div>
+      {buttons}
     </div>
   );
 }
@@ -126,7 +141,7 @@ interface UserViewButtonProps {
 
 function FightButtons({ className, setState }: UserViewButtonProps) {
   return (
-    <>
+    <div className="grid grid-cols-2 grid-rows-2 gap-2 text-center h-full">
       <TextActionButton
         className={className}
         onClick={() => setState(UserViewControllerState.fight)}
@@ -151,7 +166,7 @@ function FightButtons({ className, setState }: UserViewButtonProps) {
       >
         Run
       </TextActionButton>
-    </>
+    </div>
   );
 }
 
