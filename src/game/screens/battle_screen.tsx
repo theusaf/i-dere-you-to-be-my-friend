@@ -3,8 +3,9 @@ import { GameManager, GameScreen, UIOutput } from "../../engine/screen";
 import RenderLayer from "../../engine/render_layer";
 import { ColorScheme } from "../util/style";
 import { GameAnimation, easeMethod } from "../util/animation";
+import { BattleScreenContent } from "./ui/battle_screen_content";
 
-const enum BattleScreenState {
+export const enum BattleScreenState {
   loadingIn,
   battle,
   loadingOut,
@@ -57,7 +58,7 @@ export class BattleScreen extends GameScreen {
   }
 
   private initializeBattleGraphics() {
-    const ellipse = new PIXI.Ellipse(0, 0, 3, 1);
+    const ellipse = new PIXI.Ellipse(0, 0, 6, 2);
     this.battleGraphicsCharacterShadow = new PIXI.Graphics()
       .beginFill(ColorScheme.dark, 0.3)
       .drawShape(ellipse)
@@ -66,7 +67,7 @@ export class BattleScreen extends GameScreen {
       .beginFill(ColorScheme.dark, 0.3)
       .drawShape(ellipse)
       .endFill();
-    this.battleGraphicsCharacterShadow.x = 10;
+    this.battleGraphicsCharacterShadow.x = 12;
     this.battleGraphicsCharacterShadow.y = 17;
     this.battleGraphicsCharacterShadow.scale.set(1.5);
     this.battleGraphicsEnemyShadow.x = 30;
@@ -98,6 +99,8 @@ export class BattleScreen extends GameScreen {
     }
   }
   getUI(): UIOutput | null {
-    return null;
+    return {
+      main: <BattleScreenContent state={this} />,
+    };
   }
 }

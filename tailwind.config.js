@@ -7,6 +7,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ["Pixelify Sans", ...defaultTheme.fontFamily.sans],
+        numerals: ["DotGothic16", ...defaultTheme.fontFamily.sans],
       },
     },
   },

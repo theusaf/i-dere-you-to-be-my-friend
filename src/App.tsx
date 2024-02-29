@@ -1,5 +1,12 @@
 import * as PIXI from "pixi.js";
-import { createContext, useRef, useEffect, useState, forwardRef } from "react";
+import {
+  createContext,
+  useRef,
+  useEffect,
+  useState,
+  forwardRef,
+  useReducer,
+} from "react";
 import Game from "./Game";
 import { GameManager } from "./engine/screen";
 import { main } from "./game/main";
@@ -12,7 +19,8 @@ const PixiRenderer = forwardRef<HTMLCanvasElement>((props, ref) => {
 
 function App() {
   const pixiAppRef = useRef<HTMLCanvasElement>(null),
-    [gameManager, setGameManager] = useState<GameManager | null>(null);
+    [gameManager, setGameManager] = useState<GameManager | null>(null),
+    [, forceUpdate] = useReducer((x) => x + 1, 0);
 
   useEffect(() => {
     if (pixiAppRef.current) {
@@ -26,7 +34,8 @@ function App() {
         view: pixiAppRef.current,
       });
       (window as unknown as any).debugPixi = app;
-      const gameManager = new GameManager(app);
+      const callback = () => forceUpdate();
+      const gameManager = new GameManager(app, callback);
       main(gameManager);
       setGameManager(gameManager);
     }

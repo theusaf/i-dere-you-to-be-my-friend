@@ -70,9 +70,11 @@ export abstract class GameScreen {
 export class GameManager {
   currentScreen: GameScreen | null = null;
   app: PIXI.Application;
+  onScreenChange: () => void;
 
-  constructor(app: PIXI.Application) {
+  constructor(app: PIXI.Application, onScreenChange: () => void) {
     this.app = app;
+    this.onScreenChange = onScreenChange;
     app.ticker.add(this.executeGameLoop.bind(this));
   }
 
@@ -89,5 +91,6 @@ export class GameManager {
     this.currentScreen?.dispose();
     this.currentScreen = screen;
     this.currentScreen.initialize(this.app, this);
+    this.onScreenChange();
   }
 }

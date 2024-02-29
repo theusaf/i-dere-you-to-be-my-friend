@@ -7,6 +7,11 @@
   src: url("/public/assets/fonts/PixelifySansVariable.ttf");
 }
 
+@font-face {
+  font-family: "DotGothic16";
+  src: url("/public/assets/fonts/DotGothic16.ttf");
+}
+
 html,
 body,
 #root {
