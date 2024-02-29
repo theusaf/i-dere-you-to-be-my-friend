@@ -15,7 +15,7 @@ export function TextActionButton({
 }: ActionButtonProps): JSX.Element {
   return (
     <span
-      className={`${className ? `${className} ` : "bg-neutral-400 active:bg-neutral-600 outline-neutral-600 active:outline-neutral-400 text-white outline outline-4 p-2 m-1"}`}
+      className={`bg-neutral-400 active:bg-neutral-600 outline-neutral-600 active:outline-neutral-400 text-white outline outline-4 p-2 m-1 ${className ?? ""}`}
       onClick={onClick}
       onMouseOver={onMouseOver}
     >

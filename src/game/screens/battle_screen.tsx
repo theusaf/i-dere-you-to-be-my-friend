@@ -71,7 +71,7 @@ export class BattleScreen extends GameScreen {
     this.battleGraphicsCharacterShadow.y = 17;
     this.battleGraphicsCharacterShadow.scale.set(1.5);
     this.battleGraphicsEnemyShadow.x = 30;
-    this.battleGraphicsEnemyShadow.y = 7;
+    this.battleGraphicsEnemyShadow.y = 9;
 
     // add to screen
     this.container!.addChild(this.battleGraphicsCharacterShadow);

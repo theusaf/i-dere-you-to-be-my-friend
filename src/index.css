@@ -4,12 +4,12 @@
 
 @font-face {
   font-family: "Pixelify Sans";
-  src: url("/public/assets/fonts/PixelifySansVariable.ttf");
+  src: url("/assets/fonts/PixelifySansVariable.ttf");
 }
 
 @font-face {
   font-family: "DotGothic16";
-  src: url("/public/assets/fonts/DotGothic16.ttf");
+  src: url("/assets/fonts/DotGothic16.ttf");
 }
 
 html,
