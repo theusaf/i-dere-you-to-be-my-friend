@@ -13,7 +13,7 @@ export function MainMenuContent() {
         </div>
       </div>
       <div className="row-span-3 col-span-3 row-start-3 col-start-2 pointer-events-auto">
-        <div className="flex flex-col content-center h-full space-y-2 w-7/12 m-auto">
+        <div className="flex flex-col content-center h-full space-y-2 w-7/12 m-auto text-lg">
           <TextActionButton className="">Saves</TextActionButton>
           <TextActionButton className="">Continue</TextActionButton>
         </div>
