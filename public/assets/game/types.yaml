@@ -1,0 +1,9 @@
+# TODO: In the future, make these things translatable
+# List from https://the-dere-types.fandom.com/wiki/Category:Dere
+
+bakadere:
+  name: Bakadere
+  resists:
+    -
+  weak_to:
+    -
