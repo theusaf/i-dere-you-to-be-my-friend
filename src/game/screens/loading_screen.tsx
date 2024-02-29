@@ -1,24 +1,21 @@
 import * as PIXI from "pixi.js";
 import { GameManager, GameScreen, UIOutput } from "../../engine/screen";
-import RenderLayer from "../../engine/render_layer";
+import { ColorScheme } from "../util/style";
 
 export class LoadingScreen extends GameScreen {
-  container: RenderLayer | null = null;
-
   initialize(app: PIXI.Application, gameManager: GameManager): void {
     super.initialize(app, gameManager);
-    this.container = new RenderLayer(app, 1920, 1080);
-    app.stage.addChild(this.container);
 
     const graphics = new PIXI.Graphics();
-    graphics.beginFill(0x344ceb);
-    graphics.drawRect(0, 0, 1920, 1080);
+    graphics.beginFill(ColorScheme.background);
+    graphics.drawRect(
+      0,
+      0,
+      this.container!.worldWidth,
+      this.container!.worldHeight
+    );
     graphics.endFill();
-    this.container.addChild(graphics);
-  }
-
-  dispose(): void {
-    this.app?.stage.removeChild(this.container!);
+    this.container!.addChild(graphics);
   }
 
   update(_: number): void {

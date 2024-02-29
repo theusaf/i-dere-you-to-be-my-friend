@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import RenderLayer from "./render_layer";
 
 export interface UIOutput {
   /**
@@ -17,13 +18,16 @@ export interface UIOutput {
  * Handles PixiJS rendering, game logic, and React UI.
  */
 export abstract class GameScreen {
+  container: RenderLayer | null = null;
   app: PIXI.Application | null = null;
   gameManager: GameManager | null = null;
 
   /**
    * Called when the screen is deactivated
    */
-  abstract dispose(): void;
+  dispose(): void {
+    this.app?.stage.removeChild(this.container!);
+  };
 
   /**
    * Called when the screen becomes active
@@ -34,6 +38,8 @@ export abstract class GameScreen {
   initialize(app: PIXI.Application, gameManager: GameManager): void {
     this.app = app;
     this.gameManager = gameManager;
+    this.container = new RenderLayer(app, 1920, 1080);
+    this.app.stage.addChild(this.container);
   }
 
   /**
