@@ -1,8 +1,10 @@
 import * as PIXI from "pixi.js";
 import { createContext, useRef, useEffect, useState, forwardRef } from "react";
 import Game from "./Game";
+import { GameManager } from "./engine/screen";
+import { main } from "./game/main";
 
-const PixiAppContext = createContext<PIXI.Application | null>(null);
+export const GameManagerContext = createContext<GameManager | null>(null);
 
 const PixiRenderer = forwardRef<HTMLCanvasElement>((props, ref) => {
   return <canvas ref={ref} {...props} className="bg-white" />;
@@ -10,7 +12,7 @@ const PixiRenderer = forwardRef<HTMLCanvasElement>((props, ref) => {
 
 function App() {
   const pixiAppRef = useRef<HTMLCanvasElement>(null),
-    [pixiApp, setPixiApp] = useState<PIXI.Application | null>(null);
+    [gameManager, setGameManager] = useState<GameManager | null>(null);
 
   useEffect(() => {
     if (pixiAppRef.current) {
@@ -24,13 +26,14 @@ function App() {
         view: pixiAppRef.current,
       });
       (window as unknown as any).debugPixi = app;
-
-      setPixiApp(app);
+      const gameManager = new GameManager(app);
+      main(gameManager);
+      setGameManager(gameManager);
     }
   }, [pixiAppRef]);
 
   return (
-    <PixiAppContext.Provider value={pixiApp}>
+    <GameManagerContext.Provider value={gameManager}>
       <div
         id="pixi-engine"
         className="w-full h-full relative flex justify-center flex-col"
@@ -38,7 +41,7 @@ function App() {
         <PixiRenderer ref={pixiAppRef} />
         <Game />
       </div>
-    </PixiAppContext.Provider>
+    </GameManagerContext.Provider>
   );
 }
 

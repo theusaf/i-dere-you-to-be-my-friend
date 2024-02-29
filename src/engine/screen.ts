@@ -7,6 +7,7 @@ import * as PIXI from "pixi.js";
  */
 export abstract class GameScreen {
   app: PIXI.Application | null = null;
+  gameManager: GameManager | null = null;
 
   /**
    * Called when the screen is deactivated
@@ -17,9 +18,11 @@ export abstract class GameScreen {
    * Called when the screen becomes active
    *
    * @param app - The PixiJS application
+   * @param gameManager - The game manager
    */
-  initialize(app: PIXI.Application): void {
+  initialize(app: PIXI.Application, gameManager: GameManager): void {
     this.app = app;
+    this.gameManager = gameManager;
   }
 
   /**
@@ -35,7 +38,7 @@ export abstract class GameScreen {
    * This is useful for things like menus, and other UI elements.
    * This UI is overlaid on top of the PixiJS canvas.
    */
-  abstract getUI(): JSX.Element;
+  abstract getUI(): JSX.Element | null;
 }
 
 /**
@@ -62,6 +65,6 @@ export class GameManager {
   changeScreen(screen: GameScreen): void {
     this.currentScreen?.dispose();
     this.currentScreen = screen;
-    this.currentScreen.initialize(this.app);
+    this.currentScreen.initialize(this.app, this);
   }
 }
