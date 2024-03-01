@@ -2,7 +2,7 @@ import * as PIXI from "pixi.js";
 import { GameManager, GameScreen, UIOutput } from "../../engine/screen";
 import { MapScreenContent } from "./ui/map_screen_content";
 import RenderLayer from "../../engine/render_layer";
-import { MapData } from "../util/map";
+import { MAP_SIZE, MapData } from "../util/map";
 import { Direction } from "../util/direction";
 
 export class MapScreen extends GameScreen {
@@ -22,13 +22,16 @@ export class MapScreen extends GameScreen {
   /**
    * The x position of the player in the current map chunk.
    */
-  characterX: number = 0;
+  characterChunkX: number = 0;
   cacheCharacterX: number = 0;
   /**
    * The y position of the player in the current map chunk.
    */
-  characterY: number = 0;
+  characterChunkY: number = 0;
   cacheCharacterY: number = 0;
+
+  characterWorldX: number = 0;
+  characterWorldY: number = 0;
 
   keysDown: Set<string> = new Set();
 
@@ -61,25 +64,25 @@ export class MapScreen extends GameScreen {
   }
 
   get direction(): Direction {
-    if ("ArrowUp" in this.keysDown) {
-      if ("ArrowLeft" in this.keysDown) {
+    if ("ArrowUp" in this.keysDown || "KeyW" in this.keysDown) {
+      if ("ArrowLeft" in this.keysDown || "KeyA" in this.keysDown) {
         return Direction.upLeft;
-      } else if ("ArrowRight" in this.keysDown) {
+      } else if ("ArrowRight" in this.keysDown || "KeyD" in this.keysDown) {
         return Direction.upRight;
       } else {
         return Direction.up;
       }
-    } else if ("ArrowDown" in this.keysDown) {
-      if ("ArrowLeft" in this.keysDown) {
+    } else if ("ArrowDown" in this.keysDown || "KeyS" in this.keysDown) {
+      if ("ArrowLeft" in this.keysDown || "KeyA" in this.keysDown) {
         return Direction.downLeft;
-      } else if ("ArrowRight" in this.keysDown) {
+      } else if ("ArrowRight" in this.keysDown || "KeyD" in this.keysDown) {
         return Direction.downRight;
       } else {
         return Direction.down;
       }
-    } else if ("ArrowLeft" in this.keysDown) {
+    } else if ("ArrowLeft" in this.keysDown || "KeyA" in this.keysDown) {
       return Direction.left;
-    } else if ("ArrowRight" in this.keysDown) {
+    } else if ("ArrowRight" in this.keysDown || "KeyD" in this.keysDown) {
       return Direction.right;
     }
     return Direction.none;
@@ -100,35 +103,95 @@ export class MapScreen extends GameScreen {
     const remainingAvailableSprites =
       MapScreen.SPRITE_SIZE - totalVisibleSprites;
     const additionalLoadAllDirections = Math.floor(
-      remainingAvailableSprites / 4,
+      remainingAvailableSprites / 4
     );
 
     // don't continue if player hasn't moved enough
     if (this.chunkX === this.cacheChunkX && this.chunkY === this.cacheChunkY) {
       if (
-        Math.abs(this.characterX - this.cacheCharacterX) <
+        Math.abs(this.characterChunkX - this.cacheCharacterX) <
           additionalLoadAllDirections / 2 &&
-        Math.abs(this.characterY - this.cacheCharacterY) <
+        Math.abs(this.characterChunkY - this.cacheCharacterY) <
           additionalLoadAllDirections / 2
       ) {
         return;
       }
     }
 
-    // player has moved enough, update cache
-    this.cacheChunkX = this.chunkX;
-    this.cacheChunkY = this.chunkY;
-    this.cacheCharacterX = this.characterX;
-    this.cacheCharacterY = this.characterY;
-
     // load all directions
-    this.chunks = {};
     for (let i = 0; i < 9; i++) {
       const x = this.chunkX + (i % 3) - 1;
       const y = this.chunkY + Math.floor(i / 3) - 1;
+      if (`${x},${y}` in this.chunks) continue;
       const chunk = PIXI.Assets.get<MapData>(`map/${x},${y}`) ?? null;
       this.chunks[`${x},${y}`] = chunk;
     }
+
+    // update cache locations
+    this.cacheChunkX = this.chunkX;
+    this.cacheChunkY = this.chunkY;
+    this.currentChunk = this.chunks[`${this.chunkX},${this.chunkY}`]!; // movement logic should prevent this from being null
+    this.cacheCharacterX = this.characterChunkX;
+    this.cacheCharacterY = this.characterChunkY;
+  }
+
+  /**
+   * @param x The x position relative to current chunk.
+   * @param y The y position relative to current chunk.
+   */
+  getChunkRelative(x: number, y: number): MapData | null {
+    return this.chunks[this.getChunkNumberRelative(x, y)];
+  }
+
+  /**
+   * @param x The x position relative to current chunk.
+   * @param y The y position relative to current chunk.
+   */
+  getChunkNumberRelative(x: number, y: number): `${number},${number}` {
+    if (x < 0 && y < 0) {
+      return `${this.chunkX - 1},${this.chunkY - 1}`;
+    } else if (x < 0 && y >= MAP_SIZE) {
+      return `${this.chunkX - 1},${this.chunkY + 1}`;
+    } else if (x >= MAP_SIZE && y < 0) {
+      return `${this.chunkX + 1},${this.chunkY - 1}`;
+    } else if (x >= MAP_SIZE && y >= MAP_SIZE) {
+      return `${this.chunkX + 1},${this.chunkY + 1}`;
+    } else if (x < 0) {
+      return `${this.chunkX - 1},${this.chunkY}`;
+    } else if (x >= MAP_SIZE) {
+      return `${this.chunkX + 1},${this.chunkY}`;
+    } else if (y < 0) {
+      return `${this.chunkX},${this.chunkY - 1}`;
+    } else if (y >= MAP_SIZE) {
+      return `${this.chunkX},${this.chunkY + 1}`;
+    }
+    return `${this.chunkX},${this.chunkY}`;
+  }
+
+  /**
+   * Calculates the global world position from a chunk position.
+   *
+   * @param x The x chunk position.
+   * @param y The y chunk position.
+   * @param rx The x position relative to the chunk.
+   * @param ry The y position relative to the chunk.
+   * @returns The global position in the world.
+   */
+  getChunkGlobalPosition(
+    x: number,
+    y: number,
+    rx: number = 0,
+    ry: number = 0
+  ): {
+    x: number;
+    y: number;
+  } {
+    const baseX = x * MAP_SIZE,
+      baseY = y * MAP_SIZE;
+    return {
+      x: baseX + rx,
+      y: baseY + ry,
+    };
   }
 
   update(): void {}

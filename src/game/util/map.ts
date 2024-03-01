@@ -29,6 +29,10 @@ export const mapTiles = {
   0xe1d334: MapTile.sand,
 };
 
+
+// Hardcoded. Represents the width and height of the map.
+export const MAP_SIZE = 128;
+
 export interface MapData {
   width: number;
   height: number;
