@@ -1,6 +1,6 @@
 import { GameManager } from "../engine/screen";
-import { BattleScreen } from "./screens/battle_screen";
+import { LoadingScreen } from "./screens/loading_screen";
 
 export function main(gameManager: GameManager) {
-  gameManager.changeScreen(new BattleScreen());
+  gameManager.changeScreen(new LoadingScreen());
 }

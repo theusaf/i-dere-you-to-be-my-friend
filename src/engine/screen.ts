@@ -1,4 +1,4 @@
-import * as PIXI from "pixi.js";
+import { Application } from "pixi.js";
 import RenderLayer from "./render_layer";
 
 export interface UIOutput {
@@ -19,7 +19,7 @@ export interface UIOutput {
  */
 export abstract class GameScreen {
   container: RenderLayer | null = null;
-  app: PIXI.Application | null = null;
+  app: Application | null = null;
   gameManager: GameManager | null = null;
 
   /**
@@ -37,7 +37,7 @@ export abstract class GameScreen {
    * @param gameManager - The game manager
    */
   initialize(
-    app: PIXI.Application,
+    app: Application,
     gameManager: GameManager,
     container?: RenderLayer
   ): void {
@@ -69,10 +69,10 @@ export abstract class GameScreen {
  */
 export class GameManager {
   currentScreen: GameScreen | null = null;
-  app: PIXI.Application;
+  app: Application;
   onScreenChange: () => void;
 
-  constructor(app: PIXI.Application, onScreenChange: () => void) {
+  constructor(app: Application, onScreenChange: () => void) {
     this.app = app;
     this.onScreenChange = onScreenChange;
     app.ticker.add(this.executeGameLoop.bind(this));
