@@ -22,7 +22,7 @@ export class BattleScreen extends GameScreen {
     { distance: 0 },
     { distance: 40 },
     2000,
-    easeMethod.easeInQuart
+    easeMethod.easeInQuart,
   );
   battleGraphicsCharacterShadow?: PIXI.Graphics;
   battleGraphicsEnemyShadow?: PIXI.Graphics;
@@ -36,7 +36,7 @@ export class BattleScreen extends GameScreen {
           { x: this.container!.worldWidth, y: this.container!.worldHeight },
           { x: this.container!.worldWidth, y: 0 },
           { x: 0, y: 0 },
-        ])
+        ]),
       )
       .endFill();
     this.transitionGraphicsBottom = new PIXI.Graphics()
@@ -47,7 +47,7 @@ export class BattleScreen extends GameScreen {
           { x: 0, y: this.container!.worldHeight },
           { x: this.container!.worldWidth, y: this.container!.worldHeight },
           { x: 0, y: 0 },
-        ])
+        ]),
       )
       .endFill();
     this.transitionAnimation.reset();

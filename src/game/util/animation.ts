@@ -46,7 +46,7 @@ export class GameAnimation<
     startValues: T,
     endValues: T,
     duration: number,
-    easing?: (t: number) => number
+    easing?: (t: number) => number,
   ) {
     super();
     this.startValues = startValues;
@@ -82,7 +82,7 @@ export class GameAnimation<
           progress: this.progress,
           values: this.currentValues,
         },
-      })
+      }),
     );
     if (this.progress === 1) {
       this.dispatchEvent(new CustomEvent(GameAnimationEvents.onEnd));

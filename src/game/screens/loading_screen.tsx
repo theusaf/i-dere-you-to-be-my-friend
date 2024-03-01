@@ -11,7 +11,7 @@ export class LoadingScreen extends GameScreen {
   onDoneLoadingAnimation: GameAnimation = new GameAnimation(
     { opacity: 1 },
     { opacity: 0 },
-    2000
+    2000,
   );
 
   loadingBarForegroundShape?: Rectangle;
@@ -36,7 +36,7 @@ export class LoadingScreen extends GameScreen {
       worldWidth * 0.1 - 1,
       worldHeight * 0.75,
       worldWidth * 0.8 + 2,
-      40
+      40,
     );
     this.loadingBarBackground = new Graphics()
       .beginFill(ColorScheme.dark)
@@ -48,7 +48,7 @@ export class LoadingScreen extends GameScreen {
       worldWidth * 0.1,
       worldHeight * 0.75 + 1,
       0,
-      38
+      38,
     );
     this.loadingBarForeground = new Graphics()
       .beginFill(ColorScheme.light)

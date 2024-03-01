@@ -39,7 +39,7 @@ export abstract class GameScreen {
   initialize(
     app: Application,
     gameManager: GameManager,
-    container?: RenderLayer
+    container?: RenderLayer,
   ): void {
     this.app = app;
     this.gameManager = gameManager;

@@ -65,7 +65,7 @@ export function registerMapParsingExtension(): void {
             0,
             0,
             image.width,
-            image.height
+            image.height,
           );
           for (let i = 0; i < imageData.data.length; i += 4) {
             const r = imageData.data[i];
@@ -73,7 +73,7 @@ export function registerMapParsingExtension(): void {
             const b = imageData.data[i + 2];
             const color = (r << 16) + (g << 8) + b;
             mapData.tiles.push(
-              mapTiles[color as keyof typeof mapTiles] ?? MapTile.unknown
+              mapTiles[color as keyof typeof mapTiles] ?? MapTile.unknown,
             );
           }
           URL.revokeObjectURL(image.src);

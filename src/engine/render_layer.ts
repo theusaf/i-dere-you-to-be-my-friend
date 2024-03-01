@@ -11,7 +11,7 @@ class RenderLayer extends Container {
       this.worldHeight = worldHeight;
       this.scale.set(
         pixiApp.view.width / worldWidth,
-        pixiApp.view.height / worldHeight
+        pixiApp.view.height / worldHeight,
       );
     } else {
       this.worldHeight =

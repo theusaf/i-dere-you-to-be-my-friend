@@ -13,7 +13,7 @@ export class MainMenuScreen extends GameScreen {
       0,
       0,
       this.container!.worldWidth,
-      this.container!.worldHeight
+      this.container!.worldHeight,
     );
     graphics.endFill();
     this.container!.addChild(graphics);

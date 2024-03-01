@@ -115,7 +115,7 @@ function UserViewButtonController(): JSX.Element {
     >
       <span>
         {![UserViewControllerState.index, UserViewControllerState.run].includes(
-          state
+          state,
         ) && (
           <>
             <FontAwesomeIcon
@@ -202,7 +202,9 @@ function FriendsButtons() {
   return (
     <div className="h-full overflow-x-auto grid grid-cols-1">
       <div className="gap-2 text-center h-full grid grid-flow-col grid-rows-1">
-        <TextActionButton className={className}>Selected Friend</TextActionButton>
+        <TextActionButton className={className}>
+          Selected Friend
+        </TextActionButton>
         <TextActionButton className={className}>Friend 2</TextActionButton>
         <TextActionButton className={className}>Friend 3</TextActionButton>
         <TextActionButton className={className}>Friend 4</TextActionButton>
