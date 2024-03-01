@@ -1,0 +1,9 @@
+__template__:
+  - name: "Template"
+  - description: "Template description"
+  - type: tsundere
+  - max_uses: 10
+  - might: 10
+  - traits:
+    - loading
+    - single_use

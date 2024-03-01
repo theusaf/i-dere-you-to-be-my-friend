@@ -34,6 +34,7 @@ function App() {
         view: pixiAppRef.current,
       });
       (window as unknown as any).debugPixi = app;
+      (window as unknown as any).debugAssets = PIXI.Assets;
       const callback = () => forceUpdate();
       const gameManager = new GameManager(app, callback);
       main(gameManager);

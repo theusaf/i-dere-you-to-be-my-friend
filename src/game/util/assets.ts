@@ -29,7 +29,7 @@ export const assetList: AssetsManifest = {
     },
     {
       name: "data-map",
-      assets: [{ src: "/assets/maps/0,0.png", alias: "map/0,0" }],
+      assets: [{ src: "/assets/maps/0,0.map", alias: "map/0,0" }],
     },
     {
       name: "game-data",
