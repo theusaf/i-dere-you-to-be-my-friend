@@ -18,7 +18,7 @@ export class MainMenuScreen extends GameScreen {
     graphics.endFill();
     this.container!.addChild(graphics);
   }
-  update(_: number): void {}
+  update(): void {}
   getUI(): UIOutput | null {
     return {
       main: <MainMenuContent />,

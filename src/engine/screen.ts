@@ -53,7 +53,7 @@ export abstract class GameScreen {
    * @param deltaMs - The time since the last frame in milliseconds
    * @param delta - The delta in terms of speed (fps)
    */
-  abstract update(deltaMs: number, delta?: number): void;
+  abstract update(deltaMs?: number, delta?: number): void;
 
   /**
    * Returns the React UI for the screen.
