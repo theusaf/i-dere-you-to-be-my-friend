@@ -103,7 +103,7 @@ export class MapScreen extends GameScreen {
     const remainingAvailableSprites =
       MapScreen.SPRITE_SIZE - totalVisibleSprites;
     const additionalLoadAllDirections = Math.floor(
-      remainingAvailableSprites / 4
+      remainingAvailableSprites / 4,
     );
 
     // don't continue if player hasn't moved enough
@@ -181,7 +181,7 @@ export class MapScreen extends GameScreen {
     x: number,
     y: number,
     rx: number = 0,
-    ry: number = 0
+    ry: number = 0,
   ): {
     x: number;
     y: number;

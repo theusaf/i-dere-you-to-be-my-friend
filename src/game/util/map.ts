@@ -3,6 +3,7 @@ import {
   ExtensionType,
   LoaderParser,
   LoaderParserPriority,
+  Texture,
   extensions,
 } from "pixi.js";
 
@@ -29,13 +30,13 @@ export const mapTiles = {
   0xe1d334: MapTile.sand,
 };
 
-
 // Hardcoded. Represents the width and height of the map.
 export const MAP_SIZE = 128;
 
 export interface MapData {
   width: number;
   height: number;
+  texture: Texture;
   tiles: MapTile[];
 }
 
@@ -60,6 +61,7 @@ export function registerMapParsingExtension(): void {
           const mapData: MapData = {
             width: image.width,
             height: image.height,
+            texture: Texture.from(image),
             tiles: [],
           };
           extractionCanvas.width = image.width;
@@ -80,7 +82,6 @@ export function registerMapParsingExtension(): void {
               mapTiles[color as keyof typeof mapTiles] ?? MapTile.unknown,
             );
           }
-          URL.revokeObjectURL(image.src);
           return resolve(mapData as T);
         });
       });
