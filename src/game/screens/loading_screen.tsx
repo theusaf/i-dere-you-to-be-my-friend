@@ -3,9 +3,16 @@ import { GameManager, GameScreen, UIOutput } from "../../engine/screen";
 import { ColorScheme } from "../util/style";
 import { LoadingScreenContent } from "./ui/loading_screen_content";
 import { assetList, getAllBundles } from "../util/assets";
+import { GameAnimation } from "../util/animation";
 
 export class LoadingScreen extends GameScreen {
   progress: number = 0;
+  onDoneLoadingOpacity: number = 1;
+  onDoneLoadingAnimation: GameAnimation = new GameAnimation(
+    { opacity: 1 },
+    { opacity: 0 },
+    2000
+  );
 
   loadingBarForegroundShape?: Rectangle;
   loadingBarBackground?: Graphics;
@@ -56,18 +63,24 @@ export class LoadingScreen extends GameScreen {
     });
   }
 
-  update(_: number): void {
+  update(delta: number): void {
     this.loadingBarForegroundShape!.width =
       this.container!.worldWidth * 0.8 * this.progress;
     this.loadingBarForeground!.clear()
       .beginFill(ColorScheme.light)
       .drawShape(this.loadingBarForegroundShape!)
       .endFill();
+    if (this.progress === 1) {
+      this.onDoneLoadingOpacity =
+        this.onDoneLoadingAnimation.update(delta).opacity;
+      this.loadingBarBackground!.alpha = this.onDoneLoadingOpacity;
+      this.loadingBarForeground!.alpha = this.onDoneLoadingOpacity;
+    }
   }
 
   getUI(): UIOutput | null {
     return {
-      main: <LoadingScreenContent />,
+      main: <LoadingScreenContent data={this} />,
     };
   }
 }
