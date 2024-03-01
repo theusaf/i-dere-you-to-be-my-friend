@@ -2,7 +2,7 @@ import * as PIXI from "pixi.js";
 import { GameManager, GameScreen, UIOutput } from "../../engine/screen";
 import { MapScreenContent } from "./ui/map_screen_content";
 import RenderLayer from "../../engine/render_layer";
-import { MAP_SIZE, MapData } from "../util/map";
+import { MAP_SIZE, MapData, MapTile } from "../util/map";
 import { Direction } from "../util/direction";
 
 export class MapScreen extends GameScreen {
@@ -13,12 +13,12 @@ export class MapScreen extends GameScreen {
    * The x position of the map chunk the player is currently in.
    */
   chunkX: number = 0;
-  cacheChunkX: number = 0;
+  cacheChunkX: number = Infinity;
   /**
    * The y position of the  map chunk the player is currently in.
    */
   chunkY: number = 0;
-  cacheChunkY: number = 0;
+  cacheChunkY: number = Infinity;
   /**
    * The x position of the player in the current map chunk.
    */
@@ -49,6 +49,8 @@ export class MapScreen extends GameScreen {
     // enough time.
     this.mapBgContainer = new PIXI.ParticleContainer(MapScreen.SPRITE_SIZE);
     this.container!.addChild(this.mapBgContainer);
+    this.characterChunkX = Math.floor(MAP_SIZE / 2);
+    this.characterChunkY = Math.floor(MAP_SIZE / 2);
     this.updateChunks();
 
     window.addEventListener("keydown", (e) => this.onKeyDown(e.code));
@@ -99,11 +101,13 @@ export class MapScreen extends GameScreen {
    */
   updateChunks(): void {
     const { worldWidth, worldHeight } = this.container!;
-    const totalVisibleSprites = worldWidth * worldHeight;
+    const totalVisibleSprites = Math.ceil(worldWidth * worldHeight);
     const remainingAvailableSprites =
       MapScreen.SPRITE_SIZE - totalVisibleSprites;
-    const additionalLoadAllDirections = Math.floor(
-      remainingAvailableSprites / 4,
+    const additionalLoadAllDirections = this.calculateMarginSize(
+      worldWidth,
+      worldHeight,
+      remainingAvailableSprites,
     );
 
     // don't continue if player hasn't moved enough
@@ -133,6 +137,41 @@ export class MapScreen extends GameScreen {
     this.currentChunk = this.chunks[`${this.chunkX},${this.chunkY}`]!; // movement logic should prevent this from being null
     this.cacheCharacterX = this.characterChunkX;
     this.cacheCharacterY = this.characterChunkY;
+
+    const relativeStartX = this.characterChunkX - additionalLoadAllDirections,
+      relativeStartY = this.characterChunkY - additionalLoadAllDirections,
+      relativeEndX = this.characterChunkX + additionalLoadAllDirections,
+      relativeEndY = this.characterChunkY + additionalLoadAllDirections;
+
+    this.mapBgContainer!.removeChildren();
+    for (let x = relativeStartX; x < relativeEndX; x++) {
+      for (let y = relativeStartY; y < relativeEndY; y++) {
+        const chunk = this.getChunkRelative(x, y);
+        if (chunk) {
+          const [chunkX, chunkY] = this.getChunkNumberRelative(x, y)
+            .split(",")
+            .map(Number);
+          const { x: newChunkBaseGlobalX, y: newChunkBaseGlobalY } =
+            this.getChunkGlobalPosition(chunkX, chunkY);
+          const { x: globalX, y: globalY } = this.getChunkGlobalPosition(
+            this.chunkX,
+            this.chunkY,
+            x,
+            y,
+          );
+          const offsetX = globalX - newChunkBaseGlobalX,
+            offsetY = globalY - newChunkBaseGlobalY;
+          const tileIndex = offsetY * MAP_SIZE + offsetX,
+            tile = chunk.tiles[tileIndex];
+          const sprite = new PIXI.Sprite(this.getTextureFromTile(tile));
+          sprite.x = globalX;
+          sprite.y = globalY;
+          sprite.width = 1;
+          sprite.height = 1;
+          this.mapBgContainer!.addChild(sprite);
+        }
+      }
+    }
   }
 
   /**
@@ -192,6 +231,57 @@ export class MapScreen extends GameScreen {
       x: baseX + rx,
       y: baseY + ry,
     };
+  }
+
+  getTextureFromTile(tile: MapTile): PIXI.Texture {
+    // TODO: wrap in another class to allow for animations
+    switch (tile) {
+      case MapTile.bridge:
+        return PIXI.Assets.get("icon/map/wood")!;
+      case MapTile.dirtRoad:
+        return PIXI.Assets.get("icon/map/dirt")!;
+      case MapTile.grass:
+        return PIXI.Assets.get("icon/map/grass")!;
+      case MapTile.pavedRoad:
+        return PIXI.Assets.get("icon/map/rock")!;
+      case MapTile.sand:
+        return PIXI.Assets.get("icon/map/sand")!;
+      case MapTile.tallgrass:
+        return PIXI.Assets.get("icon/map/thick_grass")!;
+      case MapTile.water:
+        return PIXI.Assets.get("icon/map/water1")!;
+    }
+    return PIXI.Texture.WHITE;
+  }
+
+  /**
+   * Calculates the margin size for a rectangle given available margin area.
+   *
+   * @param innerWidth The width of the rectangle.
+   * @param innerHeight The height of the rectangle.
+   * @param marginArea The available margin area.
+   */
+  calculateMarginSize(
+    innerWidth: number,
+    innerHeight: number,
+    marginArea: number,
+  ): number {
+    // formula derived from quadratic forumla using wolfram alpha:
+    // area = area with margins - area of rectangle
+    // area with margins = (rect width + 2 * margin width) * (rect height + 2 * margin height)
+    // area of rectangle = rect width * rect height
+    const d = Math.sqrt(
+      innerHeight ** 2 +
+        innerWidth ** 2 +
+        2 * innerHeight * innerWidth +
+        4 * marginArea,
+    );
+    return Math.floor(
+      Math.max(
+        (d - innerHeight - innerWidth) / 4,
+        (-d - innerHeight - innerWidth) / 4,
+      ),
+    );
   }
 
   update(): void {}

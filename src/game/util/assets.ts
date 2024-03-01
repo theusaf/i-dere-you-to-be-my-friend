@@ -13,6 +13,7 @@ export const assetList: AssetsManifest = {
         { src: "/assets/images/map_icons/grass.png", alias: "icon/map/grass" },
         { src: "/assets/images/map_icons/rock.png", alias: "icon/map/rock" },
         { src: "/assets/images/map_icons/sand.png", alias: "icon/map/sand" },
+        { src: "/assets/images/map_icons/wood.png", alias: "icon/map/wood" },
         {
           src: "/assets/images/map_icons/thick_grass.png",
           alias: "icon/map/thick_grass",
