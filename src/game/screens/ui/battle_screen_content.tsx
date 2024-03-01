@@ -75,19 +75,19 @@ function UserViewButtonController(): JSX.Element {
   let message: string;
   switch (state) {
     case UserViewControllerState.index:
-      buttons = <FightButtons className={className} setState={setState} />;
+      buttons = <IndexButtons className={className} setState={setState} />;
       message = "What do you want to do?";
       break;
     case UserViewControllerState.fight:
-      buttons = <div>Fight</div>;
+      buttons = <FightButtons />;
       message = "Fight";
       break;
     case UserViewControllerState.friends:
-      buttons = <div>Friends</div>;
+      buttons = <FriendsButtons />;
       message = "Friends";
       break;
     case UserViewControllerState.actions:
-      buttons = <div>Actions</div>;
+      buttons = <ActionsButton />;
       message = "Actions";
       break;
     case UserViewControllerState.run:
@@ -134,12 +134,39 @@ function UserViewButtonController(): JSX.Element {
   );
 }
 
+function UserStatsView({
+  style,
+}: {
+  style?: React.CSSProperties;
+}): JSX.Element {
+  return (
+    <div
+      className="border-r-4 pr-2 flex flex-col transition-transform duration-300"
+      style={{
+        ...style,
+        flex: 2,
+      }}
+    >
+      <h3 className="text-2xl pointer-events-auto">INSERT CHARACTER NAME</h3>
+      <HealthBar percentage={44 / 50} />
+      <p className="font-numerals pointer-events-auto">
+        <span>44/50</span>
+        <span>{/* effect icons here */}</span>
+      </p>
+      <div className="overflow-y-auto pointer-events-auto w-full flex flex-col-reverse">
+        <p>Example Log 1</p>
+        <p>Example Log 2</p>
+      </div>
+    </div>
+  );
+}
+
 interface UserViewButtonProps {
   className: string;
   setState: React.Dispatch<React.SetStateAction<UserViewControllerState>>;
 }
 
-function FightButtons({ className, setState }: UserViewButtonProps) {
+function IndexButtons({ className, setState }: UserViewButtonProps) {
   return (
     <div className="grid grid-cols-2 grid-rows-2 gap-2 text-center h-full">
       <TextActionButton
@@ -170,29 +197,55 @@ function FightButtons({ className, setState }: UserViewButtonProps) {
   );
 }
 
-function UserStatsView({
-  style,
-}: {
-  style?: React.CSSProperties;
-}): JSX.Element {
+function FriendsButtons() {
+  const className = "w-32";
   return (
-    <div
-      className="border-r-4 pr-2 flex flex-col transition-transform duration-300"
-      style={{
-        ...style,
-        flex: 2,
-      }}
-    >
-      <h3 className="text-2xl pointer-events-auto">INSERT CHARACTER NAME</h3>
-      <HealthBar percentage={44 / 50} />
-      <p className="font-numerals pointer-events-auto">
-        <span>44/50</span>
-        <span>{/* effect icons here */}</span>
-      </p>
-      <div className="overflow-y-auto pointer-events-auto w-full flex flex-col-reverse">
-        <p>Example Log 1</p>
-        <p>Example Log 2</p>
+    <div className="h-full overflow-x-auto grid grid-cols-1">
+      <div className="gap-2 text-center h-full grid grid-flow-col grid-rows-1">
+        <TextActionButton className={className}>Selected Friend</TextActionButton>
+        <TextActionButton className={className}>Friend 2</TextActionButton>
+        <TextActionButton className={className}>Friend 3</TextActionButton>
+        <TextActionButton className={className}>Friend 4</TextActionButton>
+        <TextActionButton className={className}>Friend 5</TextActionButton>
+        <TextActionButton className={className}>Friend 6</TextActionButton>
+        <TextActionButton className={className}>Friend 7</TextActionButton>
+        <TextActionButton className={className}>Friend 8</TextActionButton>
       </div>
+    </div>
+  );
+}
+
+function ActionsButton() {
+  return (
+    <div className="text-center h-full overflow-y-auto">
+      <h4 className="text-left">Actions</h4>
+      <div className="flex gap-2">
+        <TextActionButton className="min-w-24">Rizz</TextActionButton>
+        <TextActionButton className="min-w-24">Pass</TextActionButton>
+      </div>
+      <h4 className="text-left">Items</h4>
+      <div className="grid grid-cols-4 gap-2">
+        <TextActionButton>Item</TextActionButton>
+        <TextActionButton>Item</TextActionButton>
+        <TextActionButton>Item</TextActionButton>
+        <TextActionButton>Item</TextActionButton>
+        <TextActionButton>Item</TextActionButton>
+        <TextActionButton>Item</TextActionButton>
+      </div>
+    </div>
+  );
+}
+
+function FightButtons() {
+  const className = "min-h-14";
+  return (
+    <div className="grid grid-cols-3 gap-2 text-center h-full">
+      <TextActionButton className={className}>Attack 1</TextActionButton>
+      <TextActionButton className={className}>Attack 2</TextActionButton>
+      <TextActionButton className={className}>Debuff 1</TextActionButton>
+      <TextActionButton className={className}>Buff 1</TextActionButton>
+      <TextActionButton className={className}>Attack 3</TextActionButton>
+      <TextActionButton className={className}>Attack 4</TextActionButton>
     </div>
   );
 }
