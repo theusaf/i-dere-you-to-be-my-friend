@@ -1,4 +1,4 @@
-import { GameManager } from "../engine/screen";
+import { GameManager } from "../engine/game_manager";
 import { LoadingScreen } from "./screens/loading_screen";
 import { registerMapParsingExtension } from "./util/map";
 import { registerPixelTextureExtension } from "./util/texture_pixel";

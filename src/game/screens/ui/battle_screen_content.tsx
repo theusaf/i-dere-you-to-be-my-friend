@@ -5,7 +5,7 @@ import { BattleScreen, BattleScreenState } from "../battle_screen";
 import { HealthBar } from "../../../engine/components/health_bar";
 import { TextActionButton } from "../../../engine/components/action_button";
 import { AnimatedTextController } from "../../../engine/components/animated_text_container";
-import { GameManager } from "../../../engine/screen";
+import { GameManager } from "../../../engine/game_manager";
 import { MapScreen } from "../map_screen";
 
 export interface BattleScreenContentProps {

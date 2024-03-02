@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js";
-import { GameManager, GameScreen, UIOutput } from "../../engine/screen";
+import { GameScreen, UIOutput } from "../../engine/screen";
+import { GameManager } from "../../engine/game_manager";
 import { MapScreenContent } from "./ui/map_screen_content";
 import RenderLayer from "../../engine/render_layer";
 import { MAP_SIZE, MapData, MapTile, mapTileStrings } from "../util/map";

@@ -8,7 +8,7 @@ import {
   useReducer,
 } from "react";
 import Game from "./Game";
-import { GameManager } from "./engine/screen";
+import { GameManager } from "./engine/game_manager";
 import { main } from "./game/main";
 
 export const GameManagerContext = createContext<GameManager | null>(null);

@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js";
-import { GameManager, GameScreen, UIOutput } from "../../engine/screen";
+import { GameScreen, UIOutput } from "../../engine/screen";
+import { GameManager } from "../../engine/game_manager";
 import { ColorScheme } from "../util/style";
 import { MainMenuContent } from "./ui/main_menu_content";
 

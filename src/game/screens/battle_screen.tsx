@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js";
-import { GameManager, GameScreen, UIOutput } from "../../engine/screen";
+import { GameScreen, UIOutput } from "../../engine/screen";
+import { GameManager } from "../../engine/game_manager";
 import RenderLayer from "../../engine/render_layer";
 import { ColorScheme } from "../util/style";
 import { GameAnimation, easeMethod } from "../util/animation";

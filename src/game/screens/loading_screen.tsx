@@ -1,5 +1,6 @@
 import { Application, Assets, Graphics, Rectangle } from "pixi.js";
-import { GameManager, GameScreen, UIOutput } from "../../engine/screen";
+import { GameScreen, UIOutput } from "../../engine/screen";
+import { GameManager } from "../../engine/game_manager";
 import { ColorScheme } from "../util/style";
 import { LoadingScreenContent } from "./ui/loading_screen_content";
 import { assetList, getAllBundles } from "../util/assets";
