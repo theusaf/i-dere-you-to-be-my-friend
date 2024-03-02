@@ -384,6 +384,13 @@ export class MapScreen extends GameScreen {
     );
   }
 
+  getSpeed(): number {
+    const base = 0.008;
+    const mult =
+      this.keysDown.has("ShiftLeft") || this.keysDown.has("ShiftRight") ? 2 : 1;
+    return base * mult;
+  }
+
   update(delta: number): void {
     this.mapBgContainer!.x = -(
       this.characterWorldX -
@@ -395,7 +402,7 @@ export class MapScreen extends GameScreen {
     );
 
     if (this.direction !== Direction.none) {
-      const distance = 0.008 * delta;
+      const distance = this.getSpeed() * delta;
       switch (this.direction) {
         case Direction.up:
           this.moveCharacterY(-distance);
