@@ -7,6 +7,10 @@ export const assetList: AssetsManifest = {
       assets: [{ src: "/assets/images/logo-banner.png", alias: "logo/banner" }],
     },
     {
+      name: "images-ui",
+      assets: [{ src: "/assets/images/ui/phone.png", alias: "ui/phone" }],
+    },
+    {
       name: "images-map",
       assets: [
         { src: "/assets/images/map_icons/dirt.png", alias: "icon/map/dirt" },
