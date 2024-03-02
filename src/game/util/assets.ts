@@ -34,7 +34,12 @@ export const assetList: AssetsManifest = {
     },
     {
       name: "data-map",
-      assets: [{ src: "/assets/maps/0,0.map", alias: "map/0,0" }],
+      assets: [
+        { src: "/assets/maps/0,0.map", alias: "map/0,0" },
+        { src: "/assets/maps/0,-1.map", alias: "map/0,-1" },
+        { src: "/assets/maps/-1,0.map", alias: "map/-1,0" },
+        { src: "/assets/maps/1,0.map", alias: "map/1,0" },
+      ],
     },
     {
       name: "game-data",
