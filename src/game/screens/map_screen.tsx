@@ -2,13 +2,17 @@ import * as PIXI from "pixi.js";
 import { GameManager, GameScreen, UIOutput } from "../../engine/screen";
 import { MapScreenContent } from "./ui/map_screen_content";
 import RenderLayer from "../../engine/render_layer";
-import { MAP_SIZE, MapData, MapTile } from "../util/map";
+import { MAP_SIZE, MapData, MapTile, mapTileStrings } from "../util/map";
 import { Direction } from "../util/direction";
+import { MapSpecialData } from "../util/map_types";
+import { BattleScreen } from "./battle_screen";
 
 export class MapScreen extends GameScreen {
   mapBgContainer?: PIXI.Container;
   chunks: Record<`${number},${number}`, MapData | null> = {};
   characterSprite?: PIXI.Sprite;
+  collisionCacheX: number = 0;
+  collisionCacheY: number = 0;
   get currentChunk(): MapData | null {
     return this.chunks[`${this.chunkX},${this.chunkY}`];
   }
@@ -142,7 +146,7 @@ export class MapScreen extends GameScreen {
     const totalVisibleSprites = Math.ceil(worldWidth * worldHeight);
     const remainingAvailableSprites =
       MapScreen.SPRITE_SIZE - totalVisibleSprites;
-    const additionalLoadAllDirections = this.calculateMarginSize(
+    const additionalLoadAllDirections = MapScreen.calculateMarginSize(
       worldWidth,
       worldHeight,
       remainingAvailableSprites,
@@ -361,7 +365,7 @@ export class MapScreen extends GameScreen {
    * @param innerHeight The height of the rectangle.
    * @param marginArea The available margin area.
    */
-  calculateMarginSize(
+  static calculateMarginSize(
     innerWidth: number,
     innerHeight: number,
     marginArea: number,
@@ -455,26 +459,123 @@ export class MapScreen extends GameScreen {
 
   moveCharacterTo(x: number, y: number): void {
     // check for collisions/bounds
-    const testChunkNumber = this.getGlobalChunkNumber(x, y),
-      [testChunkX, testChunkY] = testChunkNumber.split(",").map(Number);
+    const testChunkNumber = this.getGlobalChunkNumber(x, y);
     if (!this.chunks[testChunkNumber]) return;
-
-    const { x: localX, y: localY } = this.getLocalChunkPosition(x, y);
-    const tile = this.getLocalChunkTile(localX, localY, testChunkX, testChunkY);
-    // TODO: separate into a collision detection function
-    // This can also be used for events, like entering buildings
-    if (tile === MapTile.water) {
-      // if already in water, it's alright
-      const currentTile = this.getLocalChunkTile(
-        this.characterChunkX,
-        this.characterChunkY,
-      );
-      if (currentTile !== MapTile.water) return;
-    }
+    if (this.handleCollisions(x, y)) return;
 
     // checks pass, move character
     this.characterWorldX = x;
     this.characterWorldY = y;
+  }
+
+  handleCollisions(x: number, y: number): boolean {
+    // limits checking when changing positions
+    if (
+      Math.floor(x) === this.collisionCacheX &&
+      Math.floor(y) === this.collisionCacheY
+    ) {
+      return false;
+    }
+    const testChunkNumber = this.getGlobalChunkNumber(x, y),
+      [testChunkX, testChunkY] = testChunkNumber.split(",").map(Number);
+    const { x: localX, y: localY } = this.getLocalChunkPosition(x, y);
+    const newTile = this.getLocalChunkTile(
+      localX,
+      localY,
+      testChunkX,
+      testChunkY,
+    );
+    const currentTile = this.getLocalChunkTile(
+      this.characterChunkX,
+      this.characterChunkY,
+    );
+    if (this.handleBasicCollisions(newTile, currentTile)) return true;
+
+    // special checks
+    this.handleSpecialTriggers(testChunkNumber, x, y, newTile, currentTile);
+
+    // update cache
+    this.collisionCacheX = Math.floor(x);
+    this.collisionCacheY = Math.floor(y);
+    return false;
+  }
+
+  handleBasicCollisions(newTile: MapTile, currentTile: MapTile): boolean {
+    if (newTile === MapTile.water) {
+      return currentTile !== MapTile.water;
+    }
+    if (newTile === MapTile.building) return true;
+    return false;
+  }
+
+  handleSpecialTriggers(
+    testChunkNumber: string,
+    worldX: number,
+    worldY: number,
+    newTile: MapTile,
+    currentTile: MapTile,
+  ): void {
+    const chunkData = PIXI.Assets.get<MapSpecialData | null>(
+      `map/special/${testChunkNumber}`,
+    );
+    const { x: chunkX, y: chunkY } = this.getLocalChunkPosition(worldX, worldY);
+    if (chunkData) {
+      console.log(chunkX, chunkY, chunkData.boxes[0]);
+      const { boxes } = chunkData;
+      for (const box of boxes) {
+        const { from, to, type } = box;
+        if (
+          chunkX >= from[0] &&
+          chunkX <= to[0] &&
+          chunkY >= from[1] &&
+          chunkY <= to[1]
+        ) {
+          if (type === "walk_action" || type === "interact_action") {
+            const { if: condition, unless, action } = box;
+            let passesCondition = true;
+            if (condition) {
+              const {
+                new_tile: conditionNewTile,
+                current_tile: conditionCurrentTile,
+              } = condition;
+              if (
+                conditionNewTile &&
+                mapTileStrings[conditionNewTile] !== newTile
+              ) {
+                passesCondition = false;
+              }
+              if (
+                conditionCurrentTile &&
+                mapTileStrings[conditionCurrentTile] !== currentTile
+              ) {
+                passesCondition = false;
+              }
+            }
+            if (unless) {
+              const {
+                new_tile: unlessNewTile,
+                current_tile: unlessCurrentTile,
+              } = unless;
+              if (unlessNewTile && mapTileStrings[unlessNewTile] === newTile) {
+                passesCondition = false;
+              }
+              if (
+                unlessCurrentTile &&
+                mapTileStrings[unlessCurrentTile] === currentTile
+              ) {
+                passesCondition = false;
+              }
+            }
+            if (passesCondition) {
+              if (action.type === "enter_battle") {
+                // enter battle
+                this.gameManager?.changeScreen(new BattleScreen());
+              }
+            }
+          }
+        }
+      }
+    }
   }
 
   getUI(): UIOutput | null {

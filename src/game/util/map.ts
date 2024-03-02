@@ -19,7 +19,21 @@ export enum MapTile {
   dirtRoad = "dirtRoad",
   bridge = "bridge",
   sand = "sand",
+  building = "building",
 }
+
+export const mapTileStrings = {
+  unknown: MapTile.unknown,
+  grass: MapTile.grass,
+  tallgrass: MapTile.tallgrass,
+  water: MapTile.water,
+  pavedRoad: MapTile.pavedRoad,
+  dirtRoad: MapTile.dirtRoad,
+  bridge: MapTile.bridge,
+  sand: MapTile.sand,
+  building: MapTile.building,
+}
+
 export const mapTiles = {
   0x2ab34b: MapTile.grass,
   0x287039: MapTile.tallgrass,
@@ -28,6 +42,7 @@ export const mapTiles = {
   0x83580e: MapTile.dirtRoad,
   0xf2b141: MapTile.bridge,
   0xe1d334: MapTile.sand,
+  0x838383: MapTile.building,
 };
 
 // Hardcoded. Represents the width and height of the map.

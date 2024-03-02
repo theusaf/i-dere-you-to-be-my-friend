@@ -1,0 +1,47 @@
+boxes:
+  - from: [7, 77]
+    to: [128, 128]
+    type: walk_action
+    action:
+      type: enter_battle
+      against: random
+    if:
+      new_tile: tallgrass
+
+  - from: [47, 11]
+    to: [49, 13]
+    type: building
+    image: store_stall
+    background_tile: grass
+
+  - from: [47, 16]
+    to: [49, 18]
+    type: building
+    image: store_stall
+    background_tile: grass
+
+  - from: [46, 27]
+    to: [47, 29]
+    type: building
+    image: store_stall
+    background_tile: grass
+
+  - from: [72, 16]
+    to: [74, 18]
+    type: building
+    image: store_stall_2
+    background_tile: grass
+
+  - from: [72, 21]
+    to: [74, 23]
+    type: building
+    image: store_stall_2
+    background_tile: grass
+
+  - from: [71, 41]
+    to: [73, 43]
+    type: building
+    image: store_stall_2
+    background_tile: grass
+
+npcs: []

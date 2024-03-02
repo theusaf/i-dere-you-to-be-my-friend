@@ -33,12 +33,31 @@ export const assetList: AssetsManifest = {
       ],
     },
     {
+      name: "images-map-structures",
+      assets: [
+        {
+          src: "/assets/images/map_structures/store_stall.png",
+          alias: "icon/structure/store_stall",
+        },
+        {
+          src: "/assets/images/map_structures/store_stall_2.png",
+          alias: "icon/structure/store_stall_2",
+        },
+      ],
+    },
+    {
       name: "data-map",
       assets: [
         { src: "/assets/maps/0,0.map", alias: "map/0,0" },
         { src: "/assets/maps/0,-1.map", alias: "map/0,-1" },
         { src: "/assets/maps/-1,0.map", alias: "map/-1,0" },
         { src: "/assets/maps/1,0.map", alias: "map/1,0" },
+      ],
+    },
+    {
+      name: "data-map-special",
+      assets: [
+        { src: "/assets/maps/special/-1,0.yaml", alias: "map/special/-1,0" },
       ],
     },
     {
