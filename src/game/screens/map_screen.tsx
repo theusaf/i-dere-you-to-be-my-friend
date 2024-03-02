@@ -7,27 +7,50 @@ import { Direction } from "../util/direction";
 
 export class MapScreen extends GameScreen {
   mapBgContainer?: PIXI.Container;
-  currentChunk?: MapData;
   chunks: Record<`${number},${number}`, MapData | null> = {};
   /**
    * The x position of the map chunk the player is currently in.
    */
-  chunkX: number = 0;
+  get chunkX(): number {
+    const chunkPos = this.getGlobalChunkNumber(
+      this.characterWorldX,
+      this.characterWorldY,
+    );
+    return +chunkPos.split(",")[0];
+  }
   cacheChunkX: number = Infinity;
   /**
-   * The y position of the  map chunk the player is currently in.
+   * The y position of the map chunk the player is currently in.
    */
-  chunkY: number = 0;
+  get chunkY(): number {
+    const chunkPos = this.getGlobalChunkNumber(
+      this.characterWorldX,
+      this.characterWorldY,
+    );
+    return +chunkPos.split(",")[1];
+  }
   cacheChunkY: number = Infinity;
   /**
    * The x position of the player in the current map chunk.
    */
-  characterChunkX: number = 0;
+  get characterChunkX(): number {
+    const { x } = this.getLocalChunkPosition(
+      this.characterWorldX,
+      this.characterWorldY,
+    );
+    return x;
+  }
   cacheCharacterX: number = 0;
   /**
    * The y position of the player in the current map chunk.
    */
-  characterChunkY: number = 0;
+  get characterChunkY(): number {
+    const { y } = this.getLocalChunkPosition(
+      this.characterWorldX,
+      this.characterWorldY,
+    );
+    return y;
+  }
   cacheCharacterY: number = 0;
 
   characterWorldX: number = 0;
@@ -48,10 +71,8 @@ export class MapScreen extends GameScreen {
     // the player shouldn't be able to move super fast, so this should be
     // enough time.
     this.mapBgContainer = new PIXI.Container();
-    this.characterChunkX = Math.floor(MAP_SIZE / 2);
-    this.characterChunkY = Math.floor(MAP_SIZE / 2);
-    this.characterWorldX = this.characterChunkX;
-    this.characterWorldY = this.characterChunkY;
+    this.characterWorldX = Math.floor(MAP_SIZE / 2);
+    this.characterWorldY = Math.floor(MAP_SIZE / 2);
     this.updateChunks();
 
     this.container?.addChild(this.mapBgContainer);
@@ -70,25 +91,25 @@ export class MapScreen extends GameScreen {
   }
 
   get direction(): Direction {
-    if ("ArrowUp" in this.keysDown || "KeyW" in this.keysDown) {
-      if ("ArrowLeft" in this.keysDown || "KeyA" in this.keysDown) {
+    if (this.keysDown.has("ArrowUp") || this.keysDown.has("KeyW")) {
+      if (this.keysDown.has("ArrowLeft") || this.keysDown.has("KeyA")) {
         return Direction.upLeft;
-      } else if ("ArrowRight" in this.keysDown || "KeyD" in this.keysDown) {
+      } else if (this.keysDown.has("ArrowRight") || this.keysDown.has("KeyD")) {
         return Direction.upRight;
       } else {
         return Direction.up;
       }
-    } else if ("ArrowDown" in this.keysDown || "KeyS" in this.keysDown) {
-      if ("ArrowLeft" in this.keysDown || "KeyA" in this.keysDown) {
+    } else if (this.keysDown.has("ArrowDown") || this.keysDown.has("KeyS")) {
+      if (this.keysDown.has("ArrowLeft") || this.keysDown.has("KeyA")) {
         return Direction.downLeft;
-      } else if ("ArrowRight" in this.keysDown || "KeyD" in this.keysDown) {
+      } else if (this.keysDown.has("ArrowRight") || this.keysDown.has("KeyD")) {
         return Direction.downRight;
       } else {
         return Direction.down;
       }
-    } else if ("ArrowLeft" in this.keysDown || "KeyA" in this.keysDown) {
+    } else if (this.keysDown.has("ArrowLeft") || this.keysDown.has("KeyA")) {
       return Direction.left;
-    } else if ("ArrowRight" in this.keysDown || "KeyD" in this.keysDown) {
+    } else if (this.keysDown.has("ArrowRight") || this.keysDown.has("KeyD")) {
       return Direction.right;
     }
     return Direction.none;
@@ -118,9 +139,9 @@ export class MapScreen extends GameScreen {
     if (this.chunkX === this.cacheChunkX && this.chunkY === this.cacheChunkY) {
       if (
         Math.abs(this.characterChunkX - this.cacheCharacterX) <
-          additionalLoadAllDirections / 2 &&
+          additionalLoadAllDirections - 4 &&
         Math.abs(this.characterChunkY - this.cacheCharacterY) <
-          additionalLoadAllDirections / 2
+          additionalLoadAllDirections - 4
       ) {
         return;
       }
@@ -138,16 +159,21 @@ export class MapScreen extends GameScreen {
     // update cache locations
     this.cacheChunkX = this.chunkX;
     this.cacheChunkY = this.chunkY;
-    this.currentChunk = this.chunks[`${this.chunkX},${this.chunkY}`]!; // movement logic should prevent this from being null
     this.cacheCharacterX = this.characterChunkX;
     this.cacheCharacterY = this.characterChunkY;
 
-    const relativeStartX = this.characterChunkX - additionalLoadAllDirections,
-      relativeStartY = this.characterChunkY - additionalLoadAllDirections,
-      relativeEndX =
-        this.characterChunkX + additionalLoadAllDirections + worldWidth,
-      relativeEndY =
-        this.characterChunkY + additionalLoadAllDirections + worldHeight;
+    const relativeStartX = Math.floor(
+        this.characterChunkX - additionalLoadAllDirections - worldWidth / 2,
+      ),
+      relativeStartY = Math.floor(
+        this.characterChunkY - additionalLoadAllDirections - worldHeight / 2,
+      ),
+      relativeEndX = Math.floor(
+        this.characterChunkX + additionalLoadAllDirections + worldWidth / 2,
+      ),
+      relativeEndY = Math.floor(
+        this.characterChunkY + additionalLoadAllDirections + worldHeight / 2,
+      );
 
     this.mapBgContainer!.removeChildren();
     for (let y = relativeStartY; y < relativeEndY; y++) {
@@ -170,8 +196,8 @@ export class MapScreen extends GameScreen {
           const tileIndex = offsetY * MAP_SIZE + offsetX,
             tile = chunk.tiles[tileIndex];
           const sprite = new PIXI.Sprite(this.getTextureFromTile(tile));
-          sprite.x = x;
-          sprite.y = y;
+          sprite.x = globalX;
+          sprite.y = globalY;
           sprite.width = 1;
           sprite.height = 1;
           sprite.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
@@ -240,6 +266,32 @@ export class MapScreen extends GameScreen {
     };
   }
 
+  /**
+   * Calculates the chunk number from a global position.
+   */
+  getGlobalChunkNumber(worldX: number, worldY: number): `${number},${number}` {
+    return `${Math.floor(worldX / MAP_SIZE)},${Math.floor(worldY / MAP_SIZE)}`;
+  }
+
+  /**
+   * Calculates the local position in a chunk from a global position.
+   */
+  getLocalChunkPosition(
+    worldX: number,
+    worldY: number,
+  ): {
+    x: number;
+    y: number;
+  } {
+    const chunkNumber = this.getGlobalChunkNumber(worldX, worldY),
+      [chunkX, chunkY] = chunkNumber.split(",").map(Number),
+      { x: baseX, y: baseY } = this.getChunkGlobalPosition(chunkX, chunkY);
+    return {
+      x: worldX - baseX,
+      y: worldY - baseY,
+    };
+  }
+
   getTextureFromTile(tile: MapTile): PIXI.Texture {
     // TODO: wrap in another class to allow for animations
     switch (tile) {
@@ -291,11 +343,66 @@ export class MapScreen extends GameScreen {
     );
   }
 
-  update(): void {
-    this.mapBgContainer!.x =
-      -this.characterWorldX + this.container!.worldWidth / 2;
-    this.mapBgContainer!.y =
-      -this.characterWorldY + this.container!.worldHeight / 2;
+  update(delta: number): void {
+    this.mapBgContainer!.x = -(
+      this.characterWorldX -
+      this.container?.worldWidth! / 2
+    );
+    this.mapBgContainer!.y = -(
+      this.characterWorldY -
+      this.container?.worldHeight! / 2
+    );
+
+    if (this.direction !== Direction.none) {
+      const distance = 0.005 * delta;
+      switch (this.direction) {
+        case Direction.up:
+          this.moveCharacterY(-distance);
+          break;
+        case Direction.down:
+          this.moveCharacterY(distance);
+          break;
+        case Direction.left:
+          this.moveCharacterX(-distance);
+          break;
+        case Direction.right:
+          this.moveCharacterX(distance);
+          break;
+        case Direction.upLeft:
+          this.moveCharacterX(-distance);
+          this.moveCharacterY(-distance);
+          break;
+        case Direction.upRight:
+          this.moveCharacterY(-distance);
+          this.moveCharacterX(distance);
+          break;
+        case Direction.downLeft:
+          this.moveCharacterY(distance);
+          this.moveCharacterX(-distance);
+          break;
+        case Direction.downRight:
+          this.moveCharacterY(distance);
+          this.moveCharacterX(distance);
+          break;
+      }
+      this.updateChunks();
+    }
+  }
+
+  moveCharacterX(dx: number): void {
+    this.characterWorldX += dx;
+  }
+
+  moveCharacterToX(x: number): void {
+    this.characterWorldX = x;
+  }
+
+  moveCharacterY(dy: number): void {
+    this.characterWorldY += dy;
+  }
+
+  moveCharacterToY(y: number): void {
+    this.characterWorldY = y;
   }
 
   getUI(): UIOutput | null {
