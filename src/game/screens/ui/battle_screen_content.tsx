@@ -27,7 +27,7 @@ export function BattleScreenContent({
   return (
     <div className="grid grid-rows-5 h-full text-white">
       <EnemyView />
-      <UserView gameManager={state.gameManager!} />
+      <UserView gameManager={state.gameManager} />
     </div>
   );
 }

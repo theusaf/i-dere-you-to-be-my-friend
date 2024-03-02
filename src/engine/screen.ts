@@ -18,20 +18,20 @@ export interface UIOutput {
  * Handles PixiJS rendering, game logic, and React UI.
  */
 export abstract class GameScreen {
-  container: RenderLayer | null = null;
-  app: Application | null = null;
-  gameManager: GameManager | null = null;
+  container!: RenderLayer;
+  app!: Application;
+  gameManager!: GameManager;
 
   /**
    * Called when the screen is deactivated
    */
   dispose(): void {
-    this.container!.destroy({
+    this.container.destroy({
       children: true,
       texture: false,
       baseTexture: false,
     });
-    this.app?.stage.removeChild(this.container!);
+    this.app.stage.removeChild(this.container);
   }
 
   /**

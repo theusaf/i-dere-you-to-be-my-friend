@@ -14,8 +14,8 @@ export const enum BattleScreenState {
 export class BattleScreen extends GameScreen {
   state: BattleScreenState = BattleScreenState.loadingIn;
 
-  transitionGraphicsTop?: PIXI.Graphics;
-  transitionGraphicsBottom?: PIXI.Graphics;
+  transitionGraphicsTop!: PIXI.Graphics;
+  transitionGraphicsBottom!: PIXI.Graphics;
   transitionAnimation: GameAnimation<{
     distance: number;
   }> = new GameAnimation(
@@ -24,8 +24,8 @@ export class BattleScreen extends GameScreen {
     2000,
     easeMethod.easeInQuart,
   );
-  battleGraphicsCharacterShadow?: PIXI.Graphics;
-  battleGraphicsEnemyShadow?: PIXI.Graphics;
+  battleGraphicsCharacterShadow!: PIXI.Graphics;
+  battleGraphicsEnemyShadow!: PIXI.Graphics;
 
   private initializeTransitionGraphics() {
     this.transitionGraphicsTop = new PIXI.Graphics()
@@ -33,8 +33,8 @@ export class BattleScreen extends GameScreen {
       .drawPolygon(
         new PIXI.Polygon([
           { x: 0, y: 0 },
-          { x: this.container!.worldWidth, y: this.container!.worldHeight },
-          { x: this.container!.worldWidth, y: 0 },
+          { x: this.container.worldWidth, y: this.container.worldHeight },
+          { x: this.container.worldWidth, y: 0 },
           { x: 0, y: 0 },
         ]),
       )
@@ -44,8 +44,8 @@ export class BattleScreen extends GameScreen {
       .drawPolygon(
         new PIXI.Polygon([
           { x: 0, y: 0 },
-          { x: 0, y: this.container!.worldHeight },
-          { x: this.container!.worldWidth, y: this.container!.worldHeight },
+          { x: 0, y: this.container.worldHeight },
+          { x: this.container.worldWidth, y: this.container.worldHeight },
           { x: 0, y: 0 },
         ]),
       )
@@ -53,8 +53,8 @@ export class BattleScreen extends GameScreen {
     this.transitionAnimation.reset();
 
     // add all graphics to screen
-    this.container!.addChild(this.transitionGraphicsTop);
-    this.container!.addChild(this.transitionGraphicsBottom);
+    this.container.addChild(this.transitionGraphicsTop);
+    this.container.addChild(this.transitionGraphicsBottom);
   }
 
   private initializeBattleGraphics() {
@@ -74,8 +74,8 @@ export class BattleScreen extends GameScreen {
     this.battleGraphicsEnemyShadow.y = 9;
 
     // add to screen
-    this.container!.addChild(this.battleGraphicsCharacterShadow);
-    this.container!.addChild(this.battleGraphicsEnemyShadow);
+    this.container.addChild(this.battleGraphicsCharacterShadow);
+    this.container.addChild(this.battleGraphicsEnemyShadow);
   }
 
   initialize(app: PIXI.Application, gameManager: GameManager): void {
@@ -88,11 +88,11 @@ export class BattleScreen extends GameScreen {
     switch (this.state) {
       case BattleScreenState.loadingIn: {
         const { distance } = this.transitionAnimation.update(delta);
-        this.transitionGraphicsBottom!.x = -distance;
-        this.transitionGraphicsTop!.x = distance;
+        this.transitionGraphicsBottom.x = -distance;
+        this.transitionGraphicsTop.x = distance;
         if (this.transitionAnimation.isDone) {
-          this.container!.removeChild(this.transitionGraphicsTop!);
-          this.container!.removeChild(this.transitionGraphicsBottom!);
+          this.container.removeChild(this.transitionGraphicsTop);
+          this.container.removeChild(this.transitionGraphicsBottom);
           this.state = BattleScreenState.battle;
         }
       }

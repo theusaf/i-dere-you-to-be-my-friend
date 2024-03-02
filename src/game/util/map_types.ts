@@ -8,7 +8,7 @@ export interface MapSpecialBoxBase {
 }
 
 export interface MapSpecialBuildingBox extends MapSpecialBoxBase {
-  type: "building"
+  type: "building";
   image: string;
   background_tile?: string;
 }
@@ -32,7 +32,7 @@ export interface MapSpecialConditions {
   npc?: {
     id: string | true;
     in_range?: number;
-  }
+  };
 }
 
 export interface MapSpecialActionBase {
@@ -52,5 +52,5 @@ export interface MapSpecialActionBattle extends MapSpecialActionBase {
 
 export interface MapSpecialData {
   boxes: (MapSpecialActionBox | MapSpecialBuildingBox)[];
-  npcs: [] // not implemented yet
+  npcs: []; // not implemented yet
 }

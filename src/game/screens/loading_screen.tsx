@@ -14,22 +14,22 @@ export class LoadingScreen extends GameScreen {
     2000,
   );
 
-  loadingBarForegroundShape?: Rectangle;
-  loadingBarBackground?: Graphics;
-  loadingBarForeground?: Graphics;
+  loadingBarForegroundShape!: Rectangle;
+  loadingBarBackground!: Graphics;
+  loadingBarForeground!: Graphics;
 
   async initialize(app: Application, gameManager: GameManager): Promise<void> {
     super.initialize(app, gameManager);
 
-    const worldWidth = this.container!.worldWidth,
-      worldHeight = this.container!.worldHeight;
+    const worldWidth = this.container.worldWidth,
+      worldHeight = this.container.worldHeight;
 
     // background
     const graphics = new Graphics();
     graphics.beginFill(ColorScheme.background);
     graphics.drawRect(0, 0, worldWidth, worldHeight);
     graphics.endFill();
-    this.container!.addChild(graphics);
+    this.container.addChild(graphics);
 
     // loading bar
     const loadingBarBackgroundShape = new Rectangle(
@@ -42,7 +42,7 @@ export class LoadingScreen extends GameScreen {
       .beginFill(ColorScheme.dark)
       .drawShape(loadingBarBackgroundShape)
       .endFill();
-    this.container!.addChild(this.loadingBarBackground);
+    this.container.addChild(this.loadingBarBackground);
 
     this.loadingBarForegroundShape = new Rectangle(
       worldWidth * 0.1,
@@ -54,7 +54,7 @@ export class LoadingScreen extends GameScreen {
       .beginFill(ColorScheme.light)
       .drawShape(this.loadingBarForegroundShape)
       .endFill();
-    this.container!.addChild(this.loadingBarForeground);
+    this.container.addChild(this.loadingBarForeground);
 
     await Assets.init({ manifest: assetList });
 
@@ -64,17 +64,18 @@ export class LoadingScreen extends GameScreen {
   }
 
   update(delta: number): void {
-    this.loadingBarForegroundShape!.width =
-      this.container!.worldWidth * 0.8 * this.progress;
-    this.loadingBarForeground!.clear()
+    this.loadingBarForegroundShape.width =
+      this.container.worldWidth * 0.8 * this.progress;
+    this.loadingBarForeground
+      .clear()
       .beginFill(ColorScheme.light)
       .drawShape(this.loadingBarForegroundShape!)
       .endFill();
     if (this.progress === 1) {
       this.onDoneLoadingOpacity =
         this.onDoneLoadingAnimation.update(delta).opacity;
-      this.loadingBarBackground!.alpha = this.onDoneLoadingOpacity;
-      this.loadingBarForeground!.alpha = this.onDoneLoadingOpacity;
+      this.loadingBarBackground.alpha = this.onDoneLoadingOpacity;
+      this.loadingBarForeground.alpha = this.onDoneLoadingOpacity;
     }
   }
 

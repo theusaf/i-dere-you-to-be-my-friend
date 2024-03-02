@@ -10,9 +10,9 @@ import { AnimatedSprite } from "../../engine/animated_sprite";
 import { lerp } from "../util/animation";
 
 export class MapScreen extends GameScreen {
-  mapBgContainer?: PIXI.Container;
+  mapBgContainer!: PIXI.Container;
   chunks: Record<`${number},${number}`, MapData | null> = {};
-  characterSprite?: PIXI.Sprite;
+  characterSprite!: PIXI.Sprite;
   collisionCacheX: number = 0;
   collisionCacheY: number = 0;
   lerpWorldY: number = 0;
@@ -245,7 +245,7 @@ export class MapScreen extends GameScreen {
       const newContainer = new PIXI.ParticleContainer(MapScreen.SPRITE_SIZE);
       newContainer.addChild(sprite);
       this.textureParticleContainerMap.set(sprite.texture, newContainer);
-      this.mapBgContainer!.addChild(newContainer);
+      this.mapBgContainer.addChild(newContainer);
     }
   }
 
@@ -452,8 +452,8 @@ export class MapScreen extends GameScreen {
     const targetY = -(this.characterWorldY - this.container?.worldHeight! / 2);
     this.lerpWorldX = lerp(this.lerpWorldX, targetX, 0.2);
     this.lerpWorldY = lerp(this.lerpWorldY, targetY, 0.2);
-    this.mapBgContainer!.x = this.lerpWorldX;
-    this.mapBgContainer!.y = this.lerpWorldY;
+    this.mapBgContainer.x = this.lerpWorldX;
+    this.mapBgContainer.y = this.lerpWorldY;
 
     if (this.direction !== Direction.none) {
       const distance = this.getSpeed() * delta;

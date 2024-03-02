@@ -32,7 +32,7 @@ export const mapTileStrings = {
   bridge: MapTile.bridge,
   sand: MapTile.sand,
   building: MapTile.building,
-}
+};
 
 export const mapTiles = {
   0x2ab34b: MapTile.grass,

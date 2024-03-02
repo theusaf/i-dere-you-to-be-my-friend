@@ -12,11 +12,11 @@ export class MainMenuScreen extends GameScreen {
     graphics.drawRect(
       0,
       0,
-      this.container!.worldWidth,
-      this.container!.worldHeight,
+      this.container.worldWidth,
+      this.container.worldHeight,
     );
     graphics.endFill();
-    this.container!.addChild(graphics);
+    this.container.addChild(graphics);
   }
   update(): void {}
   getUI(): UIOutput | null {
