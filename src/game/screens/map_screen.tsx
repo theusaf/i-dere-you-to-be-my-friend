@@ -200,7 +200,6 @@ export class MapScreen extends GameScreen {
         this.characterChunkY + additionalLoadAllDirections + worldHeight / 2,
       );
 
-    console.log(this.textureParticleContainerMap.size);
     for (const [, container] of this.textureParticleContainerMap) {
       const removedSprites = container.removeChildren();
       for (const sprite of removedSprites) {

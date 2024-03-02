@@ -58,5 +58,6 @@ export class AnimatedSprite extends Sprite {
   destroy(options?: boolean | IDestroyOptions): void {
     super.destroy(options);
     this.isDestroyed = true;
+    this.removeFrameLoop();
   }
 }
