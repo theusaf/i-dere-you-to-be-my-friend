@@ -492,7 +492,11 @@ export class MapScreen extends GameScreen {
     if (this.handleBasicCollisions(newTile, currentTile)) return true;
 
     // special checks
-    this.handleSpecialTriggers(testChunkNumber, x, y, newTile, currentTile);
+    if (
+      this.handleSpecialTriggers(testChunkNumber, x, y, newTile, currentTile)
+    ) {
+      return true;
+    }
 
     // update cache
     this.collisionCacheX = Math.floor(x);
@@ -514,7 +518,7 @@ export class MapScreen extends GameScreen {
     worldY: number,
     newTile: MapTile,
     currentTile: MapTile,
-  ): void {
+  ): boolean {
     const chunkData = PIXI.Assets.get<MapSpecialData | null>(
       `map/special/${testChunkNumber}`,
     );
@@ -575,6 +579,7 @@ export class MapScreen extends GameScreen {
         }
       }
     }
+    return false;
   }
 
   getUI(): UIOutput | null {

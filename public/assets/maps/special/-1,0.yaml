@@ -7,6 +7,8 @@ boxes:
       against: random
     if:
       new_tile: tallgrass
+    unless:
+      current_tile: tallgrass
 
   - from: [47, 11]
     to: [49, 13]
