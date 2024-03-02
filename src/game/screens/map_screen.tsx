@@ -6,7 +6,7 @@ import { MAP_SIZE, MapData, MapTile } from "../util/map";
 import { Direction } from "../util/direction";
 
 export class MapScreen extends GameScreen {
-  mapBgContainer?: PIXI.ParticleContainer<PIXI.Sprite>;
+  mapBgContainer?: PIXI.Container;
   currentChunk?: MapData;
   chunks: Record<`${number},${number}`, MapData | null> = {};
   /**
@@ -47,11 +47,15 @@ export class MapScreen extends GameScreen {
     // ideas: do this in a setInterval that runs slowly (1 second?)
     // the player shouldn't be able to move super fast, so this should be
     // enough time.
-    this.mapBgContainer = new PIXI.ParticleContainer(MapScreen.SPRITE_SIZE);
-    this.container!.addChild(this.mapBgContainer);
+    this.mapBgContainer = new PIXI.Container();
     this.characterChunkX = Math.floor(MAP_SIZE / 2);
     this.characterChunkY = Math.floor(MAP_SIZE / 2);
+    this.characterWorldX = this.characterChunkX;
+    this.characterWorldY = this.characterChunkY;
     this.updateChunks();
+
+    this.container?.addChild(this.mapBgContainer);
+    (window as unknown as any).testbg = this.mapBgContainer;
 
     window.addEventListener("keydown", (e) => this.onKeyDown(e.code));
     window.addEventListener("keyup", (e) => this.onKeyUp(e.code));
@@ -140,12 +144,14 @@ export class MapScreen extends GameScreen {
 
     const relativeStartX = this.characterChunkX - additionalLoadAllDirections,
       relativeStartY = this.characterChunkY - additionalLoadAllDirections,
-      relativeEndX = this.characterChunkX + additionalLoadAllDirections,
-      relativeEndY = this.characterChunkY + additionalLoadAllDirections;
+      relativeEndX =
+        this.characterChunkX + additionalLoadAllDirections + worldWidth,
+      relativeEndY =
+        this.characterChunkY + additionalLoadAllDirections + worldHeight;
 
     this.mapBgContainer!.removeChildren();
-    for (let x = relativeStartX; x < relativeEndX; x++) {
-      for (let y = relativeStartY; y < relativeEndY; y++) {
+    for (let y = relativeStartY; y < relativeEndY; y++) {
+      for (let x = relativeStartX; x < relativeEndX; x++) {
         const chunk = this.getChunkRelative(x, y);
         if (chunk) {
           const [chunkX, chunkY] = this.getChunkNumberRelative(x, y)
@@ -164,10 +170,11 @@ export class MapScreen extends GameScreen {
           const tileIndex = offsetY * MAP_SIZE + offsetX,
             tile = chunk.tiles[tileIndex];
           const sprite = new PIXI.Sprite(this.getTextureFromTile(tile));
-          sprite.x = globalX;
-          sprite.y = globalY;
+          sprite.x = x;
+          sprite.y = y;
           sprite.width = 1;
           sprite.height = 1;
+          sprite.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
           this.mapBgContainer!.addChild(sprite);
         }
       }
@@ -284,7 +291,12 @@ export class MapScreen extends GameScreen {
     );
   }
 
-  update(): void {}
+  update(): void {
+    this.mapBgContainer!.x =
+      -this.characterWorldX + this.container!.worldWidth / 2;
+    this.mapBgContainer!.y =
+      -this.characterWorldY + this.container!.worldHeight / 2;
+  }
 
   getUI(): UIOutput | null {
     return {
