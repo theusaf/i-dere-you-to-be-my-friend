@@ -6,6 +6,7 @@ import { MAP_SIZE, MapData, MapTile, mapTileStrings } from "../util/map";
 import { Direction } from "../util/direction";
 import { MapSpecialData } from "../util/map_types";
 import { BattleScreen } from "./battle_screen";
+import { AnimatedSprite } from "../../engine/animated_sprite";
 
 export class MapScreen extends GameScreen {
   mapBgContainer?: PIXI.Container;
@@ -212,12 +213,11 @@ export class MapScreen extends GameScreen {
             offsetY = globalY - newChunkBaseGlobalY;
           const tileIndex = offsetY * MAP_SIZE + offsetX,
             tile = chunk.tiles[tileIndex];
-          const sprite = new PIXI.Sprite(this.getTextureFromTile(tile));
+          const sprite = this.getSpriteFromTilie(tile);
           sprite.x = globalX;
           sprite.y = globalY;
           sprite.width = 1;
           sprite.height = 1;
-          sprite.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
           this.mapBgContainer!.addChild(sprite);
         }
       }
@@ -337,25 +337,42 @@ export class MapScreen extends GameScreen {
     };
   }
 
-  getTextureFromTile(tile: MapTile): PIXI.Texture {
-    // TODO: wrap in another class to allow for animations
+  getSpriteFromTilie(tile: MapTile): PIXI.Sprite {
+    let sprite = new PIXI.Sprite();
     switch (tile) {
       case MapTile.bridge:
-        return PIXI.Assets.get("icon/map/wood")!;
+        sprite.texture = PIXI.Assets.get("icon/map/wood")!;
+        break;
       case MapTile.dirtRoad:
-        return PIXI.Assets.get("icon/map/dirt")!;
+        sprite.texture = PIXI.Assets.get("icon/map/dirt")!;
+        break;
       case MapTile.grass:
-        return PIXI.Assets.get("icon/map/grass")!;
+        sprite.texture = PIXI.Assets.get("icon/map/grass")!;
+        break;
       case MapTile.pavedRoad:
-        return PIXI.Assets.get("icon/map/rock")!;
+        sprite.texture = PIXI.Assets.get("icon/map/rock")!;
+        break;
       case MapTile.sand:
-        return PIXI.Assets.get("icon/map/sand")!;
+        sprite.texture = PIXI.Assets.get("icon/map/sand")!;
+        break;
       case MapTile.tallgrass:
-        return PIXI.Assets.get("icon/map/thick_grass")!;
+        sprite.texture = PIXI.Assets.get("icon/map/thick_grass")!;
+        break;
       case MapTile.water:
-        return PIXI.Assets.get("icon/map/water1")!;
+        sprite.destroy();
+        sprite = new AnimatedSprite({
+          frames: [
+            PIXI.Assets.get("icon/map/water1")!,
+            PIXI.Assets.get("icon/map/water2")!,
+          ],
+          frameDuration: 1000,
+          loop: true,
+        });
+        break;
+      default:
+        sprite.texture = PIXI.Texture.WHITE;
     }
-    return PIXI.Texture.WHITE;
+    return sprite;
   }
 
   /**
