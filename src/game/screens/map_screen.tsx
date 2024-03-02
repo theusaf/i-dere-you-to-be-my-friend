@@ -7,6 +7,7 @@ import { Direction } from "../util/direction";
 import { MapSpecialData } from "../util/map_types";
 import { BattleScreen } from "./battle_screen";
 import { AnimatedSprite } from "../../engine/animated_sprite";
+import { lerp } from "../util/animation";
 
 export class MapScreen extends GameScreen {
   mapBgContainer?: PIXI.Container;
@@ -14,6 +15,8 @@ export class MapScreen extends GameScreen {
   characterSprite?: PIXI.Sprite;
   collisionCacheX: number = 0;
   collisionCacheY: number = 0;
+  lerpWorldY: number = 0;
+  lerpWorldX: number = 0;
   get currentChunk(): MapData | null {
     return this.chunks[`${this.chunkX},${this.chunkY}`];
   }
@@ -93,6 +96,8 @@ export class MapScreen extends GameScreen {
     this.container?.addChild(this.characterSprite);
     this.characterWorldX = Math.floor(MAP_SIZE / 2);
     this.characterWorldY = Math.floor(MAP_SIZE / 2);
+    this.lerpWorldX = -(this.characterWorldX - this.container?.worldWidth! / 2);
+    this.lerpWorldY = -(this.characterWorldY - this.container?.worldWidth! / 2);
     this.updateChunks();
 
     this.container?.addChild(this.mapBgContainer);
@@ -443,14 +448,12 @@ export class MapScreen extends GameScreen {
   }
 
   update(delta: number): void {
-    this.mapBgContainer!.x = -(
-      this.characterWorldX -
-      this.container?.worldWidth! / 2
-    );
-    this.mapBgContainer!.y = -(
-      this.characterWorldY -
-      this.container?.worldHeight! / 2
-    );
+    const targetX = -(this.characterWorldX - this.container?.worldWidth! / 2);
+    const targetY = -(this.characterWorldY - this.container?.worldHeight! / 2);
+    this.lerpWorldX = lerp(this.lerpWorldX, targetX, 0.2);
+    this.lerpWorldY = lerp(this.lerpWorldY, targetY, 0.2);
+    this.mapBgContainer!.x = this.lerpWorldX;
+    this.mapBgContainer!.y = this.lerpWorldY;
 
     if (this.direction !== Direction.none) {
       const distance = this.getSpeed() * delta;
