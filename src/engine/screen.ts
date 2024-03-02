@@ -26,7 +26,11 @@ export abstract class GameScreen {
    * Called when the screen is deactivated
    */
   dispose(): void {
-    this.container!.destroy(true);
+    this.container!.destroy({
+      children: true,
+      texture: false,
+      baseTexture: false,
+    });
     this.app?.stage.removeChild(this.container!);
   }
 

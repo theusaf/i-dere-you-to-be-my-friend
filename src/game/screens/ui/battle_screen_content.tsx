@@ -5,6 +5,8 @@ import { BattleScreen, BattleScreenState } from "../battle_screen";
 import { HealthBar } from "../../../engine/components/health_bar";
 import { TextActionButton } from "../../../engine/components/action_button";
 import { AnimatedTextController } from "../../../engine/components/animated_text_container";
+import { GameManager } from "../../../engine/screen";
+import { MapScreen } from "../map_screen";
 
 export interface BattleScreenContentProps {
   state: BattleScreen;
@@ -25,7 +27,7 @@ export function BattleScreenContent({
   return (
     <div className="grid grid-rows-5 h-full text-white">
       <EnemyView />
-      <UserView />
+      <UserView gameManager={state.gameManager!} />
     </div>
   );
 }
@@ -48,12 +50,16 @@ function EnemyView() {
   );
 }
 
-function UserView(): JSX.Element {
+interface UserViewProps {
+  gameManager: GameManager;
+}
+
+function UserView({ gameManager }: UserViewProps): JSX.Element {
   return (
     <div className="row-start-4 row-span-2 border-t-4 border-neutral-400 bg-slate-600 bg-opacity-80 p-2">
       <div className="flex w-full h-full">
         <UserStatsView />
-        <UserViewButtonController />
+        <UserViewButtonController gameManager={gameManager} />
       </div>
     </div>
   );
@@ -67,7 +73,7 @@ enum UserViewControllerState {
   run,
 }
 
-function UserViewButtonController(): JSX.Element {
+function UserViewButtonController({ gameManager }: UserViewProps): JSX.Element {
   const [state, setState] = useState(UserViewControllerState.index);
   const className = "align-middle flex flex-col place-content-center";
 
@@ -96,8 +102,7 @@ function UserViewButtonController(): JSX.Element {
         <AnimatedTextController
           className="w-full"
           onCompleteAction={() => {
-            // TODO: Navigate to the correct place
-            setState(UserViewControllerState.index);
+            gameManager.changeScreen(new MapScreen());
           }}
         >
           Your power of friendship is too weak.

@@ -520,7 +520,6 @@ export class MapScreen extends GameScreen {
     );
     const { x: chunkX, y: chunkY } = this.getLocalChunkPosition(worldX, worldY);
     if (chunkData) {
-      console.log(chunkX, chunkY, chunkData.boxes[0]);
       const { boxes } = chunkData;
       for (const box of boxes) {
         const { from, to, type } = box;
