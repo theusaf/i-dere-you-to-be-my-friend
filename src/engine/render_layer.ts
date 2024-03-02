@@ -6,6 +6,7 @@ class RenderLayer extends Container {
 
   constructor(pixiApp: Application, worldWidth: number, worldHeight?: number) {
     super();
+    this.sortableChildren = true;
     this.worldWidth = worldWidth;
     if (worldHeight) {
       this.worldHeight = worldHeight;

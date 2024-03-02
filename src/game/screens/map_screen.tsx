@@ -8,6 +8,10 @@ import { Direction } from "../util/direction";
 export class MapScreen extends GameScreen {
   mapBgContainer?: PIXI.Container;
   chunks: Record<`${number},${number}`, MapData | null> = {};
+  characterSprite?: PIXI.Sprite;
+  get currentChunk(): MapData | null {
+    return this.chunks[`${this.chunkX},${this.chunkY}`];
+  }
   /**
    * The x position of the map chunk the player is currently in.
    */
@@ -71,6 +75,15 @@ export class MapScreen extends GameScreen {
     // the player shouldn't be able to move super fast, so this should be
     // enough time.
     this.mapBgContainer = new PIXI.Container();
+    this.characterSprite = new PIXI.Sprite(PIXI.Assets.get("icon/map/water2")!);
+    this.characterSprite.width = 1;
+    this.characterSprite.height = 1;
+    this.characterSprite.x = this.container?.worldWidth! / 2 - 0.5;
+    this.characterSprite.y = this.container?.worldHeight! / 2 - 0.5;
+    this.characterSprite.texture.baseTexture.scaleMode =
+      PIXI.SCALE_MODES.NEAREST;
+    this.characterSprite.zIndex = 100;
+    this.container?.addChild(this.characterSprite);
     this.characterWorldX = Math.floor(MAP_SIZE / 2);
     this.characterWorldY = Math.floor(MAP_SIZE / 2);
     this.updateChunks();
@@ -216,28 +229,56 @@ export class MapScreen extends GameScreen {
   }
 
   /**
-   * @param x The x position relative to current chunk.
-   * @param y The y position relative to current chunk.
+   * @param x The x position relative to current/provided chunk.
+   * @param y The y position relative to current/provided chunk.
+   * @param chunkX The chunk's x number.
+   * @param chunkY The chunk's y number.
    */
-  getChunkNumberRelative(x: number, y: number): `${number},${number}` {
+  getChunkNumberRelative(
+    x: number,
+    y: number,
+    chunkX: number = this.chunkX,
+    chunkY: number = this.chunkY,
+  ): `${number},${number}` {
     if (x < 0 && y < 0) {
-      return `${this.chunkX - 1},${this.chunkY - 1}`;
+      return `${chunkX - 1},${chunkY - 1}`;
     } else if (x < 0 && y >= MAP_SIZE) {
-      return `${this.chunkX - 1},${this.chunkY + 1}`;
+      return `${chunkX - 1},${chunkY + 1}`;
     } else if (x >= MAP_SIZE && y < 0) {
-      return `${this.chunkX + 1},${this.chunkY - 1}`;
+      return `${chunkX + 1},${chunkY - 1}`;
     } else if (x >= MAP_SIZE && y >= MAP_SIZE) {
-      return `${this.chunkX + 1},${this.chunkY + 1}`;
+      return `${chunkX + 1},${chunkY + 1}`;
     } else if (x < 0) {
-      return `${this.chunkX - 1},${this.chunkY}`;
+      return `${chunkX - 1},${chunkY}`;
     } else if (x >= MAP_SIZE) {
-      return `${this.chunkX + 1},${this.chunkY}`;
+      return `${chunkX + 1},${chunkY}`;
     } else if (y < 0) {
-      return `${this.chunkX},${this.chunkY - 1}`;
+      return `${chunkX},${chunkY - 1}`;
     } else if (y >= MAP_SIZE) {
-      return `${this.chunkX},${this.chunkY + 1}`;
+      return `${chunkX},${chunkY + 1}`;
     }
-    return `${this.chunkX},${this.chunkY}`;
+    return `${chunkX},${chunkY}`;
+  }
+
+  /**
+   * Gets the tile at a relative position to a chunk.
+   *
+   * @param x The x position relative to provided chunk.
+   * @param y The y position relative to provided chunk.
+   * @param chunkX The chunk's x number.
+   * @param chunkY The chunk's y number.
+   */
+  getLocalChunkTile(
+    x: number,
+    y: number,
+    chunkX: number = this.chunkX,
+    chunkY: number = this.chunkY,
+  ): MapTile {
+    const chunk = this.chunks[`${chunkX},${chunkY}`];
+    if (!chunk) return MapTile.unknown;
+    return (
+      chunk.tiles[Math.floor(y) * MAP_SIZE + Math.floor(x)] ?? MapTile.unknown
+    );
   }
 
   /**
@@ -354,7 +395,7 @@ export class MapScreen extends GameScreen {
     );
 
     if (this.direction !== Direction.none) {
-      const distance = 0.005 * delta;
+      const distance = 0.008 * delta;
       switch (this.direction) {
         case Direction.up:
           this.moveCharacterY(-distance);
@@ -390,18 +431,42 @@ export class MapScreen extends GameScreen {
   }
 
   moveCharacterX(dx: number): void {
-    this.characterWorldX += dx;
+    this.moveCharacterToX(this.characterWorldX + dx);
   }
 
   moveCharacterToX(x: number): void {
-    this.characterWorldX = x;
+    this.moveCharacterTo(x, this.characterWorldY);
   }
 
   moveCharacterY(dy: number): void {
-    this.characterWorldY += dy;
+    this.moveCharacterToY(this.characterWorldY + dy);
   }
 
   moveCharacterToY(y: number): void {
+    this.moveCharacterTo(this.characterWorldX, y);
+  }
+
+  moveCharacterTo(x: number, y: number): void {
+    // check for collisions/bounds
+    const testChunkNumber = this.getGlobalChunkNumber(x, y),
+      [testChunkX, testChunkY] = testChunkNumber.split(",").map(Number);
+    if (!this.chunks[testChunkNumber]) return;
+
+    const { x: localX, y: localY } = this.getLocalChunkPosition(x, y);
+    const tile = this.getLocalChunkTile(localX, localY, testChunkX, testChunkY);
+    // TODO: separate into a collision detection function
+    // This can also be used for events, like entering buildings
+    if (tile === MapTile.water) {
+      // if already in water, it's alright
+      const currentTile = this.getLocalChunkTile(
+        this.characterChunkX,
+        this.characterChunkY,
+      );
+      if (currentTile !== MapTile.water) return;
+    }
+
+    // checks pass, move character
+    this.characterWorldX = x;
     this.characterWorldY = y;
   }
 
