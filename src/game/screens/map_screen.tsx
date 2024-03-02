@@ -67,6 +67,8 @@ export class MapScreen extends GameScreen {
 
   keysDown: Set<string> = new Set();
 
+  textureParticleContainerMap: Map<PIXI.Texture, PIXI.ParticleContainer> =
+    new Map();
   static SPRITE_SIZE = 4096;
 
   initialize(app: PIXI.Application, gameManager: GameManager): void {
@@ -193,7 +195,13 @@ export class MapScreen extends GameScreen {
         this.characterChunkY + additionalLoadAllDirections + worldHeight / 2,
       );
 
-    this.mapBgContainer!.removeChildren();
+    console.log(this.textureParticleContainerMap.size);
+    for (const [, container] of this.textureParticleContainerMap) {
+      const removedSprites = container.removeChildren();
+      for (const sprite of removedSprites) {
+        sprite.destroy();
+      }
+    }
     for (let y = relativeStartY; y < relativeEndY; y++) {
       for (let x = relativeStartX; x < relativeEndX; x++) {
         const chunk = this.getChunkRelative(x, y);
@@ -218,9 +226,21 @@ export class MapScreen extends GameScreen {
           sprite.y = globalY;
           sprite.width = 1;
           sprite.height = 1;
-          this.mapBgContainer!.addChild(sprite);
+          this.addSpriteParticle(sprite);
         }
       }
+    }
+  }
+
+  addSpriteParticle(sprite: PIXI.Sprite) {
+    const container = this.textureParticleContainerMap.get(sprite.texture);
+    if (container) {
+      container.addChild(sprite);
+    } else {
+      const newContainer = new PIXI.ParticleContainer(MapScreen.SPRITE_SIZE);
+      newContainer.addChild(sprite);
+      this.textureParticleContainerMap.set(sprite.texture, newContainer);
+      this.mapBgContainer!.addChild(newContainer);
     }
   }
 
@@ -360,6 +380,7 @@ export class MapScreen extends GameScreen {
         break;
       case MapTile.water:
         sprite.destroy();
+        let oldTexture: PIXI.Texture = PIXI.Assets.get("icon/map/water1");
         sprite = new AnimatedSprite({
           frames: [
             PIXI.Assets.get("icon/map/water1")!,
@@ -367,6 +388,15 @@ export class MapScreen extends GameScreen {
           ],
           frameDuration: 1000,
           loop: true,
+          onTextureChange: (texture) => {
+            if (oldTexture !== texture) {
+              oldTexture = texture;
+              this.textureParticleContainerMap
+                .get(texture)
+                ?.removeChild(sprite);
+              this.addSpriteParticle(sprite);
+            }
+          },
         });
         break;
       default:
