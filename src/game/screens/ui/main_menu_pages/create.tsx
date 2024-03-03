@@ -48,6 +48,7 @@ export function CreateSavePage({
     character.name = currentName;
     character.gender = currentGender;
     if (creationState) {
+      myFriend.current.id = "ura_bosu";
       const gameData: RawGameDataContent = {
         friends: [],
         activeFriends: [],
