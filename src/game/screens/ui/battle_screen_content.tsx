@@ -7,6 +7,7 @@ import { TextActionButton } from "../../../engine/components/action_button";
 import { AnimatedTextController } from "../../../engine/components/animated_text_container";
 import { GameManager } from "../../../engine/game_manager";
 import { MapScreen } from "../map_screen";
+import { ConfirmationButton } from "../../../engine/components/confirmation_button";
 
 export interface BattleScreenContentProps {
   state: BattleScreen;
@@ -209,12 +210,12 @@ function IndexButtons({ className, setState }: UserViewButtonProps) {
       >
         Actions & Items
       </TextActionButton>
-      <TextActionButton
+      <ConfirmationButton
         className={className}
         onClick={() => setState(UserViewControllerState.run)}
       >
         Run
-      </TextActionButton>
+      </ConfirmationButton>
     </div>
   );
 }
