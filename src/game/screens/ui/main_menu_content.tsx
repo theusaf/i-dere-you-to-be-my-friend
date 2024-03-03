@@ -13,8 +13,20 @@ import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 enum MainMenuPage {
   index = "index",
   saves = "saves",
-  characterCreation = "characterCreation",
-  friendCreation = "friendCreation",
+  newSave = "newSave",
+}
+
+export function MainMenuLogo() {
+  return (
+    <div className="grid grid-rows-5 h-full">
+      <Unselectable className="h-full row-start-2 row-span-4">
+        <PixelImage
+          src="/assets/images/logo-banner.png"
+          className="h-full m-auto"
+        />
+      </Unselectable>
+    </div>
+  );
 }
 
 export function MainMenuContent({ gameManager }: { gameManager: GameManager }) {
@@ -23,13 +35,16 @@ export function MainMenuContent({ gameManager }: { gameManager: GameManager }) {
   const onContinue = async () => {
     const latestSave = await getLatestSave<RawGameDataContent>();
     if (latestSave) {
-      gameManager.gameData = GameData.fromMap(latestSave);
-      gameManager.changeScreen(new MapScreen());
+      onSaveSelected(latestSave);
     } else {
       navigateToSaveList();
     }
   };
   const navigateToSaveList = () => setPage(MainMenuPage.saves);
+  const onSaveSelected = (save: RawGameDataContent) => {
+    gameManager.gameData = GameData.fromMap(save);
+    gameManager.changeScreen(new MapScreen());
+  };
 
   const pages: Partial<Record<MainMenuPage, JSX.Element | JSX.Element[]>> = {
     [MainMenuPage.index]: (
@@ -38,23 +53,27 @@ export function MainMenuContent({ gameManager }: { gameManager: GameManager }) {
         onContinue={onContinue}
       />
     ),
-    [MainMenuPage.saves]: <SavesPage />,
+    [MainMenuPage.saves]: (
+      <SavesPage
+        onSaveSelected={onSaveSelected}
+        onNewSave={() => {
+          setPage(MainMenuPage.newSave);
+        }}
+      />
+    ),
   };
+  const pagesWithLogo: Set<MainMenuPage> = new Set([
+    MainMenuPage.index,
+    MainMenuPage.saves,
+  ]);
 
   return (
     <div className="grid-rows-5 grid-cols-5 h-full grid pointer-events-auto text-white">
       <div className="col-span-3 row-start-1 col-start-2 row-span-2">
-        <div className="grid grid-rows-5 h-full">
-          <Unselectable className="h-full row-start-2 row-span-4">
-            <PixelImage
-              src="/assets/images/logo-banner.png"
-              className="h-full m-auto"
-            />
-          </Unselectable>
-        </div>
+        {pagesWithLogo.has(page) && <MainMenuLogo />}
         {page !== MainMenuPage.index && (
           <span
-            className="absolute left-0 cursor-pointer ml-4"
+            className="absolute left-0 cursor-pointer ml-4 pt-4"
             onClick={() => setPage(MainMenuPage.index)}
           >
             <FontAwesomeIcon icon={faArrowLeft} className="inline mr-2" />
