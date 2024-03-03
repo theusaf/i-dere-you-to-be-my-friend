@@ -92,6 +92,7 @@ export interface CharacterInfo {
   stats?: CharacterStats;
   statusEffects?: { effect: StatusEffect; duration: number }[];
   gender?: Gender;
+  knownMoves?: string[];
 }
 
 export class Character implements CharacterInfo {
