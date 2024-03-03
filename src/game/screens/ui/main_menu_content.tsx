@@ -43,7 +43,7 @@ export function MainMenuContent({ gameManager }: { gameManager: GameManager }) {
 
   return (
     <div className="grid-rows-5 grid-cols-5 h-full grid pointer-events-auto text-white">
-      <div className="col-span-3 row-start-1 col-start-2 row-span-2 relative">
+      <div className="col-span-3 row-start-1 col-start-2 row-span-2">
         <div className="grid grid-rows-5 h-full">
           <Unselectable className="h-full row-start-2 row-span-4">
             <PixelImage
@@ -54,7 +54,7 @@ export function MainMenuContent({ gameManager }: { gameManager: GameManager }) {
         </div>
         {page !== MainMenuPage.index && (
           <span
-            className="fixed left-0 cursor-pointer ml-4"
+            className="absolute left-0 cursor-pointer ml-4"
             onClick={() => setPage(MainMenuPage.index)}
           >
             <FontAwesomeIcon icon={faArrowLeft} className="inline mr-2" />
