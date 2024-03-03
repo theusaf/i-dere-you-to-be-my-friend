@@ -113,6 +113,8 @@ export class Character implements CharacterInfo {
   xPower: number;
   stats: CharacterStats;
   gender: Gender;
+  knownMoves: string[];
+  statusEffects: { effect: StatusEffect; duration: number }[];
 
   constructor({
     hp,
@@ -123,6 +125,8 @@ export class Character implements CharacterInfo {
     love,
     stats,
     gender,
+    knownMoves,
+    statusEffects,
   }: CharacterInfo) {
     this.hp = hp ?? 1;
     this.name = name ?? "Unnamed";
@@ -132,6 +136,8 @@ export class Character implements CharacterInfo {
     this.love = love ?? 1;
     this.stats = stats ?? { speed: 1, constitution: 1, maxHealth: 10 };
     this.gender = gender ?? Gender.they;
+    this.knownMoves = knownMoves ?? [];
+    this.statusEffects = statusEffects ?? [];
   }
 
   static createRandomCharacter(love: number = 1): Character {

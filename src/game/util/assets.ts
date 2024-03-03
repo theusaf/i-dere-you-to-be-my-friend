@@ -65,7 +65,7 @@ export const assetList: AssetsManifest = {
       assets: [
         {
           src: "/assets/game/attacks.yaml",
-          alias: "game/attacks",
+          alias: "game/moves",
         },
         {
           src: "/assets/game/types.yaml",
