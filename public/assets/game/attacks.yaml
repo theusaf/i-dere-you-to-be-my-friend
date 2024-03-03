@@ -1,9 +1,260 @@
-__template__:
-  - name: "Template"
-  - description: "Template description"
-  - type: tsundere
-  - max_uses: 10
-  - might: 10
-  - traits:
+hard_punch:
+  name: Hard Punch
+  description: Hits well and true with a [g]10%[/g] chance to [r]stun[/r]
+  type: bokodere
+  max_uses: 20
+  might: 5
+  speed: 8
+  targets: enemy
+  traits:
+    - stun:
+        chance: 0.1
+        duration: 2
+
+fist_flurry:
+  name: Fist Flurry
+  description: Send a flurry of punches wildly, may hit multiple times
+  type: bokodere
+  max_uses: 12
+  might: 2
+  speed: 8
+  targets: enemy
+  traits:
+   - multi_hit:
+       chance: 0.3
+       max: 5
+
+kick:
+  name: Kick
+  description: Kicks the enemy, a classic attack
+  type: sdere
+  max_uses: 16
+  might: 8
+  speed: 6
+  targets: enemy
+  traits: []
+
+tease:
+  name: Tease
+  description: Tease the enemy, causing significant annoyance. Has [g]40%[/g] chance to [r]weaken[/r] the enemy and a [g]20%[/g] chance to become [y]strengthened[/y]
+  type: sdere
+  max_uses: 14
+  might: 3
+  speed: 5
+  targets: enemy
+  traits:
+    - weaken:
+        chance: 0.4
+    - strengthen:
+        chance: 0.2
+        duration: [1, 3]
+
+slap:
+  name: Slap
+  description: Quickly strikes the enemy.
+  type: tsundere
+  max_uses: 22
+  might: 5
+  speed: 10
+  targets: enemy
+  traits: []
+
+yell:
+  name: Yell
+  description: Yell loudly even if you don't mean it. Has [g]30%[/g] chance to [r]confuse[/r] the enemy
+  type: tsundere
+  max_uses: 18
+  might: 4
+  speed: 4
+  targets: enemy
+  traits:
+    - confuse:
+        chance: 0.3
+        duration: [1, 2]
+
+elation:
+  name: Elation
+  description: Become [y]elated[/y], gaining powerful strength with disregard for defense
+  type: yandere
+  max_uses: 8
+  might: 0
+  speed: 8
+  targets: self
+  traits:
+    - elation:
+        duration: [3, 4]
+
+slash:
+  name: Slash
+  description: Slash out violently with a knife. Has [g]15%[/g] chance to cause [r]bleeding[/r]
+  type: yandere
+  max_uses: 14
+  might: 7
+  speed: 6
+  targets: enemy
+  traits:
+    - bleed:
+        chance: 0.15
+        duration: [1, 3]
+
+ehe:
+  name: Ehe
+  description: Laugh blissfully causing mental damage. Has [g]20%[/g] chance to cause [r]confusion[/r]
+  type: bakadere
+  max_uses: 20
+  might: 3
+  speed: 6
+  targets: enemy
+  traits:
+    - confuse:
+        chance: 0.2
+        duration: [1, 2]
+
+cheers:
+  name: Cheers!
+  description: Offer a drink to the enemy. Oops, there was poison in it. Has [g]30%[/g] chance to [r]poison[/r] the enemy
+  type: bakadere
+  max_uses: 10
+  might: 1
+  speed: 2
+  targets: enemy
+  traits:
+    - poison:
+        chance: 0.3
+        duration: [1, 5]
+
+ignore:
+  name: Ignore
+  description: Ignore the enemy, causing mental damage. Has [g]70%[/g] chance to [r]weaken[/r] the enemy
+  type: kuudere
+  max_uses: 8
+  might: 6
+  speed: 1
+  targets: enemy
+  traits:
+    - weaken:
+        chance: 0.7
+
+stare:
+  name: Stare
+  description: Stare at the enemy, causing awkward discomfort. Has [g]20%[/g] chance to [r]weaken[/r] the enemy
+  type: kuudere
+  max_uses: 14
+  might: 6
+  speed: 2
+  targets: enemy
+  traits:
+    - weaken:
+        chance: 0.2
+
+gun:
+  name: Gun
+  description: Shoot the enemy with a gun... The next action will be used to reload. [g]10%[/g] chance to [y]crit[/y]
+  type: gandere
+  max_uses: 6
+  might: 15
+  speed: 5
+  targets: enemy
+  traits:
     - loading
-    - single_use
+    - critical:
+        chance: 0.1
+
+aim:
+  name: Aim
+  description: Aim carefully, increasing the chance to [y]crit[/y] the next attack
+  type: gandere
+  max_uses: 12
+  might: 0
+  speed: 3
+  targets: self
+  traits:
+    - critical_up:
+        chance: 1
+        duration: 1
+
+smile:
+  name: Smile
+  description: Smile happily, making your opponent rethink their decisions. [g]30%[/g] chance to make the opponent [r]vulnerable[/r]
+  type: deredere
+  max_uses: 16
+  might: 4
+  speed: 5
+  targets: enemy
+  traits:
+    - vulnerable:
+        chance: 0.3
+
+hug:
+  name: Hug
+  description: Hug the enemy. Sharing is caring! [g]20%[/g] chance to [y]heal[/y] the user and [r]weaken[/r] the enemy
+  type: deredere
+  max_uses: 10
+  might: 1
+  speed: 4
+  targets: enemy
+  traits:
+    - heal:
+        chance: 0.2
+        amount: [3, 8]
+    - weaken:
+        chance: 0.2
+
+taunt:
+  name: Taunt
+  description: Taunt the enemy, causing them to lose focus. Increases defense.
+  type: mdere
+  max_uses: 18
+  might: 0
+  speed: 5
+  targets: self
+  traits:
+    - tought:
+        duration: [2, 5]
+
+i_can_take_it:
+  name: I Can Take It
+  description: Smile when the enemy hits you, putting fear into their heart. Reflects damage back to the enemy.
+  type: mdere
+  max_uses: 10
+  might: 0
+  speed: 10
+  targets: self
+  traits:
+    - reflect:
+        chance: 1
+        duration: [1, 5]
+
+# Other miscellaneous attacks
+tackle:
+  name: Tackle
+  description: Tackle the enemy, causing physical damage
+  type: normal
+  max_uses: 20
+  might: 5
+  speed: 8
+  targets: enemy
+  traits: []
+
+squeeze:
+  name: Squeeze
+  description: Squeeze the enemy hard!
+  type: normal
+  max_uses: 16
+  might: 7
+  speed: 4
+  targets: enemy
+  traits: []
+
+self_affirm:
+  name: Self Affirm
+  description: It's alright. You're a good person. Grants mental [y]strength[/y]
+  type: normal
+  max_uses: 12
+  might: 0
+  speed: 3
+  targets: self
+  traits:
+    - strengthen:
+      chance: 1
+      duration: 2

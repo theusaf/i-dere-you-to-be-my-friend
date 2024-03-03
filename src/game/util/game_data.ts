@@ -73,10 +73,13 @@ export enum StatusEffect {
   stunned = "stunned",
   weakened = "weakened",
   vulnerable = "vulnerable",
+  reload = "reload",
   // positive
   strengthened = "strengthened",
   toughened = "toughened",
   elated = "elated",
+  criticalUp = "criticalUp",
+  damageReflect = "damageReflect",
 }
 
 export interface CharacterInfo {
@@ -87,7 +90,7 @@ export interface CharacterInfo {
   xPower?: number;
   love?: number;
   stats?: CharacterStats;
-  statusEffects?: StatusEffect[];
+  statusEffects?: { effect: StatusEffect; duration: number }[];
   gender?: Gender;
 }
 
