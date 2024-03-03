@@ -66,8 +66,18 @@ export class MapScreen extends GameScreen {
   }
   cacheCharacterY: number = 0;
 
-  characterWorldX: number = 0;
-  characterWorldY: number = 0;
+  get characterWorldX(): number {
+    return this.gameManager.gameData.worldMapData.playerX;
+  }
+  set characterWorldX(x: number) {
+    this.gameManager.gameData.worldMapData.playerX = x;
+  }
+  get characterWorldY(): number {
+    return this.gameManager.gameData.worldMapData.playerY;
+  }
+  set characterWorldY(y: number) {
+    this.gameManager.gameData.worldMapData.playerY = y;
+  }
 
   keysDown: Set<string> = new Set();
 
@@ -95,8 +105,6 @@ export class MapScreen extends GameScreen {
       PIXI.SCALE_MODES.NEAREST;
     this.characterSprite.zIndex = 100;
     this.container?.addChild(this.characterSprite);
-    this.characterWorldX = Math.floor(MAP_SIZE / 2);
-    this.characterWorldY = Math.floor(MAP_SIZE / 2);
     this.lerpWorldX = -(this.characterWorldX - this.container?.worldWidth! / 2);
     this.lerpWorldY = -(this.characterWorldY - this.container?.worldWidth! / 2);
     this.updateChunks();
@@ -621,8 +629,10 @@ export class MapScreen extends GameScreen {
             }
             if (passesCondition) {
               if (action.type === "enter_battle") {
-                // enter battle
-                this.gameManager?.changeScreen(new BattleScreen());
+                this.characterWorldX = Math.floor(this.characterWorldX) + 0.5;
+                this.characterWorldY = Math.floor(this.characterWorldY) + 0.5;
+                this.gameManager.changeScreen(new BattleScreen());
+                return true;
               }
             }
           }
