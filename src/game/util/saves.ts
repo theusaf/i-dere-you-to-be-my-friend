@@ -5,11 +5,22 @@ export interface Saveable<T> {
   toMap(): T;
 }
 
+export async function getLatestSave<T>(): Promise<T | null> {
+  if (window.Gluon) {
+    // TODO: Implement latest save
+  } else {
+    const saveData = localStorage.getItem("latestSave");
+    if (saveData && typeof saveData === "string") return load(saveData);
+  }
+  return null;
+}
+
 export async function save<T>(data: Saveable<T>, id: string): Promise<void> {
   if (window.Gluon) {
     // TODO: Implement save
   } else {
     localStorage.setItem(`save/${id}`, data.toYAML());
+    localStorage.setItem("latestSave", id);
   }
 }
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { LoadingScreen } from "../loading_screen";
 import { Unselectable } from "../../../engine/components/unselectable";
-import { MapScreen } from "../map_screen";
+import { MainMenuScreen } from "../main_menu_screen";
 
 export function LoadingScreenContent({
   data,
@@ -24,7 +24,7 @@ export function LoadingScreenContent({
       className="pointer-events-auto h-full flex flex-col items-center"
       onClick={() => {
         if (data.progress >= 1) {
-          data.gameManager.changeScreen(new MapScreen());
+          data.gameManager.changeScreen(new MainMenuScreen());
         }
       }}
     >

@@ -22,7 +22,7 @@ export class MainMenuScreen extends GameScreen {
   update(): void {}
   getUI(): UIOutput | null {
     return {
-      main: <MainMenuContent />,
+      main: <MainMenuContent gameManager={this.gameManager} />,
     };
   }
 }
