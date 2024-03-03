@@ -28,12 +28,16 @@ export function CreateSavePage({
   };
 
   const randomize = () => {
-    setCurrentGender(
-      chance.pickone([Gender.he, Gender.she, Gender.they, Gender.none]),
-    );
+    const gender = chance.pickone([
+      Gender.he,
+      Gender.she,
+      Gender.they,
+      Gender.none,
+    ]);
+    setCurrentGender(gender);
     setCurrentName(
       getRandomName({
-        gender: genderMap[currentGender],
+        gender: genderMap[gender],
       }),
     );
   };

@@ -44,6 +44,7 @@ export function MainMenuContent({ gameManager }: { gameManager: GameManager }) {
   const navigateToSaveList = () => setPage(MainMenuPage.saves);
   const onSaveSelected = (save: RawGameDataContent) => {
     gameManager.gameData = GameData.fromMap(save);
+    gameManager.gameData.save();
     gameManager.changeScreen(new MapScreen());
   };
 

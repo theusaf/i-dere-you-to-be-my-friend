@@ -1,6 +1,6 @@
 import { Battle } from "./battle";
 import { Character, CharacterInfo } from "./character";
-import { Saveable } from "./saves";
+import { Saveable, save } from "./saves";
 import { stringify } from "yaml";
 import data from "../../../package.json";
 import { chance } from "./chance";
@@ -38,7 +38,7 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
   mainNPC: Character;
 
   battleData?: Battle;
-  saveId?: string;
+  saveId: string;
 
   constructor({
     worldMapData,
@@ -72,6 +72,10 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
 
   toYAML(): string {
     return stringify(this.toMap());
+  }
+
+  save(): Promise<void> {
+    return save(this, this.saveId);
   }
 
   isNPCinFriendGroup(id: string): boolean {
