@@ -14,6 +14,10 @@ export interface CharacterStats {
    * Affects health gain and resistances.
    */
   constitution: number;
+  /**
+   * The character's ability to dodge attacks.
+   */
+  agility: number;
   maxHealth: number;
 }
 
@@ -97,7 +101,7 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
     this.isDead = isDead ?? false;
     this.xPower = xPower ?? 0;
     this.love = love ?? 1;
-    this.stats = stats ?? { speed: 1, constitution: 1, maxHealth: 10 };
+    this.stats = stats ?? { speed: 1, constitution: 1, maxHealth: 10, agility: 1 };
     this.gender = gender ?? Gender.they;
     this.knownMoves = knownMoves ?? [];
     this.statusEffects = statusEffects ?? [];
@@ -186,6 +190,7 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
         speed: chance.integer({ min: 1, max: 3 }),
         constitution: chance.integer({ min: 1, max: 3 }),
         maxHealth: chance.integer({ min: 10, max: 13 }),
+        agility: chance.integer({ min: 1, max: 3 }),
       },
       knownMoves: moves.map((move) => move.name),
     });
