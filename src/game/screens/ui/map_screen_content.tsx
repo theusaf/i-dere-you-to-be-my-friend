@@ -88,8 +88,8 @@ function BattleAnimationDisplay({
   const animation = useRef<GameAnimation>(
     new GameAnimation(
       { distance: 0 },
-      { distance: 4 },
-      1000,
+      { distance: 2 },
+      500,
       easeMethod.linear,
     ),
   );
@@ -103,7 +103,7 @@ function BattleAnimationDisplay({
           animation.current = new GameAnimation(
             { distance: 100 },
             { distance: 15 },
-            1500,
+            1000,
             easeMethod.easeOutBack,
           );
           setState(BattleAnimationState.initial);
@@ -112,7 +112,7 @@ function BattleAnimationDisplay({
           animation.current = new GameAnimation(
             { distance: 15 },
             { distance: 0 },
-            1000,
+            500,
             easeMethod.easeInBack,
           );
           setState(BattleAnimationState.closing);
