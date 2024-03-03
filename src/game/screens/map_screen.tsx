@@ -5,10 +5,18 @@ import { MapScreenContent } from "./ui/map_screen_content";
 import RenderLayer from "../../engine/render_layer";
 import { MAP_SIZE, MapData, MapTile, mapTileStrings } from "../util/map";
 import { Direction } from "../util/direction";
-import { MapSpecialData } from "../util/map_types";
-import { BattleScreen } from "./battle_screen";
+import { MapSpecialActionBattle, MapSpecialData } from "../util/map_types";
 import { AnimatedSprite } from "../../engine/animated_sprite";
 import { lerp } from "../util/animation";
+
+export enum MapScreenEvents {
+  /**
+   * Emitted when a battle is about to start.
+   *
+   * @param {MapSpecialActionBattle} detail - The battle data.
+   */
+  battleStart = "battleStart",
+}
 
 export class MapScreen extends GameScreen {
   mapBgContainer!: PIXI.Container;
@@ -87,6 +95,8 @@ export class MapScreen extends GameScreen {
     new Map();
   static SPRITE_SIZE = 4096;
 
+  eventNotifier: EventTarget = new EventTarget();
+
   initialize(app: PIXI.Application, gameManager: GameManager): void {
     // intialize world size in terms of "blocks" (about 0.5 meters)
     super.initialize(app, gameManager, new RenderLayer(app, 30));
@@ -98,7 +108,9 @@ export class MapScreen extends GameScreen {
     this.mapSpecialContainer.sortableChildren = true;
     this.mapContainer.sortableChildren = true;
 
-    this.characterSprite = new PIXI.Sprite(PIXI.Assets.get("icon/structure/store_stall")!);
+    this.characterSprite = new PIXI.Sprite(
+      PIXI.Assets.get("icon/structure/store_stall")!,
+    );
     this.characterSprite.width = 1;
     this.characterSprite.height = 1;
     this.characterSprite.x = this.container.worldWidth! / 2 - 0.5;
@@ -297,7 +309,6 @@ export class MapScreen extends GameScreen {
         buildingSprite.x = x;
         buildingSprite.y = y;
         buildingSprite.zIndex = 50;
-        console.log(x, y, buildingSprite.width, buildingSprite.height);
         this.mapSpecialContainer.addChild(buildingSprite);
 
         // check for background fill
@@ -710,7 +721,12 @@ export class MapScreen extends GameScreen {
               if (action.type === "enter_battle") {
                 this.characterWorldX = Math.floor(this.characterWorldX) + 0.5;
                 this.characterWorldY = Math.floor(this.characterWorldY) + 0.5;
-                this.gameManager.changeScreen(new BattleScreen());
+                this.eventNotifier.dispatchEvent(
+                  new CustomEvent<MapSpecialActionBattle>(
+                    MapScreenEvents.battleStart,
+                    { detail: action },
+                  ),
+                );
                 return true;
               }
             }
@@ -723,7 +739,7 @@ export class MapScreen extends GameScreen {
 
   getUI(): UIOutput | null {
     return {
-      main: <MapScreenContent />,
+      main: <MapScreenContent state={this} />,
     };
   }
 }
