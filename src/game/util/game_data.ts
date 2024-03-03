@@ -28,6 +28,7 @@ export interface RawGameDataContent {
   worldMapData: WorldMapData;
   version?: string;
   mainNPC: CharacterInfo;
+  saveId?: string;
 }
 
 export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
@@ -67,6 +68,7 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
       you: this.you,
       mainNPC: this.mainNPC,
       version,
+      saveId: this.saveId,
     };
   }
 
@@ -89,6 +91,7 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
       activeFriends: map.activeFriends.map((friend) => new Character(friend)),
       you: new Character(map.you),
       mainNPC: new Character(map.mainNPC),
+      saveId: map.saveId,
     });
   }
 }
