@@ -99,6 +99,7 @@ export class BattleScreen extends GameScreen {
       }
     }
   }
+
   getUI(): UIOutput | null {
     return {
       main: <BattleScreenContent state={this} />,

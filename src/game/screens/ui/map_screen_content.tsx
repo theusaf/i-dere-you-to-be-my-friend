@@ -9,6 +9,7 @@ import {
   SettingsPageLarge,
   SettingsPagePhone,
 } from "./map_screen_pages/settings";
+import { Battle } from "../../util/battle";
 
 interface MapScreenContentProps {
   state: MapScreen;
@@ -27,9 +28,15 @@ export function MapScreenContent({
   const [battleStartState, setBattleStartState] = useState(
     EnterBattleAnimationState.none,
   );
+  const [battleData, setBattleData] = useState<MapSpecialActionBattle | null>(
+    null,
+  );
   useEffect(() => {
-    const battleStartListener = ((_: CustomEvent<MapSpecialActionBattle>) => {
+    const battleStartListener = ((
+      data: CustomEvent<MapSpecialActionBattle>,
+    ) => {
       setPhoneVisible(false);
+      setBattleData(data.detail);
       setBattleStartState(EnterBattleAnimationState.running);
     }) as EventListener;
     state.eventNotifier.addEventListener(
@@ -54,6 +61,10 @@ export function MapScreenContent({
         <BattleAnimationDisplay
           onDone={() => {
             setBattleStartState(EnterBattleAnimationState.done);
+            state.gameManager.gameData.battleData = Battle.fromBattleData(
+              battleData!,
+              state.gameManager,
+            );
             state.gameManager.changeScreen(new BattleScreen());
           }}
         />
