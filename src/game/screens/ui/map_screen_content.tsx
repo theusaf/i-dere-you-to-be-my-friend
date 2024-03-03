@@ -5,6 +5,7 @@ import { MapScreen, MapScreenEvents } from "../map_screen";
 import { MapSpecialActionBattle } from "../../util/map_types";
 import { BattleScreen } from "../battle_screen";
 import { GameAnimation, easeMethod } from "../../util/animation";
+import { SettingsPageLarge, SettingsPagePhone } from "./map_screen_pages/settings";
 
 interface MapScreenContentProps {
   state: MapScreen;
@@ -180,6 +181,32 @@ function PhoneWidget({ onClick }: PhoneWidgetProps) {
 }
 
 function PhoneLargeDisplay() {
+  const [page, setPage] = useState("index");
+  const className = "h-full drop-shadow-md shadow-black";
+  const apps = ["contacts", "party", "me", "bag", "settings", "credits"];
+  const appIndex = apps.map((app) => (
+    <div
+      key={app}
+      className="w-full h-full cursor-pointer"
+      onClick={() => {
+        setPage(app);
+      }}
+    >
+      <Unselectable className="w-full h-full">
+        <PixelImage
+          src={`/assets/images/ui/apps/${app}.png`}
+          className={className}
+        />
+      </Unselectable>
+    </div>
+  ));
+  const pages: Record<string, JSX.Element | JSX.Element[]> = {
+    index: appIndex,
+    settings: <SettingsPagePhone />,
+  };
+  const pageContents: Record<string, JSX.Element | JSX.Element[]> = {
+    settings: <SettingsPageLarge />,
+  };
   return (
     <div className="row-span-8 row-start-1 col-start-1 flex items-start flex-row p-4 z-10">
       <div
@@ -189,17 +216,32 @@ function PhoneLargeDisplay() {
         <PixelImage src="/assets/images/ui/phone.png" className="h-full" />
         <div className="absolute h-full w-full top-0 left-0 p-6 grid grid-rows-12 text-white">
           <span className="text-sm flex items-center pb-2">XX:XX</span>
-          <div className="row-span-10 row-start-2 grid grid-rows-5 grid-cols-4">
-            <span>PHONE</span>
+          <div
+            className={`h-full row-span-10 row-start-2 ${page === "index" ? "grid" : ""} grid-rows-7 grid-cols-3 items-center relative`}
+          >
+            {page !== "index" && (
+              <span
+                className="absolute top-0 left-0 cursor-pointer"
+                onClick={() => setPage("index")}
+              >
+                <Unselectable>Back</Unselectable>
+              </span>
+            )}
+            <span className="col-span-3 text-center text-4xl">
+              <Unselectable>{page === "index" ? "Hello!" : ""}</Unselectable>
+            </span>
+            {pages[page]}
           </div>
         </div>
       </div>
       <div
-        className="ml-4"
+        className="ml-4 w-full h-full"
         style={{
           flex: 4,
         }}
-      ></div>
+      >
+        {pageContents[page]}
+      </div>
     </div>
   );
 }

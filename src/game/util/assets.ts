@@ -8,7 +8,21 @@ export const assetList: AssetsManifest = {
     },
     {
       name: "images-ui",
-      assets: [{ src: "/assets/images/ui/phone.png", alias: "ui/phone" }],
+      assets: [
+        { src: "/assets/images/ui/phone.png", alias: "ui/phone" },
+        { src: "/assets/images/ui/apps/bag.png", alias: "ui/apps/bag" },
+        {
+          src: "/assets/images/ui/apps/contacts.png",
+          alias: "ui/apps/contacts",
+        },
+        { src: "/assets/images/ui/apps/credits.png", alias: "ui/apps/credits" },
+        { src: "/assets/images/ui/apps/me.png", alias: "ui/apps/me" },
+        { src: "/assets/images/ui/apps/party.png", alias: "ui/apps/party" },
+        {
+          src: "/assets/images/ui/apps/settings.png",
+          alias: "ui/apps/settings",
+        },
+      ],
     },
     {
       name: "images-map",
