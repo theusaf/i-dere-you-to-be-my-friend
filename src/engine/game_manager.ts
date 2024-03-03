@@ -48,5 +48,4 @@ class GameData {
       playerY: 64,
     };
   }
-
 }

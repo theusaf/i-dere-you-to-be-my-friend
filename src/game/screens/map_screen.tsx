@@ -99,17 +99,17 @@ export class MapScreen extends GameScreen {
     this.characterSprite = new PIXI.Sprite(PIXI.Assets.get("icon/map/water2")!);
     this.characterSprite.width = 1;
     this.characterSprite.height = 1;
-    this.characterSprite.x = this.container?.worldWidth! / 2 - 0.5;
-    this.characterSprite.y = this.container?.worldHeight! / 2 - 0.5;
+    this.characterSprite.x = this.container.worldWidth! / 2 - 0.5;
+    this.characterSprite.y = this.container.worldHeight! / 2 - 0.5;
     this.characterSprite.texture.baseTexture.scaleMode =
       PIXI.SCALE_MODES.NEAREST;
     this.characterSprite.zIndex = 100;
-    this.container?.addChild(this.characterSprite);
-    this.lerpWorldX = -(this.characterWorldX - this.container?.worldWidth! / 2);
-    this.lerpWorldY = -(this.characterWorldY - this.container?.worldWidth! / 2);
+    this.container.addChild(this.characterSprite);
+    this.lerpWorldX = -(this.characterWorldX - this.container.worldWidth! / 2);
+    this.lerpWorldY = -(this.characterWorldY - this.container.worldWidth! / 2);
     this.updateChunks();
 
-    this.container?.addChild(this.mapBgContainer);
+    this.container.addChild(this.mapBgContainer);
     (window as unknown as any).testbg = this.mapBgContainer;
 
     window.addEventListener("keydown", (e) => this.onKeyDown(e.code));
@@ -456,8 +456,8 @@ export class MapScreen extends GameScreen {
   }
 
   update(delta: number): void {
-    const targetX = -(this.characterWorldX - this.container?.worldWidth! / 2);
-    const targetY = -(this.characterWorldY - this.container?.worldHeight! / 2);
+    const targetX = -(this.characterWorldX - this.container.worldWidth! / 2);
+    const targetY = -(this.characterWorldY - this.container.worldHeight! / 2);
     this.lerpWorldX = lerp(this.lerpWorldX, targetX, 0.2);
     this.lerpWorldY = lerp(this.lerpWorldY, targetY, 0.2);
     this.mapBgContainer.x = this.lerpWorldX;

@@ -24,7 +24,7 @@ export function LoadingScreenContent({
       className="pointer-events-auto h-full flex flex-col items-center"
       onClick={() => {
         if (data.progress >= 1) {
-          data.gameManager?.changeScreen(new MapScreen());
+          data.gameManager.changeScreen(new MapScreen());
         }
       }}
     >
