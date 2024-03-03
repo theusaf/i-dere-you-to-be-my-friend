@@ -23,7 +23,7 @@ boxes:
     background_tile: grass
 
   - from: [46, 27]
-    to: [47, 29]
+    to: [48, 29]
     type: building
     image: store_stall
     background_tile: grass

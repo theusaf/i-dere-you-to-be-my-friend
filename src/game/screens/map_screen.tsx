@@ -91,18 +91,14 @@ export class MapScreen extends GameScreen {
     // intialize world size in terms of "blocks" (about 0.5 meters)
     super.initialize(app, gameManager, new RenderLayer(app, 30));
 
-    // 4096 is about 1/4 chunk's worth of sprites
-    // generally, around ~2000 sprites are visible on the screen.
-    // it will be important to keep the sprites updated.
-    // ideas: do this in a setInterval that runs slowly (1 second?)
-    // the player shouldn't be able to move super fast, so this should be
-    // enough time.
     this.mapContainer = new PIXI.Container();
     this.mapBgContainer = new PIXI.Container();
     this.mapSpecialContainer = new PIXI.Container();
     this.mapSpecialContainer.zIndex = 50;
+    this.mapSpecialContainer.sortableChildren = true;
+    this.mapContainer.sortableChildren = true;
 
-    this.characterSprite = new PIXI.Sprite(PIXI.Assets.get("icon/map/water2")!);
+    this.characterSprite = new PIXI.Sprite(PIXI.Assets.get("icon/structure/store_stall")!);
     this.characterSprite.width = 1;
     this.characterSprite.height = 1;
     this.characterSprite.x = this.container.worldWidth! / 2 - 0.5;
@@ -285,23 +281,23 @@ export class MapScreen extends GameScreen {
     for (const box of boxes) {
       const { from, to, type } = box;
       if (type === "building") {
-        const width = to[0] - from[0] + 1,
-          height = to[1] - from[1] + 1;
+        const width = to[0] - from[0],
+          height = to[1] - from[1];
         const buildingSprite = new PIXI.Sprite(
           PIXI.Assets.get(`icon/structure/${box.image}`),
         );
-        buildingSprite.width = width;
-        buildingSprite.height = height;
         const { x, y } = this.getChunkGlobalPosition(
           chunkX,
           chunkY,
           from[0],
           from[1],
         );
-        console.log(x, y, buildingSprite.width, buildingSprite.height);
+        buildingSprite.width = width;
+        buildingSprite.height = height;
         buildingSprite.x = x;
         buildingSprite.y = y;
         buildingSprite.zIndex = 50;
+        console.log(x, y, buildingSprite.width, buildingSprite.height);
         this.mapSpecialContainer.addChild(buildingSprite);
 
         // check for background fill
