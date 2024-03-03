@@ -15,10 +15,13 @@ export interface BattleScreenContentProps {
 export function BattleScreenContent({
   state,
 }: BattleScreenContentProps): JSX.Element {
+  const [showUI, setShowUI] = useState(false);
   useEffect(() => {
     const interval = setInterval(() => {
       if (state.state == BattleScreenState.battle) {
-      } else {
+        setShowUI(true);
+      } else if (state.state == BattleScreenState.loadingOut) {
+        setShowUI(false);
       }
     }, 100);
     return () => clearInterval(interval);
@@ -26,15 +29,24 @@ export function BattleScreenContent({
 
   return (
     <div className="grid grid-rows-5 h-full text-white">
-      <EnemyView />
-      <UserView gameManager={state.gameManager} />
+      <EnemyView show={showUI} />
+      <UserView gameManager={state.gameManager} show={showUI} />
     </div>
   );
 }
 
-function EnemyView() {
+interface ToggleableUIProps {
+  show?: boolean;
+}
+
+function EnemyView({ show }: ToggleableUIProps) {
   return (
-    <div className="grid grid-cols-7">
+    <div
+      className="grid grid-cols-7 transition-transform duration-300"
+      style={{
+        transform: show ? "translateX(0)" : "translateY(-100%)",
+      }}
+    >
       <div className="col-span-3 m-4 bg-slate-500 outline outline-4 outline-neutral-400 overflow-y-auto p-2 pointer-events-auto">
         <span>
           <h3 className="text-xl">INSERT ENEMY NAME</h3>
@@ -50,13 +62,18 @@ function EnemyView() {
   );
 }
 
-interface UserViewProps {
+interface UserViewProps extends ToggleableUIProps {
   gameManager: GameManager;
 }
 
-function UserView({ gameManager }: UserViewProps): JSX.Element {
+function UserView({ gameManager, show }: UserViewProps): JSX.Element {
   return (
-    <div className="row-start-4 row-span-2 border-t-4 border-neutral-400 bg-slate-600 bg-opacity-80 p-2">
+    <div
+      className="row-start-4 row-span-2 border-t-4 border-neutral-400 bg-slate-600 bg-opacity-80 p-2 transition-transform duration-300"
+      style={{
+        transform: show ? "translateX(0)" : "translateY(100%)",
+      }}
+    >
       <div className="flex w-full h-full">
         <UserStatsView />
         <UserViewButtonController gameManager={gameManager} />
