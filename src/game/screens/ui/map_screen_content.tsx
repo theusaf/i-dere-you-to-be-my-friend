@@ -40,10 +40,6 @@ export function MapScreenContent({
     };
   }, []);
 
-  if (battleStartState === EnterBattleAnimationState.done) {
-    state.gameManager.changeScreen(new BattleScreen());
-  }
-
   return (
     <div
       className={`grid grid-rows-8 relative h-full ${phoneVisible ? "pointer-events-auto" : ""}`}
@@ -54,6 +50,7 @@ export function MapScreenContent({
         <BattleAnimationDisplay
           onDone={() => {
             setBattleStartState(EnterBattleAnimationState.done);
+            state.gameManager.changeScreen(new BattleScreen());
           }}
         />
       )}
@@ -86,12 +83,7 @@ function BattleAnimationDisplay({
   const [size, setSize] = useState(100);
   const [state, setState] = useState(BattleAnimationState.flash);
   const animation = useRef<GameAnimation>(
-    new GameAnimation(
-      { distance: 0 },
-      { distance: 2 },
-      500,
-      easeMethod.linear,
-    ),
+    new GameAnimation({ distance: 0 }, { distance: 2 }, 500, easeMethod.linear),
   );
   const currentAnimation = animation.current;
   if (!currentAnimation.isDone) {

@@ -28,6 +28,7 @@ export class MapScreen extends GameScreen {
   lerpWorldX: number = 0;
   mapSpecialContainer!: PIXI.Container<PIXI.DisplayObject>;
   mapContainer!: PIXI.Container<PIXI.DisplayObject>;
+  paused: boolean = false;
   get currentChunk(): MapData | null {
     return this.chunks[`${this.chunkX},${this.chunkY}`];
   }
@@ -553,6 +554,11 @@ export class MapScreen extends GameScreen {
     this.mapContainer.x = this.lerpWorldX;
     this.mapContainer.y = this.lerpWorldY;
 
+    this.movePlayer(delta);
+  }
+
+  private movePlayer(delta: number) {
+    if (this.paused) return;
     if (this.direction !== Direction.none) {
       const distance = this.getSpeed() * delta;
       switch (this.direction) {
@@ -727,6 +733,7 @@ export class MapScreen extends GameScreen {
                     { detail: action },
                   ),
                 );
+                this.paused = true;
                 return true;
               }
             }
