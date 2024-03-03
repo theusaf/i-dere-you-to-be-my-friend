@@ -8,5 +8,14 @@ export function main(gameManager: GameManager) {
   registerYAMLParserExtension();
   registerMapParsingExtension();
   registerPixelTextureExtension();
+
+  const originalWarn = window.console.warn.bind(window.console);
+  window.console.warn = function (...data) {
+    if (typeof data?.[0] === "string") {
+      if (/[-]?\d+,[-]?\d+/.test(data[0])) return;
+    }
+    originalWarn(...data);
+  };
+
   gameManager.changeScreen(new LoadingScreen());
 }

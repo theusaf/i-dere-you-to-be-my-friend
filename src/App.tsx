@@ -33,10 +33,10 @@ function App() {
         height: 1080,
         view: pixiAppRef.current,
       });
-      (window as unknown as any).debugPixi = app;
-      (window as unknown as any).debugAssets = PIXI.Assets;
       const callback = () => forceUpdate();
       const gameManager = new GameManager(app, callback);
+      (window as unknown as any).debugGame = gameManager;
+      (window as unknown as any).debugAssets = PIXI.Assets;
       main(gameManager);
       setGameManager(gameManager);
     }

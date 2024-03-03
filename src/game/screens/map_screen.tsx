@@ -18,6 +18,8 @@ export class MapScreen extends GameScreen {
   collisionCacheY: number = 0;
   lerpWorldY: number = 0;
   lerpWorldX: number = 0;
+  mapSpecialContainer!: PIXI.Container<PIXI.DisplayObject>;
+  mapContainer!: PIXI.Container<PIXI.DisplayObject>;
   get currentChunk(): MapData | null {
     return this.chunks[`${this.chunkX},${this.chunkY}`];
   }
@@ -95,7 +97,11 @@ export class MapScreen extends GameScreen {
     // ideas: do this in a setInterval that runs slowly (1 second?)
     // the player shouldn't be able to move super fast, so this should be
     // enough time.
+    this.mapContainer = new PIXI.Container();
     this.mapBgContainer = new PIXI.Container();
+    this.mapSpecialContainer = new PIXI.Container();
+    this.mapSpecialContainer.zIndex = 50;
+
     this.characterSprite = new PIXI.Sprite(PIXI.Assets.get("icon/map/water2")!);
     this.characterSprite.width = 1;
     this.characterSprite.height = 1;
@@ -104,13 +110,16 @@ export class MapScreen extends GameScreen {
     this.characterSprite.texture.baseTexture.scaleMode =
       PIXI.SCALE_MODES.NEAREST;
     this.characterSprite.zIndex = 100;
-    this.container.addChild(this.characterSprite);
+
     this.lerpWorldX = -(this.characterWorldX - this.container.worldWidth! / 2);
     this.lerpWorldY = -(this.characterWorldY - this.container.worldWidth! / 2);
-    this.updateChunks();
 
-    this.container.addChild(this.mapBgContainer);
-    (window as unknown as any).testbg = this.mapBgContainer;
+    this.mapContainer.addChild(this.mapBgContainer);
+    this.mapContainer.addChild(this.mapSpecialContainer);
+    this.container.addChild(this.mapContainer);
+    this.container.addChild(this.characterSprite);
+
+    this.updateChunks();
 
     window.addEventListener("keydown", (e) => this.onKeyDown(e.code));
     window.addEventListener("keyup", (e) => this.onKeyUp(e.code));
@@ -179,6 +188,8 @@ export class MapScreen extends GameScreen {
       ) {
         return;
       }
+    } else {
+      setTimeout(() => this.updateSpecials());
     }
 
     // load all directions
@@ -234,12 +245,84 @@ export class MapScreen extends GameScreen {
             offsetY = globalY - newChunkBaseGlobalY;
           const tileIndex = offsetY * MAP_SIZE + offsetX,
             tile = chunk.tiles[tileIndex];
-          const sprite = this.getSpriteFromTilie(tile);
+          const sprite = this.getSpriteFromTile(tile);
           sprite.x = globalX;
           sprite.y = globalY;
           sprite.width = 1;
           sprite.height = 1;
           this.addSpriteParticle(sprite);
+        }
+      }
+    }
+  }
+
+  /**
+   * Updates the special sprites on the map.
+   *
+   * These include:
+   * - buildings
+   * - backgrounds
+   * - treasure
+   */
+  updateSpecials(): void {
+    for (const removed of this.mapSpecialContainer.removeChildren()) {
+      removed.destroy();
+    }
+    for (let i = 0; i < 9; i++) {
+      const x = this.chunkX + (i % 3) - 1;
+      const y = this.chunkY + Math.floor(i / 3) - 1;
+      this.updateSpecialsChunk(x, y);
+    }
+  }
+
+  updateSpecialsChunk(chunkX: number, chunkY: number): void {
+    const chunkData = PIXI.Assets.get<MapSpecialData | null>(
+      `map/special/${chunkX},${chunkY}`,
+    );
+    if (!chunkData) return;
+
+    const { boxes } = chunkData;
+    for (const box of boxes) {
+      const { from, to, type } = box;
+      if (type === "building") {
+        const width = to[0] - from[0] + 1,
+          height = to[1] - from[1] + 1;
+        const buildingSprite = new PIXI.Sprite(
+          PIXI.Assets.get(`icon/structure/${box.image}`),
+        );
+        buildingSprite.width = width;
+        buildingSprite.height = height;
+        const { x, y } = this.getChunkGlobalPosition(
+          chunkX,
+          chunkY,
+          from[0],
+          from[1],
+        );
+        console.log(x, y, buildingSprite.width, buildingSprite.height);
+        buildingSprite.x = x;
+        buildingSprite.y = y;
+        buildingSprite.zIndex = 50;
+        this.mapSpecialContainer.addChild(buildingSprite);
+
+        // check for background fill
+        if (!box.background_tile) continue;
+        for (let y = from[1]; y <= to[1]; y++) {
+          for (let x = from[0]; x <= to[0]; x++) {
+            const sprite = this.getSpriteFromTile(
+              mapTileStrings[box.background_tile],
+            );
+            sprite.width = 1;
+            sprite.height = 1;
+            const { x: calcX, y: calcY } = this.getChunkGlobalPosition(
+              chunkX,
+              chunkY,
+              x,
+              y,
+            );
+            sprite.x = calcX;
+            sprite.y = calcY;
+            this.mapSpecialContainer.addChild(sprite);
+          }
         }
       }
     }
@@ -370,7 +453,7 @@ export class MapScreen extends GameScreen {
     };
   }
 
-  getSpriteFromTilie(tile: MapTile): PIXI.Sprite {
+  getSpriteFromTile(tile: MapTile): PIXI.Sprite {
     let sprite = new PIXI.Sprite();
     switch (tile) {
       case MapTile.bridge:
@@ -460,8 +543,8 @@ export class MapScreen extends GameScreen {
     const targetY = -(this.characterWorldY - this.container.worldHeight! / 2);
     this.lerpWorldX = lerp(this.lerpWorldX, targetX, 0.2);
     this.lerpWorldY = lerp(this.lerpWorldY, targetY, 0.2);
-    this.mapBgContainer.x = this.lerpWorldX;
-    this.mapBgContainer.y = this.lerpWorldY;
+    this.mapContainer.x = this.lerpWorldX;
+    this.mapContainer.y = this.lerpWorldY;
 
     if (this.direction !== Direction.none) {
       const distance = this.getSpeed() * delta;

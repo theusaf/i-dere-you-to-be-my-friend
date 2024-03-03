@@ -10,7 +10,7 @@ export interface MapSpecialBoxBase {
 export interface MapSpecialBuildingBox extends MapSpecialBoxBase {
   type: "building";
   image: string;
-  background_tile?: string;
+  background_tile?: keyof typeof mapTileStrings;
 }
 
 export interface MapSpecialActionBox extends MapSpecialBoxBase {
