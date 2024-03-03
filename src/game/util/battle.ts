@@ -14,7 +14,10 @@ export class Battle implements BattleData {
   rewardTable?: string;
 
   constructor({
-    opponentLeader, opponentTeam, playerTeam, rewardTable,
+    opponentLeader,
+    opponentTeam,
+    playerTeam,
+    rewardTable,
   }: BattleData) {
     this.opponentLeader = opponentLeader;
     this.opponentTeam = opponentTeam ?? [opponentLeader];

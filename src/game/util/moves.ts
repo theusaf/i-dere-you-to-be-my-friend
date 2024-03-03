@@ -38,19 +38,20 @@ export interface MoveData {
   traits: (TraitData | TraitKind)[];
 }
 
-export const movesets = Assets.get<Record<string, MoveData>>("game/moves");
+export const getMovesets = () =>
+  Assets.get<Record<string, MoveData>>("game/moves");
 
 export function getRandomMoves(
   weightedTypes: DereType[],
   count = 0,
   ignoreMoves: string[] = [],
 ): MoveData[] {
-  const matchingMoves = Object.values(movesets).filter((move) => {
+  const matchingMoves = Object.values(getMovesets()).filter((move) => {
     return (
       weightedTypes.includes(move.type) && !ignoreMoves.includes(move.name)
     );
   });
-  const nonMatchingMoves = Object.values(movesets).filter((move) => {
+  const nonMatchingMoves = Object.values(getMovesets()).filter((move) => {
     return (
       !weightedTypes.includes(move.type) && !ignoreMoves.includes(move.name)
     );

@@ -9,6 +9,7 @@ import { IndexPage } from "./main_menu_pages";
 import { SavesPage } from "./main_menu_pages/saves";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { CreateSavePage } from "./main_menu_pages/create";
 
 enum MainMenuPage {
   index = "index",
@@ -61,6 +62,7 @@ export function MainMenuContent({ gameManager }: { gameManager: GameManager }) {
         }}
       />
     ),
+    [MainMenuPage.newSave]: <CreateSavePage onSaveCreated={onSaveSelected} />,
   };
   const pagesWithLogo: Set<MainMenuPage> = new Set([
     MainMenuPage.index,

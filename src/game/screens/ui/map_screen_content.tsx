@@ -5,7 +5,10 @@ import { MapScreen, MapScreenEvents } from "../map_screen";
 import { MapSpecialActionBattle } from "../../util/map_types";
 import { BattleScreen } from "../battle_screen";
 import { GameAnimation, easeMethod } from "../../util/animation";
-import { SettingsPageLarge, SettingsPagePhone } from "./map_screen_pages/settings";
+import {
+  SettingsPageLarge,
+  SettingsPagePhone,
+} from "./map_screen_pages/settings";
 
 interface MapScreenContentProps {
   state: MapScreen;

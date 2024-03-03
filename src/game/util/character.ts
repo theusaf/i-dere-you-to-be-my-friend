@@ -1,5 +1,6 @@
 import { chance } from "./chance";
 import { getRandomMoves } from "./moves";
+import { getRandomName } from "./random";
 import { Saveable } from "./saves";
 import { DereType } from "./types";
 
@@ -101,7 +102,12 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
     this.isDead = isDead ?? false;
     this.xPower = xPower ?? 0;
     this.love = love ?? 1;
-    this.stats = stats ?? { speed: 1, constitution: 1, maxHealth: 10, agility: 1 };
+    this.stats = stats ?? {
+      speed: 1,
+      constitution: 1,
+      maxHealth: 10,
+      agility: 1,
+    };
     this.gender = gender ?? Gender.they;
     this.knownMoves = knownMoves ?? [];
     this.statusEffects = statusEffects ?? [];
@@ -166,13 +172,7 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
   }
 
   static createRandomCharacter(love: number = 1): Character {
-    const name = chance.name({
-      gender: chance.pickone(["male", "female", undefined]),
-      full: true,
-      nationality: "en",
-      prefix: chance.bool({ likelihood: 10 }),
-      suffix: chance.bool({ likelihood: 5 }),
-    });
+    const name = getRandomName();
     const types = chance.pickset(
       Object.values(DereType),
       chance.integer({ min: 1, max: 2 }),
