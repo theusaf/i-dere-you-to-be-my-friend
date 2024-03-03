@@ -5,6 +5,9 @@ boxes:
     action:
       type: enter_battle
       against: random
+      reward_table: null
+      size: 1
+      level: null
     if:
       new_tile: tallgrass
     unless:

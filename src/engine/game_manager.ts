@@ -1,5 +1,6 @@
 import { Application } from "pixi.js";
 import { GameScreen } from "./screen";
+import { GameData } from "../game/util/game_data";
 
 /**
  * Manages game screens.
@@ -31,21 +32,5 @@ export class GameManager {
     this.currentScreen = screen;
     this.currentScreen.initialize(this.app, this);
     this.onScreenChange();
-  }
-}
-
-interface worldMapData {
-  playerX: number;
-  playerY: number;
-}
-
-class GameData {
-  worldMapData: worldMapData;
-
-  constructor() {
-    this.worldMapData = {
-      playerX: 64,
-      playerY: 64,
-    };
   }
 }

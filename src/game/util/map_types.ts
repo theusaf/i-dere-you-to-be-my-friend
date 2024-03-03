@@ -47,7 +47,25 @@ export interface MapSpecialActionBattle extends MapSpecialActionBase {
   /**
    * 'random' or the id of an npc.
    */
-  against: string;
+  against: string | "random";
+  /**
+   * The table to use for rewards.
+   *
+   * If `null`, no rewards are given.
+   */
+  reward_table: string | null;
+  /**
+   * The amount of NPCs to fight.
+   *
+   * Only applies if `against` is "random".
+   */
+  size: number | number[];
+  /**
+   * The level of the NPCs to fight.
+   *
+   * If `null`, level is based off the player's level.
+   */
+  level: number | number[] | null;
 }
 
 export interface MapSpecialData {

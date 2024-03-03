@@ -1,6 +1,11 @@
 # TODO: In the future, make these things translatable
 # List from https://the-dere-types.fandom.com/wiki/Category:Dere
 
+normal: # mainly used for certain attacks
+  name: Normal
+  resists: []
+  weak_to: []
+
 # Type weaknesses somewhat made up arbitrarily. I just put down whatever I thought felt right.
 
 bakadere:
@@ -87,68 +92,68 @@ deredere:
 # The following are not planned to be implemented for the basic game
 # (dere are too many of them!)
 
-shindere:
-  name: Shindere
+# shindere:
+#   name: Shindere
 
-dorodere:
-  name: Dorodere
+# dorodere:
+#   name: Dorodere
 
-rindere:
-  name: Rindere
+# rindere:
+#   name: Rindere
 
-darudere:
-  name: Darudere
+# darudere:
+#   name: Darudere
 
-onidere:
-  name: Onidere
+# onidere:
+#   name: Onidere
 
-ojoudere:
-  name: Ojoudere
+# ojoudere:
+#   name: Ojoudere
 
-butsudere:
-  name: Butsudere
+# butsudere:
+#   name: Butsudere
 
-yoidere:
-  name: Yoidere
+# yoidere:
+#   name: Yoidere
 
-wandere:
-  name: Wandere
+# wandere:
+#   name: Wandere
 
-kiridere:
-  name: Kiridere
+# kiridere:
+#   name: Kiridere
 
-kiredere:
-  name: Kiredere
+# kiredere:
+#   name: Kiredere
 
-kichidere:
-  name: Kichidere
+# kichidere:
+#   name: Kichidere
 
-kamidere:
-  name: Kamidere
+# kamidere:
+#   name: Kamidere
 
-hinedere:
-  name: Hinedere
+# hinedere:
+#   name: Hinedere
 
-himedere:
-  name: Himedere
+# himedere:
+#   name: Himedere
 
-undere:
-  name: Undere
+# undere:
+#   name: Undere
 
-usodere:
-  name: Usodere
+# usodere:
+#   name: Usodere
 
-utsudere:
-  name: Utsudere
+# utsudere:
+#   name: Utsudere
 
-uzadere:
-  name: Uzadere
+# uzadere:
+#   name: Uzadere
 
-teredere:
-  name: Teredere
+# teredere:
+#   name: Teredere
 
-goudere:
-  name: Goudere
+# goudere:
+#   name: Goudere
 
-gundere:
-  name: Gundere
+# gundere:
+#   name: Gundere
