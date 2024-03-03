@@ -1,4 +1,5 @@
 import { chance } from "./chance";
+import { getRandomMoves } from "./moves";
 import { DereType } from "./types";
 
 export interface worldMapData {
@@ -152,6 +153,11 @@ export class Character implements CharacterInfo {
       Object.values(DereType),
       chance.integer({ min: 1, max: 2 }),
     );
+    let minMovesByLove = Math.floor(love / 2);
+    if (minMovesByLove < 2) minMovesByLove = 2;
+    if (minMovesByLove > 6) minMovesByLove = 6;
+    const numMoves = chance.integer({ min: minMovesByLove, max: 6 });
+    const moves = getRandomMoves(types, numMoves);
     const character = new Character({
       love: 1,
       name,
@@ -161,6 +167,7 @@ export class Character implements CharacterInfo {
         constitution: chance.integer({ min: 1, max: 3 }),
         maxHealth: chance.integer({ min: 10, max: 13 }),
       },
+      knownMoves: moves.map((move) => move.name),
     });
     for (let i = 1; i < love; i++) {
       character.loveUp();

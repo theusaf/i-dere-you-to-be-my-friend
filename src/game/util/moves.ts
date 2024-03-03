@@ -1,5 +1,6 @@
 import { Assets } from "pixi.js";
 import { DereType } from "./types";
+import { chance } from "./chance";
 
 export enum TraitKind {
   strengthen = "strengthen",
@@ -38,3 +39,29 @@ export interface MoveData {
 }
 
 export const movesets = Assets.get<Record<string, MoveData>>("game/moves");
+
+export function getRandomMoves(
+  weightedTypes: DereType[],
+  count = 0,
+): MoveData[] {
+  const matchingMoves = Object.values(movesets).filter((move) => {
+    return weightedTypes.includes(move.type);
+  });
+  const nonMatchingMoves = Object.values(movesets).filter((move) => {
+    return !weightedTypes.includes(move.type);
+  });
+  if (count === 0) count = chance.integer({ min: 2, max: 6 });
+  let moves: MoveData[] = [];
+  for (let i = 0; i < count; i++) {
+    const move = chance.weighted(
+      [...matchingMoves, ...nonMatchingMoves],
+      [...matchingMoves.map(() => 5), ...nonMatchingMoves.map(() => 1)],
+    );
+    moves.push(move);
+    const indexMatching = matchingMoves.indexOf(move),
+      indexNonMatching = nonMatchingMoves.indexOf(move);
+    if (indexMatching !== -1) matchingMoves.splice(indexMatching, 1);
+    if (indexNonMatching !== -1) nonMatchingMoves.splice(indexNonMatching, 1);
+  }
+  return moves;
+}
