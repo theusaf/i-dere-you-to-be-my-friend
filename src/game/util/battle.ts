@@ -765,21 +765,20 @@ export class Battle extends EventTarget implements BattleData {
   ): BattlePlayback {
     const playback: BattlePlayback = [];
     const hpUnder = Math.abs(character.hp);
-    const isPlayer = character === this.activePlayer;
+    const isPlayer = realCharacter === this.activePlayer;
     let deathChance = (0.4 / character.love) * 4;
     if (isCrit) deathChance *= 2;
     deathChance += (hpUnder / character.stats.maxHealth) * 0.25;
-    console.log(deathChance);
+    console.log(`Death Chance: ${deathChance}%`);
     if (chance.bool({ likelihood: Math.min(deathChance, 100) })) {
       character.isDead = true;
-      const message =
-        realCharacter === this.activePlayer
-          ? `Oh no! ${character.name} died... ${getGenderedString({
-              gender: character.gender,
-              type: "pronoun",
-              name: character.name,
-            })} will live on in our hearts.`
-          : `${character.name} died.`;
+      const message = isPlayer
+        ? `Oh no! ${character.name} died... ${getGenderedString({
+            gender: character.gender,
+            type: "pronoun",
+            name: character.name,
+          })} will live on in our hearts.`
+        : `${character.name} died.`;
       playback.push([
         message,
         () => {

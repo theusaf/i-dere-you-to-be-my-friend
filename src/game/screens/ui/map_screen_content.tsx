@@ -99,17 +99,22 @@ enum BattleAnimationState {
 function BattleAnimationDisplay({
   onDone,
 }: BattleAnimationDisplayProps): JSX.Element {
-  console.debug("Animation running");
   const [size, setSize] = useState(100);
   const [state, setState] = useState(BattleAnimationState.flash);
-  const animation = useRef<GameAnimation>(
-    new GameAnimation({ distance: 0 }, { distance: 2 }, 500, easeMethod.linear),
-  );
+  const animation = useRef<GameAnimation | null>(null);
+  if (animation.current === null) {
+    console.debug("Creating new animation");
+    animation.current = new GameAnimation(
+      { distance: 0 },
+      { distance: 2 },
+      500,
+      easeMethod.linear,
+    );
+  }
   const currentAnimation = animation.current;
   useEffect(() => {
     const timeout = setTimeout(() => {
       console.warn("Animation timed out!");
-      console.warn("Animation timed out! Are there multiple animations running?");
       onDone();
     }, 5000);
     return () => clearTimeout(timeout);
