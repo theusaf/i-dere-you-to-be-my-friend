@@ -282,6 +282,6 @@ self_affirm:
   speed: 3
   targets: self
   traits:
-    - strengthen:
+    - name: strengthen
       chance: 1
       duration: 2
