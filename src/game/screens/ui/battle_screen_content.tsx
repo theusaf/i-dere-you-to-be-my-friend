@@ -23,11 +23,9 @@ export function BattleScreenContent({
   const [logIndex, setLogIndex] = useState(0);
   const { gameManager } = state;
   const battle = gameManager.gameData.battle!;
-  const logsAreDone = logIndex >= battle.logs.length;
 
-  console.log("logsAreDone", logsAreDone, logIndex, battle.logs.length);
   // handle other updates dependent on log timing
-  if (logsAreDone) {
+  if (logIndex >= battle.logs.length) {
     if (battle.activeOpponent === null) {
       // if no enemy active
       const nextOpponent = battle.getNextOpponent();
@@ -110,7 +108,9 @@ function EnemyView({ show, activeEnemy }: EnemyViewProps) {
                 className="col-span-4 m-auto"
                 percentage={activeEnemy.hp / activeEnemy.stats.maxHealth}
               />
-              <p className="text-center">Lov. {activeEnemy.love}</p>
+              <p className="text-center">
+                Lov. <span className="font-numerals">{activeEnemy.love}</span>
+              </p>
             </div>
             <div>{/* other icons here */}</div>
           </>
@@ -145,6 +145,7 @@ function UserView({
           battle={gameManager.gameData.battle!}
         />
         <UserViewButtonController
+          key={logIndex}
           gameManager={gameManager}
           show={show}
           logIndex={logIndex}
@@ -299,15 +300,18 @@ function UserStatsView({
         />
       )}
       {activeCharacter && (
-        <p className="font-numerals pointer-events-auto">
-          <span className="font-numerals">
-            Lov. {activeCharacter.love} | {activeCharacter.hp}/
-            {activeCharacter.stats.maxHealth}
+        <p className="pointer-events-auto">
+          <span>
+            Lov. <span className="font-numerals">{activeCharacter.love}</span> —{" "}
+            <span className="font-numerals">{activeCharacter.hp}</span>/
+            <span className="font-numerals">
+              {activeCharacter.stats.maxHealth}
+            </span>
           </span>
           <span>{/* effect icons here */}</span>
         </p>
       )}
-      <div className="overflow-y-auto pointer-events-auto w-full flex flex-col-reverse">
+      <div className="overflow-y-auto pointer-events-auto w-full flex flex-col-reverse bg-slate-800 p-2 rounded mt-2">
         {battle.logs.map((log, i) => {
           return (
             <p key={i} className="text-sm">
