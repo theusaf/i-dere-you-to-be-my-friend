@@ -230,7 +230,11 @@ function UserViewButtonController({
               );
             }
             battle.addLog("You and your friends get away to safety...");
-            // TODO: heal all friends and subtract money
+            // TODO: heal all friends and subtract money properly
+            for (const friend of gameManager.gameData.activeFriends) {
+              if (friend.isDead) continue;
+              friend.hp = friend.stats.maxHealth;
+            }
           }
         }
         if (isEndOfBattle) {
