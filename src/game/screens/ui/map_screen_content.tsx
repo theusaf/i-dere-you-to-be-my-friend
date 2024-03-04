@@ -99,6 +99,7 @@ enum BattleAnimationState {
 function BattleAnimationDisplay({
   onDone,
 }: BattleAnimationDisplayProps): JSX.Element {
+  console.debug("Animation running");
   const [size, setSize] = useState(100);
   const [state, setState] = useState(BattleAnimationState.flash);
   const animation = useRef<GameAnimation>(
