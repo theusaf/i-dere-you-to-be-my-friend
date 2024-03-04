@@ -21,6 +21,7 @@ export interface CharacterStats {
    */
   agility: number;
   maxHealth: number;
+  strength: number;
 }
 
 export enum Gender {
@@ -145,6 +146,7 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
       constitution: 1,
       maxHealth: 10,
       agility: 1,
+      strength: 1,
     };
     this.gender = gender ?? Gender.they;
     this.knownMoves = knownMoves ?? [];
@@ -283,6 +285,7 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
         constitution: chance.integer({ min: 1, max: 3 }),
         maxHealth: chance.integer({ min: 10, max: 13 }),
         agility: chance.integer({ min: 1, max: 3 }),
+        strength: chance.integer({ min: 1, max: 3 }),
       },
       knownMoves: moves,
       moveUses: moveUses,

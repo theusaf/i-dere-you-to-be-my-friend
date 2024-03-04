@@ -248,11 +248,11 @@ export class Battle extends EventTarget implements BattleData {
           }
           case StatusEffect.poisoned: {
             const duration = effect.duration;
-            target.hp -= 3 + duration;
+            target.hp -= 2 + duration;
             playback.push([
               `${target.name} was hurt by poison.`,
               () => {
-                realTarget.hp -= 3 + duration;
+                realTarget.hp -= 2 + duration;
               },
             ]);
             break;
@@ -414,6 +414,7 @@ export class Battle extends EventTarget implements BattleData {
     ]);
 
     if (damage > 0) {
+      damage += user.stats.strength;
       // calculate miss
       if (chance.bool({ likelihood: Math.min(target.stats.agility, 100) })) {
         playback.push(["However, the attack missed!", () => {}]);
