@@ -232,7 +232,7 @@ export class Battle extends EventTarget implements BattleData {
           break;
         }
         effect.duration -= 1;
-        if (effect.duration <= 0) {
+        if (effect.duration < 0) {
           playback.push([`The ${effect.effect} effect wore off.`, () => {}]);
         }
       }
@@ -310,7 +310,9 @@ export class Battle extends EventTarget implements BattleData {
             this.extractTraitData(trait);
           let multiplier = 1;
           for (let i = 0; i < amount!; i++) {
-            if (chance.bool({ likelihood: triggerChance! * 100 })) {
+            if (
+              chance.bool({ likelihood: Math.min(triggerChance! * 100, 100) })
+            ) {
               multiplier++;
             } else {
               break;
@@ -358,7 +360,7 @@ export class Battle extends EventTarget implements BattleData {
     }
 
     // calculate critical hit
-    if (chance.bool({ likelihood: critChance * 100 })) {
+    if (chance.bool({ likelihood: Math.min(critChance * 100, 100) })) {
       isCrit = true;
       damage *= 2;
     }
@@ -373,7 +375,7 @@ export class Battle extends EventTarget implements BattleData {
 
     if (damage > 0) {
       // calculate miss
-      if (chance.bool({ likelihood: target.stats.agility })) {
+      if (chance.bool({ likelihood: Math.min(target.stats.agility, 100) })) {
         playback.push(["However, the attack missed!", () => {}]);
       } else {
         // apply damage
@@ -427,7 +429,9 @@ export class Battle extends EventTarget implements BattleData {
         case TraitKind.bleed: {
           const { chance: triggerChance, duration } =
             this.extractTraitData(trait);
-          if (chance.bool({ likelihood: triggerChance! * 100 })) {
+          if (
+            chance.bool({ likelihood: Math.min(triggerChance! * 100, 100) })
+          ) {
             target.statusEffects.push({
               effect: StatusEffect.bleeding,
               duration: duration!,
@@ -447,7 +451,9 @@ export class Battle extends EventTarget implements BattleData {
         case TraitKind.confuse: {
           const { chance: triggerChance, duration } =
             this.extractTraitData(trait);
-          if (chance.bool({ likelihood: triggerChance! * 100 })) {
+          if (
+            chance.bool({ likelihood: Math.min(triggerChance! * 100, 100) })
+          ) {
             target.statusEffects.push({
               effect: StatusEffect.confused,
               duration: duration!,
@@ -467,7 +473,9 @@ export class Battle extends EventTarget implements BattleData {
         case TraitKind.critical_up: {
           const { chance: triggerChance, duration } =
             this.extractTraitData(trait);
-          if (chance.bool({ likelihood: triggerChance! * 100 })) {
+          if (
+            chance.bool({ likelihood: Math.min(triggerChance! * 100, 100) })
+          ) {
             target.statusEffects.push({
               effect: StatusEffect.criticalUp,
               duration: duration!,
@@ -487,7 +495,9 @@ export class Battle extends EventTarget implements BattleData {
         case TraitKind.elation: {
           const { chance: triggerChance, duration } =
             this.extractTraitData(trait);
-          if (chance.bool({ likelihood: triggerChance! * 100 })) {
+          if (
+            chance.bool({ likelihood: Math.min(triggerChance! * 100, 100) })
+          ) {
             target.statusEffects.push({
               effect: StatusEffect.elated,
               duration: duration!,
@@ -506,7 +516,9 @@ export class Battle extends EventTarget implements BattleData {
         }
         case TraitKind.loading: {
           const { chance: triggerChance } = this.extractTraitData(trait);
-          if (chance.bool({ likelihood: triggerChance! * 100 })) {
+          if (
+            chance.bool({ likelihood: Math.min(triggerChance! * 100, 100) })
+          ) {
             user.statusEffects.push({
               effect: StatusEffect.reload,
               duration: 1,
@@ -526,7 +538,9 @@ export class Battle extends EventTarget implements BattleData {
         case TraitKind.poison: {
           const { chance: triggerChance, duration } =
             this.extractTraitData(trait);
-          if (chance.bool({ likelihood: triggerChance! * 100 })) {
+          if (
+            chance.bool({ likelihood: Math.min(triggerChance! * 100, 100) })
+          ) {
             target.statusEffects.push({
               effect: StatusEffect.poisoned,
               duration: duration!,
@@ -546,7 +560,9 @@ export class Battle extends EventTarget implements BattleData {
         case TraitKind.reflect: {
           const { chance: triggerChance, duration } =
             this.extractTraitData(trait);
-          if (chance.bool({ likelihood: triggerChance! * 100 })) {
+          if (
+            chance.bool({ likelihood: Math.min(triggerChance! * 100, 100) })
+          ) {
             target.statusEffects.push({
               effect: StatusEffect.damageReflect,
               duration: duration!,
@@ -566,7 +582,9 @@ export class Battle extends EventTarget implements BattleData {
         case TraitKind.strengthen: {
           const { chance: triggerChance, duration } =
             this.extractTraitData(trait);
-          if (chance.bool({ likelihood: triggerChance! * 100 })) {
+          if (
+            chance.bool({ likelihood: Math.min(triggerChance! * 100, 100) })
+          ) {
             target.statusEffects.push({
               effect: StatusEffect.strengthened,
               duration: duration!,
@@ -586,7 +604,9 @@ export class Battle extends EventTarget implements BattleData {
         case TraitKind.stun: {
           const { chance: triggerChance, duration } =
             this.extractTraitData(trait);
-          if (chance.bool({ likelihood: triggerChance! * 100 })) {
+          if (
+            chance.bool({ likelihood: Math.min(triggerChance! * 100, 100) })
+          ) {
             target.statusEffects.push({
               effect: StatusEffect.stunned,
               duration: duration!,
@@ -606,7 +626,9 @@ export class Battle extends EventTarget implements BattleData {
         case TraitKind.toughen: {
           const { chance: triggerChance, duration } =
             this.extractTraitData(trait);
-          if (chance.bool({ likelihood: triggerChance! * 100 })) {
+          if (
+            chance.bool({ likelihood: Math.min(triggerChance! * 100, 100) })
+          ) {
             target.statusEffects.push({
               effect: StatusEffect.toughened,
               duration: duration!,
@@ -630,7 +652,9 @@ export class Battle extends EventTarget implements BattleData {
         case TraitKind.vulnerable: {
           const { chance: triggerChance, duration } =
             this.extractTraitData(trait);
-          if (chance.bool({ likelihood: triggerChance! * 100 })) {
+          if (
+            chance.bool({ likelihood: Math.min(triggerChance! * 100, 100) })
+          ) {
             target.statusEffects.push({
               effect: StatusEffect.vulnerable,
               duration: duration!,
@@ -650,7 +674,9 @@ export class Battle extends EventTarget implements BattleData {
         case TraitKind.weaken: {
           const { chance: triggerChance, duration } =
             this.extractTraitData(trait);
-          if (chance.bool({ likelihood: triggerChance! * 100 })) {
+          if (
+            chance.bool({ likelihood: Math.min(triggerChance! * 100, 100) })
+          ) {
             target.statusEffects.push({
               effect: StatusEffect.weakened,
               duration: duration!,
@@ -677,7 +703,7 @@ export class Battle extends EventTarget implements BattleData {
               amount = chance.pickone(amount);
             }
           }
-          if (chance.bool({ likelihood: triggerChance * 100 })) {
+          if (chance.bool({ likelihood: Math.min(triggerChance * 100, 100) })) {
             user.hp += healAmount;
             playback.push([
               `${user.name} healed ${healAmount} health`,
@@ -730,7 +756,7 @@ export class Battle extends EventTarget implements BattleData {
     let deathChance = (0.4 / character.love) * 4;
     if (isCrit) deathChance *= 2;
     deathChance += (hpUnder / character.stats.maxHealth) * 0.25;
-    if (chance.bool({ likelihood: deathChance * 100 })) {
+    if (chance.bool({ likelihood: Math.min(deathChance * 100, 100) })) {
       character.isDead = true;
       playback.push([
         `Oh no! ${character.name} died... ${getGenderedString({

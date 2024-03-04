@@ -205,6 +205,7 @@ function UserViewButtonController({
           onMoveSelected={(move: MoveData) => {
             const playback = battle.simulateTurn(move);
             let playbackIndex = 0;
+            console.log(playback);
           }}
         />
       );

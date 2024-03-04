@@ -19,6 +19,9 @@ export enum StatusEffect {
 
 export interface ActiveStatusEffect {
   effect: StatusEffect;
+  /**
+   * Due to some bad design, when zero, it means that the effect will be removed at the end of the next turn after becoming zero
+   */
   duration: number;
   traitData?: TraitData;
 }
