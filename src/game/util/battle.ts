@@ -1,7 +1,7 @@
 import { GameManager } from "../../engine/game_manager";
 import { chance } from "./chance";
 import { Character, getGenderedString } from "./character";
-import { StatusEffect } from "./effects";
+import { ActiveStatusEffect, StatusEffect } from "./effects";
 import { MapSpecialActionBattle } from "./map_types";
 import { MoveData, TraitData, TraitKind, getMovesets } from "./moves";
 import {
@@ -163,6 +163,91 @@ export class Battle extends EventTarget implements BattleData {
       playback.push(...moveSimulation);
     }
 
+    playback.push(
+      ...this.simulateEndOfTurnEffects(
+        playerCopy,
+        opponentCopy,
+        this.activePlayer!,
+        this.activeOpponent!,
+      ),
+    );
+
+    return playback;
+  }
+
+  simulateEndOfTurnEffects(
+    player: Character,
+    opponent: Character,
+    realPlayer: Character,
+    realOpponent: Character,
+  ): BattlePlayback {
+    const playback: BattlePlayback = [];
+    const playerEffects = player.statusEffects;
+    const opponentEffects = opponent.statusEffects;
+    const applyEffects = (
+      effects: ActiveStatusEffect[],
+      target: Character,
+      realTarget: Character,
+    ) => {
+      for (const effect of effects) {
+        switch (effect.effect) {
+          case StatusEffect.bleeding: {
+            target.hp -= 5;
+            playback.push([
+              `${target.name} lost some blood from bleeding.`,
+              () => {
+                realTarget.hp -= 5;
+              },
+            ]);
+            break;
+          }
+          case StatusEffect.elated: {
+            target.hp -= 2;
+            playback.push([
+              `${target.name} damages ${getGenderedString({
+                gender: target.gender,
+                type: "objectself",
+                name: target.name,
+              })} from excessive recklessness.`,
+              () => {
+                realTarget.hp -= 2;
+              },
+            ]);
+            break;
+          }
+          case StatusEffect.poisoned: {
+            const duration = effect.duration;
+            target.hp -= 3 + duration;
+            playback.push([
+              `${target.name} was hurt by poison.`,
+              () => {
+                realTarget.hp -= 3 + duration;
+              },
+            ]);
+            break;
+          }
+        }
+        if (target.hp <= 0) {
+          playback.push(...this.handleKnockout(target, realTarget, false));
+          break;
+        }
+        effect.duration -= 1;
+        if (effect.duration <= 0) {
+          playback.push([`The ${effect.effect} effect wore off.`, () => {}]);
+        }
+      }
+      target.statusEffects = effects.filter((effect) => effect.duration > 0);
+      playback.push([
+        "",
+        () => {
+          realTarget.statusEffects = effects.filter(
+            (effect) => effect.duration > 0,
+          );
+        },
+      ]);
+    };
+    applyEffects(playerEffects, player, realPlayer);
+    applyEffects(opponentEffects, opponent, realOpponent);
     return playback;
   }
 
