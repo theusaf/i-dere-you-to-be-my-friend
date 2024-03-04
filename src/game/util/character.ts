@@ -1,5 +1,5 @@
 import { chance } from "./chance";
-import { getRandomMoves } from "./moves";
+import { getRandomMoveIds } from "./moves";
 import { getRandomName } from "./random";
 import { Saveable } from "./saves";
 import { DereType } from "./types";
@@ -228,7 +228,7 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
     if (minMovesByLove < 2) minMovesByLove = 2;
     if (minMovesByLove > 6) minMovesByLove = 6;
     const numMoves = chance.integer({ min: minMovesByLove, max: 6 });
-    const moves = getRandomMoves(types, numMoves);
+    const moves = getRandomMoveIds(types, numMoves);
     const character = new Character({
       love: 1,
       name,
@@ -239,7 +239,7 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
         maxHealth: chance.integer({ min: 10, max: 13 }),
         agility: chance.integer({ min: 1, max: 3 }),
       },
-      knownMoves: moves.map((move) => move.name),
+      knownMoves: moves,
     });
     for (let i = 1; i < love; i++) {
       character.loveUp();

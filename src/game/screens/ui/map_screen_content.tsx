@@ -74,6 +74,7 @@ export function MapScreenContent({
                 ? `${name}'s friend group appeared!`
                 : `A wild ${name} appeared!`,
             );
+            state.gameManager.gameData.save();
             state.gameManager.changeScreen(new BattleScreen());
           }}
         />

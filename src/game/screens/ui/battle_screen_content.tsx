@@ -10,6 +10,7 @@ import { MapScreen } from "../map_screen";
 import { ConfirmationButton } from "../../../engine/components/confirmation_button";
 import { Character, getGenderedString } from "../../util/character";
 import { Battle, BattleEvents } from "../../util/battle";
+import { MoveData, getMovesets } from "../../util/moves";
 
 // TODO: clean up this code...
 export interface BattleScreenContentProps {
@@ -190,7 +191,14 @@ function UserViewButtonController({
       message = "What do you want to do?";
       break;
     case UserViewControllerState.fight:
-      buttons = <FightButtons />;
+      buttons = (
+        <FightButtons
+          moves={gameManager.gameData.battle!.activePlayer?.knownMoves ?? []}
+          onMoveSelected={(move: MoveData) => {
+            // TODO: implement move selection
+          }}
+        />
+      );
       message = "Fight";
       break;
     case UserViewControllerState.friends:
@@ -380,7 +388,7 @@ function FriendsButtons() {
   );
 }
 
-function ActionsButton() {
+function ActionsButton(): JSX.Element {
   return (
     <div className="text-center h-full overflow-y-auto">
       <h4 className="text-left">Actions</h4>
@@ -401,16 +409,24 @@ function ActionsButton() {
   );
 }
 
-function FightButtons() {
+function FightButtons({
+  moves,
+  onMoveSelected,
+}: {
+  moves: string[];
+  onMoveSelected: (move: MoveData) => void;
+}): JSX.Element {
+  const movesets = getMovesets();
   const className = "min-h-14";
   return (
     <div className="grid grid-cols-3 gap-2 text-center h-full">
-      <TextActionButton className={className}>Attack 1</TextActionButton>
-      <TextActionButton className={className}>Attack 2</TextActionButton>
-      <TextActionButton className={className}>Debuff 1</TextActionButton>
-      <TextActionButton className={className}>Buff 1</TextActionButton>
-      <TextActionButton className={className}>Attack 3</TextActionButton>
-      <TextActionButton className={className}>Attack 4</TextActionButton>
+      {moves.map((move, i) => {
+        return (
+          <TextActionButton key={i} className={className}>
+            {movesets[move].name}
+          </TextActionButton>
+        );
+      })}
     </div>
   );
 }

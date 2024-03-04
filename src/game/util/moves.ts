@@ -41,23 +41,26 @@ export interface MoveData {
 export const getMovesets = () =>
   Assets.get<Record<string, MoveData>>("game/moves");
 
-export function getRandomMoves(
+export function getRandomMoveIds(
   weightedTypes: DereType[],
   count = 0,
   ignoreMoves: string[] = [],
-): MoveData[] {
-  const matchingMoves = Object.values(getMovesets()).filter((move) => {
+) {
+  const movesets = getMovesets();
+  const moveKeys = Object.keys(movesets);
+  const matchingMoves = moveKeys.filter((move) => {
     return (
-      weightedTypes.includes(move.type) && !ignoreMoves.includes(move.name)
+      weightedTypes.includes(movesets[move].type) && !ignoreMoves.includes(move)
     );
   });
-  const nonMatchingMoves = Object.values(getMovesets()).filter((move) => {
+  const nonMatchingMoves = moveKeys.filter((move) => {
     return (
-      !weightedTypes.includes(move.type) && !ignoreMoves.includes(move.name)
+      !weightedTypes.includes(movesets[move].type) &&
+      !ignoreMoves.includes(move)
     );
   });
   if (count === 0) count = chance.integer({ min: 2, max: 6 });
-  let moves: MoveData[] = [];
+  let moves: string[] = [];
   for (let i = 0; i < count; i++) {
     const move = chance.weighted(
       [...matchingMoves, ...nonMatchingMoves],
@@ -71,4 +74,14 @@ export function getRandomMoves(
     if (indexNonMatching !== -1) nonMatchingMoves.splice(indexNonMatching, 1);
   }
   return moves;
+}
+
+export function getRandomMoves(
+  weightedTypes: DereType[],
+  count = 0,
+  ignoreMoves: string[] = [],
+): MoveData[] {
+  const ids = getRandomMoveIds(weightedTypes, count, ignoreMoves);
+  const movesets = getMovesets();
+  return ids.map((id) => movesets[id]);
 }
