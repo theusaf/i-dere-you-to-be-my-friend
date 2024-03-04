@@ -314,8 +314,6 @@ export class Battle extends EventTarget implements BattleData {
               chance.bool({ likelihood: Math.min(triggerChance! * 100, 100) })
             ) {
               multiplier++;
-            } else {
-              break;
             }
           }
           damage *= multiplier;
@@ -387,7 +385,7 @@ export class Battle extends EventTarget implements BattleData {
               ? "It's not very effective..."
               : `${target.name} was hurt. Ouch.`;
         if (numberOfMultiHits > 0) {
-          playback.push([`It hit ${numberOfMultiHits} times!`, () => {}]);
+          playback.push([`It hit ${numberOfMultiHits + 1} times!`, () => {}]);
         }
         playback.push([
           message,
