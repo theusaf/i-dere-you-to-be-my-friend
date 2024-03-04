@@ -36,6 +36,7 @@ export interface MoveData {
   speed: number;
   targets: "self" | "enemy";
   traits: (TraitData | TraitKind)[];
+  hidden?: boolean;
 }
 
 export const getMovesets = () =>
@@ -49,16 +50,20 @@ export function getRandomMoveIds(
   const movesets = getMovesets();
   const moveKeys = Object.keys(movesets);
   const matchingMoves = moveKeys.filter((move) => {
+    const moveData = movesets[move];
     return (
-      (weightedTypes.includes(movesets[move].type) ||
-        movesets[move].type === DereType.normal) &&
-      !ignoreMoves.includes(move)
+      (weightedTypes.includes(moveData.type) ||
+        moveData.type === DereType.normal) &&
+      !ignoreMoves.includes(move) &&
+      !moveData.hidden
     );
   });
   const nonMatchingMoves = moveKeys.filter((move) => {
+    const moveData = movesets[move];
     return (
-      !weightedTypes.includes(movesets[move].type) &&
-      !ignoreMoves.includes(move)
+      !weightedTypes.includes(moveData.type) &&
+      !ignoreMoves.includes(move) &&
+      !moveData.hidden
     );
   });
   if (count === 0) count = chance.integer({ min: 2, max: 6 });
