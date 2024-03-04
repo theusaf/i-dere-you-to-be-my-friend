@@ -19,8 +19,8 @@ export interface DereTypeData {
   weak_to: DereType[];
 }
 
-export const TYPE_ADV_BOOST = 1.5;
-export const TYPE_DISADV_BOOST = 0.75;
+export const ADV_BOOST = 1.5;
+export const DISADV_BOOST = 0.75;
 
 export function getTypeData(type: DereType): DereTypeData {
   const types = Assets.get<Record<DereType, DereTypeData>>("game/types");
@@ -35,9 +35,9 @@ export function calculateDamageMultiplier(
   for (const defenderType of defenderTypes) {
     const typeData = getTypeData(defenderType);
     if (typeData.resists.includes(attackType)) {
-      multiplier *= TYPE_DISADV_BOOST;
+      multiplier *= DISADV_BOOST;
     } else if (typeData.weak_to.includes(attackType)) {
-      multiplier *= TYPE_ADV_BOOST;
+      multiplier *= ADV_BOOST;
     }
   }
   return multiplier;

@@ -1,14 +1,15 @@
 import { GameManager } from "../../engine/game_manager";
 import { chance } from "./chance";
-import {
-  ActiveStatusEffect,
-  Character,
-  StatusEffect,
-  getGenderedString,
-} from "./character";
+import { Character, getGenderedString } from "./character";
+import { StatusEffect } from "./effects";
 import { MapSpecialActionBattle } from "./map_types";
-import { MoveData, getMovesets } from "./moves";
-import { DereType, TYPE_ADV_BOOST, TYPE_DISADV_BOOST } from "./types";
+import { MoveData, TraitData, TraitKind, getMovesets } from "./moves";
+import {
+  DereType,
+  ADV_BOOST,
+  DISADV_BOOST,
+  calculateDamageMultiplier,
+} from "./types";
 
 interface BattleData {
   opponentLeader: Character;
@@ -151,10 +152,13 @@ export class Battle extends EventTarget implements BattleData {
     }
 
     for (const character of orderOfPlayers) {
+      const characterIsPlayer = character === playerCopy;
       const moveSimulation = this.simulateMove(
-        character === playerCopy ? playerMove : opponentMove,
-        character === playerCopy ? playerCopy : opponentCopy,
-        character === playerCopy ? opponentCopy : playerCopy,
+        characterIsPlayer ? playerMove : opponentMove,
+        characterIsPlayer ? playerCopy : opponentCopy,
+        characterIsPlayer ? opponentCopy : playerCopy,
+        characterIsPlayer ? this.activePlayer! : this.activeOpponent!,
+        characterIsPlayer ? this.activeOpponent! : this.activePlayer!,
       );
       playback.push(...moveSimulation);
     }
@@ -166,13 +170,23 @@ export class Battle extends EventTarget implements BattleData {
     move: MoveData,
     user: Character,
     opponent: Character,
+    realUser: Character,
+    realOpponent: Character,
   ): BattlePlayback {
     const playback: BattlePlayback = [];
     const movesets = getMovesets();
 
+    if (user.hp <= 0) return playback;
+
     // check for stun
     if (this.hasEffect(StatusEffect.stunned, user)) {
       playback.push([`${user.name} is stunned and can't move!`, () => {}]);
+      return playback;
+    }
+
+    // check for reload
+    if (this.hasEffect(StatusEffect.reload, user)) {
+      playback.push([`${user.name} is reloading...`, () => {}]);
       return playback;
     }
 
@@ -184,6 +198,468 @@ export class Battle extends EventTarget implements BattleData {
       }
     }
 
+    // execute the move
+    const { might, type, targets, traits } = move;
+    const target = targets === "self" ? user : opponent;
+    const realTarget = targets === "self" ? realUser : realOpponent;
+
+    let critChance = 1 / 20,
+      isCrit = false,
+      typeMultiplier = calculateDamageMultiplier(type, target.types),
+      damage = typeMultiplier * might,
+      numberOfMultiHits = 0;
+
+    // calculate modifier changes from traits
+    for (const trait of traits) {
+      let traitName: TraitKind;
+      if (typeof trait === "string") traitName = trait;
+      else traitName = trait.name;
+      switch (traitName) {
+        case TraitKind.critical: {
+          const { chance: triggerChance } = this.extractTraitData(trait);
+          critChance += triggerChance!;
+          break;
+        }
+        case TraitKind.multi_hit: {
+          const { chance: triggerChance, amount } =
+            this.extractTraitData(trait);
+          let multiplier = 1;
+          for (let i = 0; i < amount!; i++) {
+            if (chance.bool({ likelihood: triggerChance! * 100 })) {
+              multiplier++;
+            } else {
+              break;
+            }
+          }
+          damage *= multiplier;
+          numberOfMultiHits = multiplier - 1;
+          break;
+        }
+      }
+    }
+
+    // calculate modifier changes from effects
+    for (const effect of user.statusEffects) {
+      switch (effect.effect) {
+        case StatusEffect.strengthened: {
+          damage *= ADV_BOOST;
+          break;
+        }
+        case StatusEffect.elated: {
+          damage *= 2;
+          break;
+        }
+        case StatusEffect.weakened: {
+          damage *= DISADV_BOOST;
+          break;
+        }
+        case StatusEffect.criticalUp: {
+          critChance += effect.traitData?.chance ?? 0.25;
+          break;
+        }
+      }
+    }
+    for (const effect of opponent.statusEffects) {
+      switch (effect.effect) {
+        case StatusEffect.vulnerable: {
+          damage *= ADV_BOOST;
+          break;
+        }
+        case StatusEffect.toughened: {
+          damage *= DISADV_BOOST;
+          break;
+        }
+      }
+    }
+
+    // calculate critical hit
+    if (chance.bool({ likelihood: critChance * 100 })) {
+      isCrit = true;
+      damage *= 2;
+    }
+
+    user.moveUses[move.name] -= 1;
+    playback.push([
+      `${user.name} used ${move.name}!`,
+      () => {
+        realUser.moveUses[move.name] -= 1;
+      },
+    ]);
+
+    if (damage > 0) {
+      // calculate miss
+      if (chance.bool({ likelihood: target.stats.agility })) {
+        playback.push(["However, the attack missed!", () => {}]);
+      } else {
+        // apply damage
+        target.hp -= Math.ceil(damage);
+        const message =
+          typeMultiplier === ADV_BOOST
+            ? "It's super effective!"
+            : typeMultiplier === DISADV_BOOST
+              ? "It's not very effective..."
+              : `${target.name} was hurt. Ouch.`;
+        if (numberOfMultiHits > 0) {
+          playback.push([`It hit ${numberOfMultiHits} times!`, () => {}]);
+        }
+        playback.push([
+          message,
+          () => {
+            realTarget.hp -= Math.ceil(damage);
+          },
+        ]);
+
+        // check ko
+        if (target.hp <= 0) {
+          playback.push(...this.handleKnockout(target, realTarget, isCrit));
+        } else {
+          // apply target effects
+          for (const effect of target.statusEffects) {
+            if (effect.effect === StatusEffect.damageReflect) {
+              user.hp -= Math.ceil(damage * 0.5);
+              playback.push([
+                `${target.name} reflected some damage!`,
+                () => {
+                  realUser.hp -= Math.ceil(damage * 0.5);
+                },
+              ]);
+              if (user.hp <= 0) {
+                playback.push(...this.handleKnockout(user, realUser, false));
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // handle move traits
+    for (const trait of traits) {
+      let traitName: TraitKind;
+      if (typeof trait === "string") traitName = trait;
+      else traitName = trait.name;
+      switch (traitName) {
+        case TraitKind.bleed: {
+          const { chance: triggerChance, duration } =
+            this.extractTraitData(trait);
+          if (chance.bool({ likelihood: triggerChance! * 100 })) {
+            target.statusEffects.push({
+              effect: StatusEffect.bleeding,
+              duration: duration!,
+            });
+            playback.push([
+              `${target.name} starts bleeding!`,
+              () => {
+                realTarget.statusEffects.push({
+                  effect: StatusEffect.bleeding,
+                  duration: duration!,
+                });
+              },
+            ]);
+          }
+          break;
+        }
+        case TraitKind.confuse: {
+          const { chance: triggerChance, duration } =
+            this.extractTraitData(trait);
+          if (chance.bool({ likelihood: triggerChance! * 100 })) {
+            target.statusEffects.push({
+              effect: StatusEffect.confused,
+              duration: duration!,
+            });
+            playback.push([
+              `${target.name} is confused!`,
+              () => {
+                realTarget.statusEffects.push({
+                  effect: StatusEffect.confused,
+                  duration: duration!,
+                });
+              },
+            ]);
+          }
+          break;
+        }
+        case TraitKind.critical_up: {
+          const { chance: triggerChance, duration } =
+            this.extractTraitData(trait);
+          if (chance.bool({ likelihood: triggerChance! * 100 })) {
+            target.statusEffects.push({
+              effect: StatusEffect.criticalUp,
+              duration: duration!,
+            });
+            playback.push([
+              `${target.name} critical rate increased!`,
+              () => {
+                realTarget.statusEffects.push({
+                  effect: StatusEffect.criticalUp,
+                  duration: duration!,
+                });
+              },
+            ]);
+          }
+          break;
+        }
+        case TraitKind.elation: {
+          const { chance: triggerChance, duration } =
+            this.extractTraitData(trait);
+          if (chance.bool({ likelihood: triggerChance! * 100 })) {
+            target.statusEffects.push({
+              effect: StatusEffect.elated,
+              duration: duration!,
+            });
+            playback.push([
+              `${target.name} becomes elated!`,
+              () => {
+                realTarget.statusEffects.push({
+                  effect: StatusEffect.elated,
+                  duration: duration!,
+                });
+              },
+            ]);
+          }
+          break;
+        }
+        case TraitKind.loading: {
+          const { chance: triggerChance } = this.extractTraitData(trait);
+          if (chance.bool({ likelihood: triggerChance! * 100 })) {
+            user.statusEffects.push({
+              effect: StatusEffect.reload,
+              duration: 1,
+            });
+            playback.push([
+              `${user.name} needs to reload.`,
+              () => {
+                realUser.statusEffects.push({
+                  effect: StatusEffect.reload,
+                  duration: 1,
+                });
+              },
+            ]);
+          }
+          break;
+        }
+        case TraitKind.poison: {
+          const { chance: triggerChance, duration } =
+            this.extractTraitData(trait);
+          if (chance.bool({ likelihood: triggerChance! * 100 })) {
+            target.statusEffects.push({
+              effect: StatusEffect.poisoned,
+              duration: duration!,
+            });
+            playback.push([
+              `${target.name} is poisoned!`,
+              () => {
+                realTarget.statusEffects.push({
+                  effect: StatusEffect.poisoned,
+                  duration: duration!,
+                });
+              },
+            ]);
+          }
+          break;
+        }
+        case TraitKind.reflect: {
+          const { chance: triggerChance, duration } =
+            this.extractTraitData(trait);
+          if (chance.bool({ likelihood: triggerChance! * 100 })) {
+            target.statusEffects.push({
+              effect: StatusEffect.damageReflect,
+              duration: duration!,
+            });
+            playback.push([
+              `${target.name} is reflecting damage!`,
+              () => {
+                realTarget.statusEffects.push({
+                  effect: StatusEffect.damageReflect,
+                  duration: duration!,
+                });
+              },
+            ]);
+          }
+          break;
+        }
+        case TraitKind.strengthen: {
+          const { chance: triggerChance, duration } =
+            this.extractTraitData(trait);
+          if (chance.bool({ likelihood: triggerChance! * 100 })) {
+            target.statusEffects.push({
+              effect: StatusEffect.strengthened,
+              duration: duration!,
+            });
+            playback.push([
+              `${target.name} is filled with a surge of power!`,
+              () => {
+                realTarget.statusEffects.push({
+                  effect: StatusEffect.strengthened,
+                  duration: duration!,
+                });
+              },
+            ]);
+          }
+          break;
+        }
+        case TraitKind.stun: {
+          const { chance: triggerChance, duration } =
+            this.extractTraitData(trait);
+          if (chance.bool({ likelihood: triggerChance! * 100 })) {
+            target.statusEffects.push({
+              effect: StatusEffect.stunned,
+              duration: duration!,
+            });
+            playback.push([
+              `${target.name} is stunned!`,
+              () => {
+                realTarget.statusEffects.push({
+                  effect: StatusEffect.stunned,
+                  duration: duration!,
+                });
+              },
+            ]);
+          }
+          break;
+        }
+        case TraitKind.toughen: {
+          const { chance: triggerChance, duration } =
+            this.extractTraitData(trait);
+          if (chance.bool({ likelihood: triggerChance! * 100 })) {
+            target.statusEffects.push({
+              effect: StatusEffect.toughened,
+              duration: duration!,
+            });
+            playback.push([
+              `${target.name} increases ${getGenderedString({
+                gender: target.gender,
+                type: "possesive",
+                name: target.name,
+              })} defense!`,
+              () => {
+                realTarget.statusEffects.push({
+                  effect: StatusEffect.toughened,
+                  duration: duration!,
+                });
+              },
+            ]);
+          }
+          break;
+        }
+        case TraitKind.vulnerable: {
+          const { chance: triggerChance, duration } =
+            this.extractTraitData(trait);
+          if (chance.bool({ likelihood: triggerChance! * 100 })) {
+            target.statusEffects.push({
+              effect: StatusEffect.vulnerable,
+              duration: duration!,
+            });
+            playback.push([
+              `${target.name} shows their weak side.`,
+              () => {
+                realTarget.statusEffects.push({
+                  effect: StatusEffect.vulnerable,
+                  duration: duration!,
+                });
+              },
+            ]);
+          }
+          break;
+        }
+        case TraitKind.weaken: {
+          const { chance: triggerChance, duration } =
+            this.extractTraitData(trait);
+          if (chance.bool({ likelihood: triggerChance! * 100 })) {
+            target.statusEffects.push({
+              effect: StatusEffect.weakened,
+              duration: duration!,
+            });
+            playback.push([
+              `${target.name} loses some strength.`,
+              () => {
+                realTarget.statusEffects.push({
+                  effect: StatusEffect.weakened,
+                  duration: duration!,
+                });
+              },
+            ]);
+          }
+          break;
+        }
+        case TraitKind.heal: {
+          let healAmount = 10;
+          let triggerChance = 1;
+          if (typeof trait === "object") {
+            triggerChance = trait.chance ?? triggerChance;
+            let amount = trait.amount ?? healAmount;
+            if (Array.isArray(amount)) {
+              amount = chance.pickone(amount);
+            }
+          }
+          if (chance.bool({ likelihood: triggerChance * 100 })) {
+            user.hp += healAmount;
+            playback.push([
+              `${user.name} healed ${healAmount} health`,
+              () => {
+                realUser.hp += healAmount;
+              },
+            ]);
+          }
+          break;
+        }
+      }
+    }
+
+    return playback;
+  }
+
+  extractTraitData(trait: TraitData | TraitKind): {
+    chance?: number;
+    duration?: number;
+    amount?: number;
+  } {
+    let baseChance = 1;
+    let baseDuration = 1;
+    let baseAmount = 1;
+    if (typeof trait === "object") {
+      baseChance = trait.chance ?? baseChance;
+      const traitDuration = trait.duration ?? baseDuration;
+      if (Array.isArray(traitDuration)) {
+        baseDuration = chance.pickone(traitDuration);
+      } else {
+        baseDuration = traitDuration;
+      }
+      const traitAmount = trait.amount ?? baseAmount;
+      if (Array.isArray(traitAmount)) {
+        baseAmount = chance.pickone(traitAmount);
+      } else {
+        baseAmount = traitAmount;
+      }
+    }
+    return { chance: baseChance, duration: baseDuration, amount: baseAmount };
+  }
+
+  handleKnockout(
+    character: Character,
+    realCharacter: Character,
+    isCrit: boolean,
+  ): BattlePlayback {
+    const playback: BattlePlayback = [];
+    const hpUnder = Math.abs(character.hp);
+    let deathChance = (0.4 / character.love) * 4;
+    if (isCrit) deathChance *= 2;
+    deathChance += (hpUnder / character.stats.maxHealth) * 0.25;
+    if (chance.bool({ likelihood: deathChance * 100 })) {
+      character.isDead = true;
+      playback.push([
+        `Oh no! ${character.name} died... ${getGenderedString({
+          gender: character.gender,
+          type: "pronoun",
+          name: character.name,
+        })} will live on in our hearts.`,
+        () => {
+          realCharacter.isDead = true;
+        },
+      ]);
+    } else {
+      playback.push([`${character.name} fainted.`, () => {}]);
+    }
     return playback;
   }
 
@@ -212,11 +688,11 @@ export class Battle extends EventTarget implements BattleData {
     const { speed: moveSpeed, type: moveType } = move;
     let speed = character.stats.speed;
     if (types.includes(move.type)) {
-      speed += moveSpeed * TYPE_ADV_BOOST;
+      speed += moveSpeed * ADV_BOOST;
     } else if (moveType === DereType.normal) {
       speed += moveSpeed;
     } else {
-      speed += moveSpeed * TYPE_DISADV_BOOST;
+      speed += moveSpeed * DISADV_BOOST;
     }
     return speed;
   }

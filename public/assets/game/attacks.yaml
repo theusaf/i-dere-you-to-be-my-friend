@@ -12,7 +12,7 @@ _reload:
   hidden: true
 
 _confusion:
-  name: Confusion
+  name: Why am I Hitting Myself? (Confusion)
   description: ""
   type: normal
   max_uses: -1
@@ -49,7 +49,7 @@ fist_flurry:
   traits:
     - name: multi_hit
       chance: 0.3
-      max: 5
+      amount: 5
 
 kick:
   name: Kick
@@ -176,7 +176,7 @@ stare:
 
 gun:
   name: Gun
-  description: Shoot the enemy with a gun... The next action will be used to reload. [g]10%[/g] chance to [y]crit[/y]
+  description: Shoot the enemy with a gun... The next action will be used to reload. [g]10%[/g] increase for [y]crits[/y]
   type: gandere
   max_uses: 6
   might: 15

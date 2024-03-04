@@ -1,4 +1,5 @@
 import { chance } from "./chance";
+import { ActiveStatusEffect, StatusEffect } from "./effects";
 import { getMovesets, getRandomMoveIds } from "./moves";
 import { getRandomName } from "./random";
 import { Saveable } from "./saves";
@@ -76,23 +77,6 @@ export function getGenderedString({
   }
 }
 
-export enum StatusEffect {
-  // negative
-  poisoned = "poisoned",
-  bleeding = "bleeding",
-  confused = "confused",
-  stunned = "stunned",
-  weakened = "weakened",
-  vulnerable = "vulnerable",
-  reload = "reload",
-  // positive
-  strengthened = "strengthened",
-  toughened = "toughened",
-  elated = "elated",
-  criticalUp = "criticalUp",
-  damageReflect = "damageReflect",
-}
-
 export interface CharacterInfo {
   id?: string;
   hp: number;
@@ -107,11 +91,6 @@ export interface CharacterInfo {
   knownMoves: string[];
   moveUses: Record<string, number>;
   isActive: boolean;
-}
-
-export interface ActiveStatusEffect {
-  effect: StatusEffect;
-  duration: number;
 }
 
 export class Character implements CharacterInfo, Saveable<CharacterInfo> {
@@ -175,7 +154,7 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
   }
 
   clone(): Character {
-    return new Character(this.toMap());
+    return new Character(JSON.parse(JSON.stringify(this.toMap())));
   }
 
   toYAML(): string {
