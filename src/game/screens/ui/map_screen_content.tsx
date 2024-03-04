@@ -106,6 +106,14 @@ function BattleAnimationDisplay({
     new GameAnimation({ distance: 0 }, { distance: 2 }, 500, easeMethod.linear),
   );
   const currentAnimation = animation.current;
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      console.warn("Animation timed out!");
+      console.warn("Animation timed out! Are there multiple animations running?");
+      onDone();
+    }, 5000);
+    return () => clearTimeout(timeout);
+  }, []);
   if (!currentAnimation.isDone) {
     const lastTime = performance.now();
     requestAnimationFrame((time) => {

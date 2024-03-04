@@ -189,6 +189,7 @@ export class Battle extends EventTarget implements BattleData {
       target: Character,
       realTarget: Character,
     ) => {
+      if (target.hp <= 0) return;
       for (const effect of effects) {
         switch (effect.effect) {
           case StatusEffect.bleeding: {
@@ -425,6 +426,7 @@ export class Battle extends EventTarget implements BattleData {
       else traitName = trait.name;
       switch (traitName) {
         case TraitKind.bleed: {
+          if (target.hp <= 0) break;
           const { chance: triggerChance, duration } =
             this.extractTraitData(trait);
           if (
@@ -447,6 +449,7 @@ export class Battle extends EventTarget implements BattleData {
           break;
         }
         case TraitKind.confuse: {
+          if (target.hp <= 0) break;
           const { chance: triggerChance, duration } =
             this.extractTraitData(trait);
           if (
@@ -469,6 +472,7 @@ export class Battle extends EventTarget implements BattleData {
           break;
         }
         case TraitKind.critical_up: {
+          if (target.hp <= 0) break;
           const { chance: triggerChance, duration } =
             this.extractTraitData(trait);
           if (
@@ -491,6 +495,7 @@ export class Battle extends EventTarget implements BattleData {
           break;
         }
         case TraitKind.elation: {
+          if (target.hp <= 0) break;
           const { chance: triggerChance, duration } =
             this.extractTraitData(trait);
           if (
@@ -513,6 +518,7 @@ export class Battle extends EventTarget implements BattleData {
           break;
         }
         case TraitKind.loading: {
+          if (user.hp <= 0) break;
           const { chance: triggerChance } = this.extractTraitData(trait);
           if (
             chance.bool({ likelihood: Math.min(triggerChance! * 100, 100) })
@@ -534,6 +540,7 @@ export class Battle extends EventTarget implements BattleData {
           break;
         }
         case TraitKind.poison: {
+          if (target.hp <= 0) break;
           const { chance: triggerChance, duration } =
             this.extractTraitData(trait);
           if (
@@ -556,6 +563,7 @@ export class Battle extends EventTarget implements BattleData {
           break;
         }
         case TraitKind.reflect: {
+          if (target.hp <= 0) break;
           const { chance: triggerChance, duration } =
             this.extractTraitData(trait);
           if (
@@ -578,6 +586,7 @@ export class Battle extends EventTarget implements BattleData {
           break;
         }
         case TraitKind.strengthen: {
+          if (target.hp <= 0) break;
           const { chance: triggerChance, duration } =
             this.extractTraitData(trait);
           if (
@@ -600,6 +609,7 @@ export class Battle extends EventTarget implements BattleData {
           break;
         }
         case TraitKind.stun: {
+          if (target.hp <= 0) break;
           const { chance: triggerChance, duration } =
             this.extractTraitData(trait);
           if (
@@ -622,6 +632,7 @@ export class Battle extends EventTarget implements BattleData {
           break;
         }
         case TraitKind.toughen: {
+          if (target.hp <= 0) break;
           const { chance: triggerChance, duration } =
             this.extractTraitData(trait);
           if (
@@ -648,6 +659,7 @@ export class Battle extends EventTarget implements BattleData {
           break;
         }
         case TraitKind.vulnerable: {
+          if (target.hp <= 0) break;
           const { chance: triggerChance, duration } =
             this.extractTraitData(trait);
           if (
@@ -670,6 +682,7 @@ export class Battle extends EventTarget implements BattleData {
           break;
         }
         case TraitKind.weaken: {
+          if (target.hp <= 0) break;
           const { chance: triggerChance, duration } =
             this.extractTraitData(trait);
           if (
@@ -692,6 +705,7 @@ export class Battle extends EventTarget implements BattleData {
           break;
         }
         case TraitKind.heal: {
+          if (user.hp <= 0) break;
           let healAmount = 10;
           let triggerChance = 1;
           if (typeof trait === "object") {
@@ -751,23 +765,43 @@ export class Battle extends EventTarget implements BattleData {
   ): BattlePlayback {
     const playback: BattlePlayback = [];
     const hpUnder = Math.abs(character.hp);
+    const isPlayer = character === this.activePlayer;
     let deathChance = (0.4 / character.love) * 4;
     if (isCrit) deathChance *= 2;
     deathChance += (hpUnder / character.stats.maxHealth) * 0.25;
-    if (chance.bool({ likelihood: Math.min(deathChance * 100, 100) })) {
+    console.log(deathChance);
+    if (chance.bool({ likelihood: Math.min(deathChance, 100) })) {
       character.isDead = true;
+      const message =
+        realCharacter === this.activePlayer
+          ? `Oh no! ${character.name} died... ${getGenderedString({
+              gender: character.gender,
+              type: "pronoun",
+              name: character.name,
+            })} will live on in our hearts.`
+          : `${character.name} died.`;
       playback.push([
-        `Oh no! ${character.name} died... ${getGenderedString({
-          gender: character.gender,
-          type: "pronoun",
-          name: character.name,
-        })} will live on in our hearts.`,
+        message,
         () => {
           realCharacter.isDead = true;
+          if (isPlayer) {
+            this.activePlayer = null;
+          } else {
+            this.activeOpponent = null;
+          }
         },
       ]);
     } else {
-      playback.push([`${character.name} fainted.`, () => {}]);
+      playback.push([
+        `${character.name} fainted.`,
+        () => {
+          if (isPlayer) {
+            this.activePlayer = null;
+          } else {
+            this.activeOpponent = null;
+          }
+        },
+      ]);
     }
     return playback;
   }
