@@ -183,6 +183,19 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
     return Math.ceil(this.love * 1.4) ** 2;
   }
 
+  calculateGainedXP(opponentLove: number, otherMultiplier: number = 1): number {
+    let xp = chance.floating({ min: 25, max: 55 });
+    const loveDifference = opponentLove - this.love;
+    if (loveDifference > 0) {
+      xp *= Math.sqrt(loveDifference) + 1;
+    } else {
+      xp /= Math.abs(loveDifference) + 1;
+    }
+    xp *= Math.min(1, Math.sqrt(this.love));
+    xp *= otherMultiplier;
+    return Math.ceil(xp);
+  }
+
   loveUp(): (keyof CharacterStats)[] {
     this.love++;
     this.stats.maxHealth += this.stats.constitution;
