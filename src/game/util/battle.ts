@@ -234,7 +234,14 @@ export class Battle extends EventTarget implements BattleData {
         }
         effect.duration -= 1;
         if (effect.duration < 0) {
-          playback.push([`The ${effect.effect} effect wore off.`, () => {}]);
+          playback.push([
+            `${getGenderedString({
+              gender: target.gender,
+              type: "possesive",
+              name: target.name,
+            })} ${effect.effect} effect wore off.`,
+            () => {},
+          ]);
         }
       }
       target.statusEffects = effects.filter((effect) => effect.duration > 0);
@@ -242,7 +249,7 @@ export class Battle extends EventTarget implements BattleData {
         "",
         () => {
           realTarget.statusEffects = effects.filter(
-            (effect) => effect.duration > 0,
+            (effect) => effect.duration >= 0,
           );
         },
       ]);
@@ -364,11 +371,14 @@ export class Battle extends EventTarget implements BattleData {
       damage *= 2;
     }
 
-    user.moveUses[move.name] -= 1;
+    const moveIds = user.knownMoves;
+    const moveId = moveIds.find((id) => movesets[id] === move)!;
+
+    user.moveUses[moveId] -= 1;
     playback.push([
       `${user.name} used ${move.name}!`,
       () => {
-        realUser.moveUses[move.name] -= 1;
+        realUser.moveUses[moveId] -= 1;
       },
     ]);
 
@@ -379,6 +389,9 @@ export class Battle extends EventTarget implements BattleData {
       } else {
         // apply damage
         target.hp -= Math.ceil(damage);
+        if (isCrit) {
+          playback.push(["It's a critical hit!", () => {}]);
+        }
         const message =
           typeMultiplier === ADV_BOOST
             ? "It's super effective!"
@@ -820,6 +833,7 @@ export class Battle extends EventTarget implements BattleData {
   }
 
   getOpponentMove(): MoveData {
+    // TODO: in future, take into account remaining uses
     const { knownMoves } = this.activeOpponent!;
     const move = chance.pickone(knownMoves);
     return getMovesets()[move];

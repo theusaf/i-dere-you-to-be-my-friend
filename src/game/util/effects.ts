@@ -13,8 +13,8 @@ export enum StatusEffect {
   strengthened = "strengthened",
   toughened = "toughened",
   elated = "elated",
-  criticalUp = "criticalUp",
-  damageReflect = "damageReflect",
+  criticalUp = "critical up",
+  damageReflect = "damage reflection",
 }
 
 export interface ActiveStatusEffect {
