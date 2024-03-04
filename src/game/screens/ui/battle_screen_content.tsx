@@ -235,8 +235,9 @@ function UserViewButtonController({
         }
         if (isEndOfBattle) {
           callbackRegister(() => {
-            gameManager.gameData.save();
-            gameManager.changeScreen(new MapScreen());
+            gameManager.gameData.save().finally(() => {
+              gameManager.changeScreen(new MapScreen());
+            });
           });
         }
         battle.triggerChange();

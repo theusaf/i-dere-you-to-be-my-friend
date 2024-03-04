@@ -265,11 +265,7 @@ export class Battle extends EventTarget implements BattleData {
         effect.duration -= 1;
         if (effect.duration < 0) {
           playback.push([
-            `${getGenderedString({
-              gender: target.gender,
-              type: "possesive",
-              name: target.name,
-            })} ${effect.effect} effect wore off.`,
+            `${target.name}'s ${effect.effect} effect wore off.`,
             () => {},
           ]);
         }
@@ -811,11 +807,11 @@ export class Battle extends EventTarget implements BattleData {
     const playback: BattlePlayback = [];
     const hpUnder = Math.abs(character.hp);
     const isPlayer = realCharacter === this.activePlayer;
-    let deathChance = (0.4 / character.love) * 4;
-    if (isCrit) deathChance *= 2;
-    deathChance += (hpUnder / character.stats.maxHealth) * 0.25;
-    console.log(`Death Chance: ${deathChance}%`);
-    if (chance.bool({ likelihood: Math.min(deathChance, 100) })) {
+    let deathChance = (0.25 / character.love);
+    if (isCrit) deathChance *= 4;
+    deathChance += (hpUnder / character.stats.maxHealth) / 2;
+    console.log(`Death Chance: ${deathChance * 100}%`);
+    if (chance.bool({ likelihood: Math.min(deathChance * 100, 100) })) {
       character.isDead = true;
       const message = isPlayer
         ? `Oh no! ${character.name} died... ${getGenderedString({
