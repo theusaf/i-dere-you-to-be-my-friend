@@ -19,12 +19,16 @@ export function RichTextSpan({ text }: { text: string }): JSX.Element {
         }
         color = colors[text[i + 1] as keyof typeof colors];
         i += 2;
+        continue;
       } else if (text[i + 1] === "/" && text[i + 3] === "]") {
-        color = null;
-        i += 3;
         spans.push({ text: buffer, color });
+        i += 3;
+        color = null;
+        buffer = "";
+        continue;
       }
     }
+    buffer += text[i];
   }
   if (buffer) {
     spans.push({ text: buffer, color });

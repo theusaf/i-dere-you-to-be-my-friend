@@ -11,6 +11,7 @@ import { ConfirmationButton } from "../../../engine/components/confirmation_butt
 import { Character, getGenderedString } from "../../util/character";
 import { Battle, BattleEvents } from "../../util/battle";
 import { MoveData, getMovesets } from "../../util/moves";
+import { RichTextSpan } from "../../../engine/components/rich_text_span";
 
 // TODO: clean up this code...
 export interface BattleScreenContentProps {
@@ -409,13 +410,33 @@ function FightButtons({
   moves: string[];
   onMoveSelected: (move: MoveData) => void;
 }): JSX.Element {
+  const [hoverTip, setHoverTip] = useState<MoveData | null>(null);
   const movesets = getMovesets();
   const className = "min-h-14";
+  const onHover = (move: MoveData) => {
+    setHoverTip(move);
+  };
+  const onUnhover = () => setHoverTip(null);
   return (
-    <div className="grid grid-cols-3 gap-2 text-center h-full">
+    <div className="grid grid-cols-3 gap-2 text-center h-full relative">
+      {hoverTip && (
+        <div
+          className="absolute right-4 bg-slate-600 outline outline-2 outline-slate-900 w-96"
+          style={{
+            bottom: "calc(100% + 3rem)",
+          }}
+        >
+          <RichTextSpan text={hoverTip.description}/>
+        </div>
+      )}
       {moves.map((move, i) => {
         return (
-          <TextActionButton key={i} className={className}>
+          <TextActionButton
+            key={i}
+            className={className}
+            onMouseOver={() => onHover(movesets[move])}
+            onMouseOut={onUnhover}
+          >
             {movesets[move].name}
           </TextActionButton>
         );
