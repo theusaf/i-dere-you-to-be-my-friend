@@ -46,6 +46,24 @@ export class Battle extends EventTarget implements BattleData {
     this.dispatchEvent(new CustomEvent(BattleEvents.change));
   }
 
+  getNextOpponent(): Character | null {
+    const nextValidOpponent = this.opponentTeam.find((character) =>
+      this.isCharacterValidBattleCandidate(character),
+    );
+    return nextValidOpponent ?? null;
+  }
+
+  getNextPlayer(): Character | null {
+    const nextValidPlayer = this.playerTeam.find((character) =>
+      this.isCharacterValidBattleCandidate(character),
+    );
+    return nextValidPlayer ?? null;
+  }
+
+  isCharacterValidBattleCandidate(character: Character): boolean {
+    return !character.isDead && character.hp > 0;
+  }
+
   static fromBattleData(
     data: MapSpecialActionBattle,
     gameManager: GameManager,

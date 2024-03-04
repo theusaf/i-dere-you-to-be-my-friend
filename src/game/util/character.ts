@@ -29,11 +29,17 @@ export enum Gender {
   none = "none",
 }
 
-export function getGenderedString(
-  gender: Gender,
-  type: "possesive" | "objectself" | "object" | "pronoun",
-  name: string,
-): string {
+interface GenderedStringOpts {
+  gender: Gender;
+  type: "possesive" | "objectself" | "object" | "pronoun";
+  name: string;
+}
+
+export function getGenderedString({
+  gender,
+  type,
+  name,
+}: GenderedStringOpts): string {
   switch (gender) {
     case Gender.she:
       return type === "possesive"
@@ -60,7 +66,13 @@ export function getGenderedString(
             ? "himself"
             : "he";
     case Gender.none:
-      return name;
+      return type === "possesive"
+        ? `${name}'s`
+        : type === "object"
+          ? name
+          : type === "objectself"
+            ? `${name}, themself`
+            : name;
   }
 }
 

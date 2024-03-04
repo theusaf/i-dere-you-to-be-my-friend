@@ -5,6 +5,7 @@ export interface AnimatedTextControllerProps {
   children: string;
   onComplete?: () => void;
   onCompleteAction?: () => void;
+  key: any;
 }
 
 /**

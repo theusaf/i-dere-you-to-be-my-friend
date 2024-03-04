@@ -8,40 +8,69 @@ import { AnimatedTextController } from "../../../engine/components/animated_text
 import { GameManager } from "../../../engine/game_manager";
 import { MapScreen } from "../map_screen";
 import { ConfirmationButton } from "../../../engine/components/confirmation_button";
-import { Character } from "../../util/character";
-import { Battle } from "../../util/battle";
+import { Character, getGenderedString } from "../../util/character";
+import { Battle, BattleEvents } from "../../util/battle";
 
 // TODO: clean up this code...
 export interface BattleScreenContentProps {
   state: BattleScreen;
 }
 
-enum BattleScreenUIState {
-  init,
-}
-
 export function BattleScreenContent({
   state,
 }: BattleScreenContentProps): JSX.Element {
-  const [showUI, setShowUI] = useState(false);
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
+  const [logIndex, setLogIndex] = useState(0);
   const { gameManager } = state;
-  const { battle: battleData } = gameManager.gameData;
+  const battle = gameManager.gameData.battle!;
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (state.state == BattleScreenState.battle) {
-        setShowUI(true);
-      } else if (state.state == BattleScreenState.loadingOut) {
-        setShowUI(false);
+    const listener = () => {
+      if (battle.activeOpponent === null) {
+        // if no enemy active
+        const nextOpponent = battle.getNextOpponent();
+        if (nextOpponent) {
+          battle.logs.push(
+            `${battle.opponentLeader.name} sends out ${getGenderedString({
+              gender: battle.opponentLeader.gender,
+              type: "possesive",
+              name: battle.opponentLeader.name,
+            })} friend, ${nextOpponent.name}!`,
+          );
+          battle.activeOpponent = nextOpponent;
+        } else {
+          // victory!
+        }
       }
-    }, 100);
-    return () => clearInterval(interval);
+      if (battle.activePlayer === null) {
+        // if no player active
+        const nextPlayer = battle.getNextPlayer();
+        if (nextPlayer) {
+          battle.logs.push(`You got this, ${nextPlayer.name}!`);
+          battle.activePlayer = nextPlayer;
+        } else {
+          // defeat!
+        }
+      }
+      // immediately update the UI
+      forceUpdate();
+    };
+    battle.addEventListener(BattleEvents.change, listener);
+    return () => {
+      battle.removeEventListener(BattleEvents.change, listener);
+    };
   }, []);
+
+  const showUI = state.state === BattleScreenState.battle;
 
   return (
     <div className="grid grid-rows-5 h-full text-white">
-      <EnemyView show={showUI} activeEnemy={battleData!.activeOpponent} />
-      <UserView gameManager={gameManager} show={showUI} />
+      <EnemyView show={showUI} activeEnemy={battle.activeOpponent} />
+      <UserView
+        gameManager={gameManager}
+        show={showUI}
+        logIndex={logIndex}
+        setLogIndex={setLogIndex}
+      />
     </div>
   );
 }
@@ -86,9 +115,16 @@ function EnemyView({ show, activeEnemy }: EnemyViewProps) {
 
 interface UserViewProps extends ToggleableUIProps {
   gameManager: GameManager;
+  logIndex: number;
+  setLogIndex: React.Dispatch<React.SetStateAction<number>>;
 }
 
-function UserView({ gameManager, show }: UserViewProps): JSX.Element {
+function UserView({
+  gameManager,
+  show,
+  logIndex,
+  setLogIndex,
+}: UserViewProps): JSX.Element {
   return (
     <div
       className="row-start-4 row-span-2 border-t-4 border-neutral-400 bg-slate-600 bg-opacity-80 p-2 transition-transform duration-300"
@@ -101,7 +137,12 @@ function UserView({ gameManager, show }: UserViewProps): JSX.Element {
           activeCharacter={gameManager.gameData.battle!.activePlayer}
           battle={gameManager.gameData.battle!}
         />
-        <UserViewButtonController gameManager={gameManager} show={show} />
+        <UserViewButtonController
+          gameManager={gameManager}
+          show={show}
+          logIndex={logIndex}
+          setLogIndex={setLogIndex}
+        />
       </div>
     </div>
   );
@@ -120,18 +161,18 @@ enum UserViewControllerState {
 function UserViewButtonController({
   gameManager,
   show,
+  logIndex,
+  setLogIndex,
 }: UserViewProps): JSX.Element {
-  const [logIndex, setLogIndex] = useState(0);
+  const [localLogIndex, setLocalLogIndex] = useState(logIndex);
   const [state, setState] = useState(UserViewControllerState.index);
   const className = "align-middle flex flex-col place-content-center";
   const logs = gameManager.gameData.battle!.logs;
   useEffect(() => {
-    if (logs.length > logIndex) {
+    if (logs.length > localLogIndex) {
       setState(UserViewControllerState.logs);
     }
-  }, [logs.length, logIndex]);
-
-  console.log(logs, logIndex, state);
+  }, [logs.length, localLogIndex]);
 
   let buttons: JSX.Element;
   let message: string;
@@ -156,6 +197,7 @@ function UserViewButtonController({
       message = "";
       buttons = (
         <AnimatedTextController
+          key="run"
           className="w-full"
           onCompleteAction={() => {
             gameManager.changeScreen(new MapScreen());
@@ -171,15 +213,19 @@ function UserViewButtonController({
       break;
     case UserViewControllerState.logs:
       message = "";
-      const log = logs[logIndex];
+      const log = logs[localLogIndex];
       buttons = show ? (
         <AnimatedTextController
+          key={localLogIndex}
           onComplete={() => {
             setTimeout(() => {
-              if (logIndex < logs.length - 1) {
-                setLogIndex(logIndex + 1);
+              if (localLogIndex < logs.length - 1) {
+                setLocalLogIndex(localLogIndex + 1);
               } else {
                 setState(UserViewControllerState.index);
+                setTimeout(() => {
+                  setLogIndex(localLogIndex);
+                });
               }
             }, 1000);
           }}
@@ -200,9 +246,12 @@ function UserViewButtonController({
       }}
     >
       <span>
-        {![UserViewControllerState.index, UserViewControllerState.run].includes(
-          state,
-        ) && (
+        {![
+          UserViewControllerState.index,
+          UserViewControllerState.run,
+          UserViewControllerState.wait,
+          UserViewControllerState.logs,
+        ].includes(state) && (
           <>
             <FontAwesomeIcon
               icon={faArrowLeft}
@@ -245,7 +294,7 @@ function UserStatsView({
       )}
       {activeCharacter && (
         <p className="font-numerals pointer-events-auto">
-          <span>
+          <span className="font-numerals">
             Lov. {activeCharacter.love} | {activeCharacter.hp}/
             {activeCharacter.stats.maxHealth}
           </span>

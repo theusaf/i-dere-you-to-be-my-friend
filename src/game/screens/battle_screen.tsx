@@ -95,6 +95,7 @@ export class BattleScreen extends GameScreen {
           this.container.removeChild(this.transitionGraphicsTop);
           this.container.removeChild(this.transitionGraphicsBottom);
           this.state = BattleScreenState.battle;
+          this.gameManager.gameData.battle?.triggerChange();
         }
       }
     }
