@@ -109,6 +109,11 @@ export interface CharacterInfo {
   isActive: boolean;
 }
 
+export interface ActiveStatusEffect {
+  effect: StatusEffect;
+  duration: number;
+}
+
 export class Character implements CharacterInfo, Saveable<CharacterInfo> {
   id?: string;
   hp: number;
@@ -130,7 +135,7 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
   gender: Gender;
   knownMoves: string[];
   moveUses: Record<string, number>;
-  statusEffects: { effect: StatusEffect; duration: number }[];
+  statusEffects: ActiveStatusEffect[];
   isActive: boolean;
 
   constructor({
@@ -167,6 +172,10 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
     this.moveUses = moveUses ?? {};
     this.statusEffects = statusEffects ?? [];
     this.isActive = isActive ?? false;
+  }
+
+  clone(): Character {
+    return new Character(this.toMap());
   }
 
   toYAML(): string {

@@ -202,7 +202,10 @@ function UserViewButtonController({
         <FightButtons
           character={battle.activePlayer!}
           moves={battle.activePlayer?.knownMoves ?? []}
-          onMoveSelected={(move: MoveData) => {}}
+          onMoveSelected={(move: MoveData) => {
+            const playback = battle.simulateTurn(move);
+            let playbackIndex = 0;
+          }}
         />
       );
       message = "Fight";

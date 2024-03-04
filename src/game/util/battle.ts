@@ -1,6 +1,11 @@
 import { GameManager } from "../../engine/game_manager";
 import { chance } from "./chance";
-import { Character, getGenderedString } from "./character";
+import {
+  ActiveStatusEffect,
+  Character,
+  StatusEffect,
+  getGenderedString,
+} from "./character";
 import { MapSpecialActionBattle } from "./map_types";
 import { MoveData, getMovesets } from "./moves";
 import { DereType, TYPE_ADV_BOOST, TYPE_DISADV_BOOST } from "./types";
@@ -15,6 +20,8 @@ interface BattleData {
 export enum BattleEvents {
   change = "change",
 }
+
+export type BattlePlayback = [string, () => void][];
 
 /**
  * Represents a battle between the player and an enemy.
@@ -116,26 +123,82 @@ export class Battle extends EventTarget implements BattleData {
 
   // combat simulations
 
-  simulateMove(playerMove: MoveData) {
-    const {
-      statusEffects: statusEffectsPlayer,
-      hp: hpPlayer,
-      moveUses: moveUsesPlayer,
-      stats: statsPlayer,
-    } = this.activePlayer!;
-    const {
-      statusEffects: statusEffectsOpponent,
-      hp: hpOpponent,
-      moveUses: moveUsesOpponent,
-      stats: statsOpponent,
-      knownMoves: knownMovesOpponent,
-    } = this.activeOpponent!;
+  /**
+   * Calculates the outcome of a turn.
+   *
+   * @returns An array of strings and functions representing the logs of the turn and a function to execute the steps.
+   */
+  simulateTurn(playerMove: MoveData): BattlePlayback {
+    const playback: BattlePlayback = [];
+    const playerCopy = this.activePlayer!.clone();
+    const opponentCopy = this.activeOpponent!.clone();
+    const opponentMove = this.getOpponentMove();
 
-    // calculate speed
-    let playerSpeed = this.calculateMoveBaseSpeed(
-      this.activePlayer!,
-      playerMove,
-    );
+    // calculate base speed
+    let playerSpeed = this.calculateMoveBaseSpeed(playerCopy, playerMove);
+    let opponentSpeed = this.calculateMoveBaseSpeed(opponentCopy, opponentMove);
+
+    // calculate speed from effects
+    playerSpeed = this.calculateEffectSpeed(playerCopy, playerSpeed);
+    opponentSpeed = this.calculateEffectSpeed(opponentCopy, opponentSpeed);
+
+    // determine order
+    const orderOfPlayers = [];
+    if (playerSpeed >= opponentSpeed) {
+      orderOfPlayers.push(playerCopy, opponentCopy);
+    } else {
+      orderOfPlayers.push(opponentCopy, playerCopy);
+    }
+
+    for (const character of orderOfPlayers) {
+      const moveSimulation = this.simulateMove(
+        character === playerCopy ? playerMove : opponentMove,
+        character === playerCopy ? playerCopy : opponentCopy,
+        character === playerCopy ? opponentCopy : playerCopy,
+      );
+      playback.push(...moveSimulation);
+    }
+
+    return playback;
+  }
+
+  simulateMove(
+    move: MoveData,
+    user: Character,
+    opponent: Character,
+  ): BattlePlayback {
+    const playback: BattlePlayback = [];
+    const movesets = getMovesets();
+
+    // check for stun
+    if (this.hasEffect(StatusEffect.stunned, user)) {
+      playback.push([`${user.name} is stunned and can't move!`, () => {}]);
+      return playback;
+    }
+
+    // check for confusion
+    if (this.hasEffect(StatusEffect.confused, user)) {
+      playback.push([`${user.name} is confused...`, () => {}]);
+      if (chance.bool({ likelihood: 50 })) {
+        move = movesets._confusion;
+      }
+    }
+
+    return playback;
+  }
+
+  // might be used for speed-changing effects, but currently just does stun
+  calculateEffectSpeed(user: Character, speed: number): number {
+    if (this.hasEffect(StatusEffect.stunned, user)) {
+      return 0;
+    }
+    return speed;
+  }
+
+  hasEffect(effect: StatusEffect, character: Character): boolean {
+    return character.statusEffects.some((activeEffect) => {
+      return activeEffect.effect === effect;
+    });
   }
 
   getOpponentMove(): MoveData {

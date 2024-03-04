@@ -1,3 +1,30 @@
+# Special moves
+
+_reload:
+  name: Reload
+  description: ""
+  type: normal
+  max_uses: -1
+  might: 0
+  speed: 6
+  targets: self
+  traits: []
+  hidden: true
+
+_confusion:
+  name: Confusion
+  description: ""
+  type: normal
+  max_uses: -1
+  might: 3
+  speed: 0
+  targets: self
+  traits: []
+  hidden: true
+
+
+# Usable moves
+
 hard_punch:
   name: Hard Punch
   description: Hits well and true with a [g]10%[/g] chance to [r]stun[/r]
