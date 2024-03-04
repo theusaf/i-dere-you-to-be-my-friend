@@ -105,7 +105,6 @@ function BattleAnimationDisplay({
   const [state, setState] = useState(BattleAnimationState.flash);
   const animation = useRef<GameAnimation | null>(null);
   if (animation.current === null) {
-    console.debug("Creating new animation");
     animation.current = new GameAnimation(
       { distance: 0 },
       { distance: 2 },
@@ -114,16 +113,12 @@ function BattleAnimationDisplay({
     );
   }
   const currentAnimation = animation.current;
+
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      console.warn("Animation timed out!");
-      onDone();
-    }, 5000);
-    return () => clearTimeout(timeout);
-  }, []);
-  if (!currentAnimation.isDone) {
-    const lastTime = performance.now();
-    requestAnimationFrame((time) => {
+    let lastTime = performance.now();
+    let shouldStop = false;
+    const animationRunner = (time: number) => {
+      if (currentAnimation.isDone || shouldStop) return;
       setSize(currentAnimation.update(time - lastTime).distance);
       if (currentAnimation.isDone) {
         if (state === BattleAnimationState.flash) {
@@ -133,6 +128,7 @@ function BattleAnimationDisplay({
             1000,
             easeMethod.easeOutBack,
           );
+          shouldStop = true;
           setState(BattleAnimationState.initial);
           setSize(100);
         } else if (state === BattleAnimationState.initial) {
@@ -142,13 +138,27 @@ function BattleAnimationDisplay({
             500,
             easeMethod.easeInBack,
           );
+          shouldStop = true;
           setState(BattleAnimationState.closing);
         } else {
+          shouldStop = true;
           onDone();
         }
       }
-    });
-  }
+      lastTime = time;
+      requestAnimationFrame(animationRunner);
+      return () => (shouldStop = true);
+    };
+    requestAnimationFrame(animationRunner);
+  }, [currentAnimation, state]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      console.warn("Animation timed out!");
+      onDone();
+    }, 5000);
+    return () => clearTimeout(timeout);
+  }, []);
 
   const mask = (
     <svg className="absolute w-full h-full z-50">
