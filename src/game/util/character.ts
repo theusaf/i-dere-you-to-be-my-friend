@@ -179,11 +179,39 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
     };
   }
 
+  removeXP(xp: number): void {
+    this.xPower -= xp;
+    while (true) {
+      if (this.xPower < 0) {
+        this.loveDown();
+      } else {
+        break;
+      }
+      if (this.love === 1) {
+        break;
+      }
+    }
+  }
+
+  addXP(xp: number): void {
+    this.xPower += xp;
+    while (true) {
+      const required = this.getRequiredXP();
+      if (this.xPower >= required) {
+        this.loveUp();
+        this.xPower -= required;
+      } else {
+        break;
+      }
+    }
+  }
+
   getRequiredXP(): number {
     return Math.ceil(this.love * 1.4) ** 2;
   }
 
   calculateGainedXP(opponentLove: number, otherMultiplier: number = 1): number {
+    // TODO: verify if the numbers here are good
     let xp = chance.floating({ min: 25, max: 55 });
     const loveDifference = opponentLove - this.love;
     if (loveDifference > 0) {

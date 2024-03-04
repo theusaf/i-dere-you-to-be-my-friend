@@ -2,6 +2,7 @@ import { GameManager } from "../../engine/game_manager";
 import { chance } from "./chance";
 import { Character, getGenderedString } from "./character";
 import { ActiveStatusEffect, StatusEffect } from "./effects";
+import { GameData } from "./game_data";
 import { MapSpecialActionBattle } from "./map_types";
 import { MoveData, TraitData, TraitKind, getMovesets } from "./moves";
 import {
@@ -16,6 +17,7 @@ interface BattleData {
   opponentTeam?: Character[];
   playerTeam: Character[];
   rewardTable: string | null;
+  gameData: GameData;
 }
 
 export enum BattleEvents {
@@ -34,6 +36,7 @@ export class Battle extends EventTarget implements BattleData {
   opponentTeam: Character[];
   playerTeam: Character[];
   rewardTable: string | null;
+  gameData: GameData;
 
   activeOpponent: Character | null = null;
   activePlayer: Character | null = null;
@@ -44,12 +47,14 @@ export class Battle extends EventTarget implements BattleData {
     opponentTeam,
     playerTeam,
     rewardTable,
+    gameData,
   }: BattleData) {
     super();
     this.opponentLeader = opponentLeader;
     this.opponentTeam = opponentTeam ?? [opponentLeader];
     this.playerTeam = playerTeam;
     this.rewardTable = rewardTable ?? null;
+    this.gameData = gameData;
   }
 
   addLog(log: string) {
@@ -63,6 +68,33 @@ export class Battle extends EventTarget implements BattleData {
    */
   triggerChange() {
     this.dispatchEvent(new CustomEvent(BattleEvents.change));
+  }
+
+  // rewards
+
+  getRewards() {
+    if (this.rewardTable === null) {
+      this.addLog("The opponent disappeared, leaving nothing behind.");
+      return;
+    }
+  }
+
+  getExperience(opponent: Character, character: Character) {
+    // TODO: handle other bonuses in the future
+    const xpGained = character.calculateGainedXP(opponent.love);
+    this.addLog(`${character.name} gained ${xpGained} x points!`);
+    const initialLove = character.love;
+    character.addXP(xpGained);
+    const afterLove = character.love;
+    if (initialLove !== afterLove) {
+      this.addLog(
+        `${getGenderedString({
+          gender: character.gender,
+          type: "possesive",
+          name: character.name,
+        })} love grew by a factor of ${afterLove - initialLove}!`,
+      );
+    }
   }
 
   // start of battle
@@ -81,7 +113,6 @@ export class Battle extends EventTarget implements BattleData {
     const isEnemyAlone = this.opponentTeam.length === 1;
     const { name, gender } = this.opponentLeader;
     this.activeOpponent = this.getNextOpponent();
-    // TODO: handle null (end of battle)
     this.addLog(
       isEnemyAlone
         ? `${name} may have no friends, but ${getGenderedString({
@@ -100,7 +131,6 @@ export class Battle extends EventTarget implements BattleData {
   updateNextPlayer(): void {
     const nextPlayer = this.getNextPlayer();
     this.activePlayer = nextPlayer;
-    // TODO: handle null (end of battle)
     this.addLog(`You got this, ${nextPlayer!.name}!`);
   }
 
@@ -259,6 +289,7 @@ export class Battle extends EventTarget implements BattleData {
     return playback;
   }
 
+  // TODO: Extract effects and traits out into defined effects using mappings
   simulateMove(
     move: MoveData,
     user: Character,
@@ -895,6 +926,7 @@ export class Battle extends EventTarget implements BattleData {
       opponentLeader: enemyLeader,
       opponentTeam: enemyTeam,
       rewardTable: reward_table,
+      gameData: gameManager.gameData,
     });
   }
 }

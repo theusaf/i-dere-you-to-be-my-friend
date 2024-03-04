@@ -187,6 +187,8 @@ function UserViewButtonController({
   }, [logs.length, localLogIndex]);
   const onMoveSelected = (move: MoveData) => {
     const playback = battle.simulateTurn(move);
+    const currentOpponent = battle.activeOpponent!;
+    const currentPlayer = battle.activePlayer!;
     let playbackIndex = 0;
     const callback = () => {
       if (playbackIndex < playback.length) {
@@ -198,6 +200,46 @@ function UserViewButtonController({
         }
         playbackIndex++;
         callbackRegister(callback);
+      } else {
+        let isEndOfBattle = false;
+        // end of turn, check for ko/win/loss
+        if (!battle.activeOpponent) {
+          battle.getExperience(currentOpponent, currentPlayer);
+          const nextOpponent = battle.getNextOpponent();
+          if (nextOpponent) {
+            battle.updateNextOpponent();
+          } else {
+            // TODO: if rewards apply, allow player to potentially capture opponent leader
+            battle.getRewards();
+            isEndOfBattle = true;
+          }
+        }
+        if (!battle.activePlayer) {
+          const nextPlayer = battle.getNextPlayer();
+          if (nextPlayer) {
+            battle.updateNextPlayer();
+          } else {
+            isEndOfBattle = true;
+            // TODO: move player to hospital
+            const hasLivingFriends =
+              gameManager.gameData.hasAnyLivingActiveFriends();
+            if (currentPlayer.isDead && !hasLivingFriends) {
+              currentPlayer.isDead = false;
+              battle.addLog(
+                `Wait? What's this? It turns out that in your fear of being alone, you missed that ${currentPlayer.name} is still breathing!`,
+              );
+            }
+            battle.addLog("You and your friends get away to safety...");
+            // TODO: heal all friends and subtract money
+          }
+        }
+        if (isEndOfBattle) {
+          callbackRegister(() => {
+            gameManager.gameData.save();
+            gameManager.changeScreen(new MapScreen());
+          });
+        }
+        battle.triggerChange();
       }
     };
     callback();
@@ -454,7 +496,9 @@ function ActionsButton({
         </TextActionButton>
       </div>
       <h4 className="text-left">Items</h4>
-      <div className="grid grid-cols-4 gap-2">{/* items here */}</div>
+      <div className="grid grid-cols-4 gap-2">
+        THIS CONTENT IS NOT YET IMPLEMENTED
+      </div>
     </div>
   );
 }
