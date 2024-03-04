@@ -14,7 +14,7 @@ export function HealthBar({
       <span
         className="absolute z-10 h-full bg-green-500 transition-all duration-500 ease-in-out"
         style={{
-          width: `${percentage * 100}%`,
+          width: `${Math.max(0, percentage) * 100}%`,
         }}
       ></span>
       <span className="bg-red-800 absolute w-full h-full"></span>

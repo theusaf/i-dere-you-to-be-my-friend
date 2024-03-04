@@ -35,8 +35,8 @@ export function BattleScreenContent({
   if (logIndex >= battle.logs.length) {
     const callbacks = [...afterLogRenderCallbacks.current];
     callbacks.forEach((cb) => {
-      cb();
       afterLogRenderCallbacks.current.delete(cb);
+      cb();
     });
   }
 
@@ -205,7 +205,19 @@ function UserViewButtonController({
           onMoveSelected={(move: MoveData) => {
             const playback = battle.simulateTurn(move);
             let playbackIndex = 0;
-            console.log(playback);
+            const callback = () => {
+              if (playbackIndex < playback.length) {
+                const [log, applyAction] = playback[playbackIndex];
+                applyAction();
+                battle.triggerChange();
+                if (log) {
+                  battle.addLog(log);
+                }
+                playbackIndex++;
+                callbackRegister(callback);
+              }
+            };
+            callback();
           }}
         />
       );
