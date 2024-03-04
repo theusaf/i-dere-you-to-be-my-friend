@@ -22,6 +22,16 @@ _confusion:
   traits: []
   hidden: true
 
+_pass:
+  name: Browse the Blagosphere (Waiting)
+  description: ""
+  type: normal
+  max_uses: -1
+  might: 0
+  speed: 0
+  targets: self
+  traits: []
+  hidden: true
 
 # Usable moves
 

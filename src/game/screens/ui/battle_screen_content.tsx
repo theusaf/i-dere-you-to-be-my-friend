@@ -185,6 +185,23 @@ function UserViewButtonController({
       setState(UserViewControllerState.logs);
     }
   }, [logs.length, localLogIndex]);
+  const onMoveSelected = (move: MoveData) => {
+    const playback = battle.simulateTurn(move);
+    let playbackIndex = 0;
+    const callback = () => {
+      if (playbackIndex < playback.length) {
+        const [log, applyAction] = playback[playbackIndex];
+        applyAction();
+        battle.triggerChange();
+        if (log) {
+          battle.addLog(log);
+        }
+        playbackIndex++;
+        callbackRegister(callback);
+      }
+    };
+    callback();
+  };
 
   let buttons: JSX.Element;
   let message: string;
@@ -202,23 +219,7 @@ function UserViewButtonController({
         <FightButtons
           character={battle.activePlayer!}
           moves={battle.activePlayer?.knownMoves ?? []}
-          onMoveSelected={(move: MoveData) => {
-            const playback = battle.simulateTurn(move);
-            let playbackIndex = 0;
-            const callback = () => {
-              if (playbackIndex < playback.length) {
-                const [log, applyAction] = playback[playbackIndex];
-                applyAction();
-                battle.triggerChange();
-                if (log) {
-                  battle.addLog(log);
-                }
-                playbackIndex++;
-                callbackRegister(callback);
-              }
-            };
-            callback();
-          }}
+          onMoveSelected={onMoveSelected}
         />
       );
       message = "Fight";
@@ -228,7 +229,15 @@ function UserViewButtonController({
       message = "Friends";
       break;
     case UserViewControllerState.actions:
-      buttons = <ActionsButton />;
+      buttons = (
+        <ActionsButton
+          onItemUse={() => {}}
+          onPass={() => {
+            onMoveSelected(getMovesets()["_pass"]);
+          }}
+          onRizz={() => {}}
+        />
+      );
       message = "Actions";
       break;
     case UserViewControllerState.run:
@@ -415,15 +424,28 @@ function FriendsButtons() {
   );
 }
 
-function ActionsButton(): JSX.Element {
+function ActionsButton({
+  onPass,
+  onRizz,
+}: {
+  onItemUse: () => void;
+  onPass: () => void;
+  onRizz: () => void;
+}): JSX.Element {
   return (
     <div className="text-center h-full overflow-y-auto">
       <h4 className="text-left">Actions</h4>
       <div className="flex gap-2">
-        <TextActionButton className="min-w-24 cursor-pointer">
+        <TextActionButton
+          className="min-w-24 cursor-pointer"
+          onClick={() => onRizz()}
+        >
           Rizz
         </TextActionButton>
-        <TextActionButton className="min-w-24 cursor-pointer">
+        <TextActionButton
+          className="min-w-24 cursor-pointer"
+          onClick={() => onPass()}
+        >
           Pass
         </TextActionButton>
       </div>
