@@ -1,0 +1,12 @@
+boxes:
+  - from: null
+    to: null
+    type: walk_action
+    action:
+      type: enter_battle
+      against: random
+      size: [1, 6]
+      level: null
+    if:
+      new_tile: tallgrass
+      chance: 0.025

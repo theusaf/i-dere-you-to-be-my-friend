@@ -1,8 +1,8 @@
 import { mapTileStrings } from "./map";
 
 export interface MapSpecialBoxBase {
-  from: [number, number];
-  to: [number, number];
+  from: [number, number] | null;
+  to: [number, number] | null;
   type: string;
   interact_dialog?: string;
 }
@@ -29,6 +29,7 @@ export interface MapSpecialActionBox extends MapSpecialBoxBase {
 export interface MapSpecialConditions {
   new_tile?: keyof typeof mapTileStrings;
   current_tile?: keyof typeof mapTileStrings;
+  chance?: number;
   npc?: {
     id: string | true;
     in_range?: number;

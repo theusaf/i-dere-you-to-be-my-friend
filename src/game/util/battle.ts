@@ -885,16 +885,14 @@ export class Battle extends EventTarget implements BattleData {
     data: MapSpecialActionBattle,
     gameManager: GameManager,
   ): Battle {
-    const { against, reward_table, level, size } = data;
+    const { against, reward_table, size } = data;
+    let { level } = data;
     const playerLove = gameManager.gameData.you.love;
     let enemyLeader: Character;
     let enemyTeam: Character[] = [];
     let love: number | null = null;
     if (level === null) {
-      love = chance.integer({
-        min: chance.bool() ? Math.max(playerLove - 4, 1) : 1,
-        max: playerLove + 2,
-      });
+      level = [chance.bool() ? Math.max(playerLove - 4, 1) : 1, playerLove + 2];
     }
     if (against === "random") {
       const enemySize = Array.isArray(size)

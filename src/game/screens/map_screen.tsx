@@ -8,6 +8,7 @@ import { Direction } from "../util/direction";
 import { MapSpecialActionBattle, MapSpecialData } from "../util/map_types";
 import { AnimatedSprite } from "../../engine/animated_sprite";
 import { lerp } from "../util/animation";
+import { chance } from "../util/chance";
 
 export enum MapScreenEvents {
   /**
@@ -293,6 +294,7 @@ export class MapScreen extends GameScreen {
     const { boxes } = chunkData;
     for (const box of boxes) {
       const { from, to, type } = box;
+      if (from === null || to === null) continue;
       if (type === "building") {
         const width = to[0] - from[0],
           height = to[1] - from[1];
@@ -647,8 +649,17 @@ export class MapScreen extends GameScreen {
 
     // special checks
     if (
-      this.handleSpecialTriggers(testChunkNumber, x, y, newTile, currentTile)
+      this.handleSpecialtriggersChunk(
+        testChunkNumber,
+        x,
+        y,
+        newTile,
+        currentTile,
+      )
     ) {
+      return true;
+    }
+    if (this.handleSpecialtriggersDefault(x, y, newTile, currentTile)) {
       return true;
     }
 
@@ -666,7 +677,23 @@ export class MapScreen extends GameScreen {
     return false;
   }
 
-  handleSpecialTriggers(
+  handleSpecialtriggersDefault(
+    worldX: number,
+    worldY: number,
+    newTile: MapTile,
+    currentTile: MapTile,
+  ): boolean {
+    const chunkData = PIXI.Assets.get<MapSpecialData>("map/special/default");
+    return this.handleSpecialTriggers(
+      worldX,
+      worldY,
+      newTile,
+      currentTile,
+      chunkData,
+    );
+  }
+
+  handleSpecialtriggersChunk(
     testChunkNumber: string,
     worldX: number,
     worldY: number,
@@ -676,11 +703,32 @@ export class MapScreen extends GameScreen {
     const chunkData = PIXI.Assets.get<MapSpecialData | null>(
       `map/special/${testChunkNumber}`,
     );
+    return this.handleSpecialTriggers(
+      worldX,
+      worldY,
+      newTile,
+      currentTile,
+      chunkData,
+    );
+  }
+
+  handleSpecialTriggers(
+    worldX: number,
+    worldY: number,
+    newTile: MapTile,
+    currentTile: MapTile,
+    chunkData?: MapSpecialData | null,
+  ): boolean {
     const { x: chunkX, y: chunkY } = this.getLocalChunkPosition(worldX, worldY);
     if (chunkData) {
       const { boxes } = chunkData;
       for (const box of boxes) {
-        const { from, to, type } = box;
+        const { type } = box;
+        let { from, to } = box;
+        if (from === null || to === null) {
+          from = [chunkX, chunkY];
+          to = [chunkX, chunkY];
+        }
         if (
           chunkX >= from[0] &&
           chunkX <= to[0] &&
@@ -694,7 +742,13 @@ export class MapScreen extends GameScreen {
               const {
                 new_tile: conditionNewTile,
                 current_tile: conditionCurrentTile,
+                chance: conditionChance,
               } = condition;
+              if (typeof conditionChance === "number") {
+                if (!chance.bool({ likelihood: conditionChance * 100 })) {
+                  passesCondition = false;
+                }
+              }
               if (
                 conditionNewTile &&
                 mapTileStrings[conditionNewTile] !== newTile

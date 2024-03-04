@@ -71,6 +71,10 @@ export const assetList: AssetsManifest = {
     {
       name: "data-map-special",
       assets: [
+        {
+          src: "/assets/maps/special/default.yaml",
+          alias: "map/special/default",
+        },
         { src: "/assets/maps/special/-1,0.yaml", alias: "map/special/-1,0" },
       ],
     },
