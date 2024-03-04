@@ -231,6 +231,7 @@ function UserViewButtonController({
     case UserViewControllerState.actions:
       buttons = (
         <ActionsButton
+          battle={battle}
           onItemUse={() => {}}
           onPass={() => {
             onMoveSelected(getMovesets()["_pass"]);
@@ -427,16 +428,19 @@ function FriendsButtons() {
 function ActionsButton({
   onPass,
   onRizz,
+  battle,
 }: {
   onItemUse: () => void;
   onPass: () => void;
   onRizz: () => void;
+  battle: Battle;
 }): JSX.Element {
   return (
     <div className="text-center h-full overflow-y-auto">
       <h4 className="text-left">Actions</h4>
       <div className="flex gap-2">
         <TextActionButton
+          disabled={battle.rewardTable === null}
           className="min-w-24 cursor-pointer"
           onClick={() => onRizz()}
         >
