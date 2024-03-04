@@ -29,6 +29,41 @@ export enum Gender {
   none = "none",
 }
 
+export function getGenderedString(
+  gender: Gender,
+  type: "possesive" | "objectself" | "object" | "pronoun",
+  name: string,
+): string {
+  switch (gender) {
+    case Gender.she:
+      return type === "possesive"
+        ? "her"
+        : type === "object"
+          ? "her"
+          : type === "objectself"
+            ? "herself"
+            : "she";
+    case Gender.they:
+      return type === "possesive"
+        ? "their"
+        : type === "object"
+          ? "them"
+          : type === "objectself"
+            ? "themself"
+            : "they";
+    case Gender.he:
+      return type === "possesive"
+        ? "his"
+        : type === "object"
+          ? "him"
+          : type === "objectself"
+            ? "himself"
+            : "he";
+    case Gender.none:
+      return name;
+  }
+}
+
 export enum StatusEffect {
   // negative
   poisoned = "poisoned",
@@ -197,6 +232,7 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
     for (let i = 1; i < love; i++) {
       character.loveUp();
     }
+    character.hp = character.stats.maxHealth;
     return character;
   }
 }

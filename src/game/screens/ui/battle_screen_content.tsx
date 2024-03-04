@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { BattleScreen, BattleScreenState } from "../battle_screen";
@@ -8,15 +8,25 @@ import { AnimatedTextController } from "../../../engine/components/animated_text
 import { GameManager } from "../../../engine/game_manager";
 import { MapScreen } from "../map_screen";
 import { ConfirmationButton } from "../../../engine/components/confirmation_button";
+import { Character } from "../../util/character";
+import { Battle } from "../../util/battle";
 
+// TODO: clean up this code...
 export interface BattleScreenContentProps {
   state: BattleScreen;
+}
+
+enum BattleScreenUIState {
+  init,
 }
 
 export function BattleScreenContent({
   state,
 }: BattleScreenContentProps): JSX.Element {
   const [showUI, setShowUI] = useState(false);
+  const [, forceUpdate] = useReducer((x) => x + 1, 0);
+  const { gameManager } = state;
+  const { battle: battleData } = gameManager.gameData;
   useEffect(() => {
     const interval = setInterval(() => {
       if (state.state == BattleScreenState.battle) {
@@ -30,8 +40,8 @@ export function BattleScreenContent({
 
   return (
     <div className="grid grid-rows-5 h-full text-white">
-      <EnemyView show={showUI} />
-      <UserView gameManager={state.gameManager} show={showUI} />
+      <EnemyView show={showUI} activeEnemy={battleData!.activeOpponent} />
+      <UserView gameManager={gameManager} show={showUI} />
     </div>
   );
 }
@@ -40,24 +50,35 @@ interface ToggleableUIProps {
   show?: boolean;
 }
 
-function EnemyView({ show }: ToggleableUIProps) {
+interface EnemyViewProps extends ToggleableUIProps {
+  activeEnemy: Character | null;
+}
+
+function EnemyView({ show, activeEnemy }: EnemyViewProps) {
   return (
     <div
       className="grid grid-cols-7 transition-transform duration-300"
       style={{
-        transform: show ? "translateX(0)" : "translateY(-100%)",
+        transform: show && activeEnemy ? "translateX(0)" : "translateY(-100%)",
       }}
     >
       <div className="col-span-3 m-4 bg-slate-500 outline outline-4 outline-neutral-400 overflow-y-auto p-2 pointer-events-auto">
-        <span>
-          <h3 className="text-xl">INSERT ENEMY NAME</h3>
-          <span>{/* type icons here */}</span>
-        </span>
-        <div className="grid grid-cols-5">
-          <HealthBar className="col-span-4 m-auto" percentage={44 / 50} />
-          <p className="text-center">44/50</p>
-        </div>
-        <div>{/* other icons here */}</div>
+        {activeEnemy && (
+          <>
+            <span>
+              <h3 className="text-xl">{activeEnemy.name}</h3>
+              <span>{/* type icons here */}</span>
+            </span>
+            <div className="grid grid-cols-5">
+              <HealthBar
+                className="col-span-4 m-auto"
+                percentage={activeEnemy.hp / activeEnemy.stats.maxHealth}
+              />
+              <p className="text-center">Lov. {activeEnemy.love}</p>
+            </div>
+            <div>{/* other icons here */}</div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -76,8 +97,11 @@ function UserView({ gameManager, show }: UserViewProps): JSX.Element {
       }}
     >
       <div className="flex w-full h-full">
-        <UserStatsView />
-        <UserViewButtonController gameManager={gameManager} />
+        <UserStatsView
+          activeCharacter={gameManager.gameData.battle!.activePlayer}
+          battle={gameManager.gameData.battle!}
+        />
+        <UserViewButtonController gameManager={gameManager} show={show} />
       </div>
     </div>
   );
@@ -89,11 +113,25 @@ enum UserViewControllerState {
   friends,
   actions,
   run,
+  logs,
+  wait,
 }
 
-function UserViewButtonController({ gameManager }: UserViewProps): JSX.Element {
+function UserViewButtonController({
+  gameManager,
+  show,
+}: UserViewProps): JSX.Element {
+  const [logIndex, setLogIndex] = useState(0);
   const [state, setState] = useState(UserViewControllerState.index);
   const className = "align-middle flex flex-col place-content-center";
+  const logs = gameManager.gameData.battle!.logs;
+  useEffect(() => {
+    if (logs.length > logIndex) {
+      setState(UserViewControllerState.logs);
+    }
+  }, [logs.length, logIndex]);
+
+  console.log(logs, logIndex, state);
 
   let buttons: JSX.Element;
   let message: string;
@@ -125,6 +163,31 @@ function UserViewButtonController({ gameManager }: UserViewProps): JSX.Element {
         >
           Your power of friendship is too weak.
         </AnimatedTextController>
+      );
+      break;
+    case UserViewControllerState.wait:
+      message = "...";
+      buttons = <></>;
+      break;
+    case UserViewControllerState.logs:
+      message = "";
+      const log = logs[logIndex];
+      buttons = show ? (
+        <AnimatedTextController
+          onComplete={() => {
+            setTimeout(() => {
+              if (logIndex < logs.length - 1) {
+                setLogIndex(logIndex + 1);
+              } else {
+                setState(UserViewControllerState.index);
+              }
+            }, 1000);
+          }}
+        >
+          {log}
+        </AnimatedTextController>
+      ) : (
+        <></>
       );
       break;
   }
@@ -159,8 +222,12 @@ function UserViewButtonController({ gameManager }: UserViewProps): JSX.Element {
 
 function UserStatsView({
   style,
+  activeCharacter,
+  battle,
 }: {
   style?: React.CSSProperties;
+  activeCharacter: Character | null;
+  battle: Battle;
 }): JSX.Element {
   return (
     <div
@@ -170,15 +237,29 @@ function UserStatsView({
         flex: 2,
       }}
     >
-      <h3 className="text-2xl pointer-events-auto">INSERT CHARACTER NAME</h3>
-      <HealthBar percentage={44 / 50} />
-      <p className="font-numerals pointer-events-auto">
-        <span>44/50</span>
-        <span>{/* effect icons here */}</span>
-      </p>
+      <h3 className="text-2xl pointer-events-auto">{activeCharacter?.name}</h3>
+      {activeCharacter && (
+        <HealthBar
+          percentage={activeCharacter.hp / activeCharacter.stats.maxHealth}
+        />
+      )}
+      {activeCharacter && (
+        <p className="font-numerals pointer-events-auto">
+          <span>
+            Lov. {activeCharacter.love} | {activeCharacter.hp}/
+            {activeCharacter.stats.maxHealth}
+          </span>
+          <span>{/* effect icons here */}</span>
+        </p>
+      )}
       <div className="overflow-y-auto pointer-events-auto w-full flex flex-col-reverse">
-        <p>Example Log 1</p>
-        <p>Example Log 2</p>
+        {battle.logs.map((log, i) => {
+          return (
+            <p key={i} className="text-sm">
+              {log}
+            </p>
+          );
+        })}
       </div>
     </div>
   );

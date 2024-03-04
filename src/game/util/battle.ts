@@ -10,11 +10,24 @@ interface BattleData {
   rewardTable: string | null;
 }
 
-export class Battle implements BattleData {
+export enum BattleEvents {
+  change = "change",
+}
+
+/**
+ * Represents a battle between the player and an enemy.
+ *
+ * Handles data and gameplay logic.
+ */
+export class Battle extends EventTarget implements BattleData {
   opponentLeader: Character;
   opponentTeam: Character[];
   playerTeam: Character[];
   rewardTable: string | null;
+
+  activeOpponent: Character | null = null;
+  activePlayer: Character | null = null;
+  logs: string[] = [];
 
   constructor({
     opponentLeader,
@@ -22,10 +35,15 @@ export class Battle implements BattleData {
     playerTeam,
     rewardTable,
   }: BattleData) {
+    super();
     this.opponentLeader = opponentLeader;
     this.opponentTeam = opponentTeam ?? [opponentLeader];
     this.playerTeam = playerTeam;
     this.rewardTable = rewardTable ?? null;
+  }
+
+  triggerChange() {
+    this.dispatchEvent(new CustomEvent(BattleEvents.change));
   }
 
   static fromBattleData(

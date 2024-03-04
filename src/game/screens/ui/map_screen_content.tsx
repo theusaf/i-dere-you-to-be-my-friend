@@ -60,10 +60,19 @@ export function MapScreenContent({
       {battleStartState === EnterBattleAnimationState.running && (
         <BattleAnimationDisplay
           onDone={() => {
+            const { gameData } = state.gameManager;
             setBattleStartState(EnterBattleAnimationState.done);
-            state.gameManager.gameData.battleData = Battle.fromBattleData(
+            const battle = Battle.fromBattleData(
               battleData!,
               state.gameManager,
+            );
+            const isAlone = battle.opponentTeam.length > 1;
+            const { name } = battle.opponentLeader;
+            gameData.battle = battle;
+            battle.logs.push(
+              isAlone
+                ? `${name}'s friend group appeared!`
+                : `A wild ${name} appeared!`,
             );
             state.gameManager.changeScreen(new BattleScreen());
           }}

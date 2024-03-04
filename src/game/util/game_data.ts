@@ -38,7 +38,7 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
   you: Character;
   mainNPC: Character;
 
-  battleData?: Battle;
+  battle?: Battle;
   saveId: string;
 
   constructor({
