@@ -1,5 +1,5 @@
 import { chance } from "./chance";
-import { getRandomMoveIds } from "./moves";
+import { getMovesets, getRandomMoveIds } from "./moves";
 import { getRandomName } from "./random";
 import { Saveable } from "./saves";
 import { DereType } from "./types";
@@ -105,6 +105,7 @@ export interface CharacterInfo {
   statusEffects: { effect: StatusEffect; duration: number }[];
   gender: Gender;
   knownMoves: string[];
+  moveUses: Record<string, number>;
   isActive: boolean;
 }
 
@@ -128,6 +129,7 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
   stats: CharacterStats;
   gender: Gender;
   knownMoves: string[];
+  moveUses: Record<string, number>;
   statusEffects: { effect: StatusEffect; duration: number }[];
   isActive: boolean;
 
@@ -142,7 +144,9 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
     stats,
     gender,
     knownMoves,
+    moveUses,
     statusEffects,
+    isActive,
   }: Partial<CharacterInfo> = {}) {
     this.id = id;
     this.isActive = false;
@@ -160,7 +164,9 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
     };
     this.gender = gender ?? Gender.they;
     this.knownMoves = knownMoves ?? [];
+    this.moveUses = moveUses ?? {};
     this.statusEffects = statusEffects ?? [];
+    this.isActive = isActive ?? false;
   }
 
   toYAML(): string {
@@ -180,6 +186,7 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
       statusEffects: this.statusEffects,
       gender: this.gender,
       knownMoves: this.knownMoves,
+      moveUses: this.moveUses,
       isActive: this.isActive,
     };
   }
@@ -233,6 +240,11 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
     if (minMovesByLove > 6) minMovesByLove = 6;
     const numMoves = chance.integer({ min: minMovesByLove, max: 6 });
     const moves = getRandomMoveIds(types, numMoves);
+    const moveUses: Record<string, number> = {};
+    const movesets = getMovesets();
+    for (const move of moves) {
+      moveUses[move] = movesets[move].max_uses;
+    }
     const character = new Character({
       love: 1,
       name,
@@ -244,6 +256,7 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
         agility: chance.integer({ min: 1, max: 3 }),
       },
       knownMoves: moves,
+      moveUses: moveUses,
     });
     for (let i = 1; i < love; i++) {
       character.loveUp();

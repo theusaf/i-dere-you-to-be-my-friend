@@ -4,3 +4,10 @@ export const enum ColorScheme {
   dark = 0x000222,
   light = 0xdddddd,
 }
+
+export const enum ColorSchemeString {
+  background = "#344ceb",
+  onBackground = "#ffffff",
+  dark = "#000222",
+  light = "#dddddd",
+}

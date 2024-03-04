@@ -12,6 +12,8 @@ import { Character, getGenderedString } from "../../util/character";
 import { Battle, BattleEvents } from "../../util/battle";
 import { MoveData, getMovesets } from "../../util/moves";
 import { RichTextSpan } from "../../../engine/components/rich_text_span";
+import { TypeIcon } from "../../../engine/components/type_icon";
+import { NumberSpan } from "../../../engine/components/numer_span";
 
 // TODO: clean up this code...
 export interface BattleScreenContentProps {
@@ -103,7 +105,6 @@ function EnemyView({ show, activeEnemy }: EnemyViewProps) {
           <>
             <span>
               <h3 className="text-xl">{activeEnemy.name}</h3>
-              <span>{/* type icons here */}</span>
             </span>
             <div className="grid grid-cols-5">
               <HealthBar
@@ -176,7 +177,8 @@ function UserViewButtonController({
 }: UserViewProps): JSX.Element {
   const [localLogIndex, setLocalLogIndex] = useState(logIndex);
   const [state, setState] = useState(UserViewControllerState.index);
-  const className = "align-middle flex flex-col place-content-center";
+  const className =
+    "align-middle flex flex-col place-content-center cursor-pointer";
   const logs = gameManager.gameData.battle!.logs;
   useEffect(() => {
     if (logs.length > localLogIndex) {
@@ -189,11 +191,16 @@ function UserViewButtonController({
   switch (state) {
     case UserViewControllerState.index:
       buttons = <IndexButtons className={className} setState={setState} />;
-      message = "What do you want to do?";
+      if (gameManager.gameData.battle!.activePlayer === null) {
+        message = "What do you want to do?";
+      } else {
+        message = `What should ${gameManager.gameData.battle!.activePlayer.name} do?`;
+      }
       break;
     case UserViewControllerState.fight:
       buttons = (
         <FightButtons
+          character={gameManager.gameData.battle!.activePlayer!}
           moves={gameManager.gameData.battle!.activePlayer?.knownMoves ?? []}
           onMoveSelected={(move: MoveData) => {
             // TODO: implement move selection
@@ -239,7 +246,7 @@ function UserViewButtonController({
               if (localLogIndex < logs.length - 1) {
                 setLocalLogIndex(localLogIndex + 1);
               } else {
-                setState(UserViewControllerState.index);
+                // setState(UserViewControllerState.index);
                 onLogsRendered();
                 gameManager.gameData.battle!.triggerChange();
               }
@@ -302,7 +309,14 @@ function UserStatsView({
         flex: 2,
       }}
     >
-      <h3 className="text-2xl pointer-events-auto">{activeCharacter?.name}</h3>
+      <h3 className="text-2xl pointer-events-auto mb-2">
+        {activeCharacter?.name}
+        <span className="inline-flex gap-2 text-sm ml-2">
+          {activeCharacter?.types.map((type) => (
+            <TypeIcon type={type} key={type} />
+          ))}
+        </span>
+      </h3>
       {activeCharacter && (
         <HealthBar
           percentage={activeCharacter.hp / activeCharacter.stats.maxHealth}
@@ -394,8 +408,12 @@ function ActionsButton(): JSX.Element {
     <div className="text-center h-full overflow-y-auto">
       <h4 className="text-left">Actions</h4>
       <div className="flex gap-2">
-        <TextActionButton className="min-w-24">Rizz</TextActionButton>
-        <TextActionButton className="min-w-24">Pass</TextActionButton>
+        <TextActionButton className="min-w-24 cursor-pointer">
+          Rizz
+        </TextActionButton>
+        <TextActionButton className="min-w-24 cursor-pointer">
+          Pass
+        </TextActionButton>
       </div>
       <h4 className="text-left">Items</h4>
       <div className="grid grid-cols-4 gap-2">{/* items here */}</div>
@@ -405,14 +423,16 @@ function ActionsButton(): JSX.Element {
 
 function FightButtons({
   moves,
+  character,
   onMoveSelected,
 }: {
   moves: string[];
+  character: Character;
   onMoveSelected: (move: MoveData) => void;
 }): JSX.Element {
   const [hoverTip, setHoverTip] = useState<MoveData | null>(null);
   const movesets = getMovesets();
-  const className = "min-h-14";
+  const className = "min-h-14 cursor-pointer";
   const onHover = (move: MoveData) => {
     setHoverTip(move);
   };
@@ -426,18 +446,29 @@ function FightButtons({
             bottom: "calc(100% + 3rem)",
           }}
         >
-          <RichTextSpan text={hoverTip.description}/>
+          <RichTextSpan text={hoverTip.description} />
         </div>
       )}
       {moves.map((move, i) => {
+        const moveData = movesets[move];
         return (
           <TextActionButton
             key={i}
             className={className}
-            onMouseOver={() => onHover(movesets[move])}
+            onMouseOver={() => onHover(moveData)}
             onMouseOut={onUnhover}
           >
-            {movesets[move].name}
+            <div className="flex flex-col align-middle h-full">
+              <div>{moveData.name}</div>
+              <div className="text-sm">
+                <TypeIcon type={moveData.type} />
+              </div>
+              <div>
+                <NumberSpan>
+                  {character.moveUses[move]}/{moveData.max_uses}
+                </NumberSpan>
+              </div>
+            </div>
           </TextActionButton>
         );
       })}
