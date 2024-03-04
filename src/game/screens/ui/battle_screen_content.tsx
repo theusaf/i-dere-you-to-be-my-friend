@@ -23,35 +23,40 @@ export function BattleScreenContent({
   const [logIndex, setLogIndex] = useState(0);
   const { gameManager } = state;
   const battle = gameManager.gameData.battle!;
+  const logsAreDone = logIndex >= battle.logs.length;
+
+  console.log("logsAreDone", logsAreDone, logIndex, battle.logs.length);
+  // handle other updates dependent on log timing
+  if (logsAreDone) {
+    if (battle.activeOpponent === null) {
+      // if no enemy active
+      const nextOpponent = battle.getNextOpponent();
+      if (nextOpponent) {
+        battle.logs.push(
+          `${battle.opponentLeader.name} sends out ${getGenderedString({
+            gender: battle.opponentLeader.gender,
+            type: "possesive",
+            name: battle.opponentLeader.name,
+          })} friend, ${nextOpponent.name}!`,
+        );
+        battle.activeOpponent = nextOpponent;
+      } else {
+        // victory!
+      }
+    } else if (battle.activePlayer === null) {
+      // if no player active
+      const nextPlayer = battle.getNextPlayer();
+      if (nextPlayer) {
+        battle.logs.push(`You got this, ${nextPlayer.name}!`);
+        battle.activePlayer = nextPlayer;
+      } else {
+        // defeat!
+      }
+    }
+  }
+
   useEffect(() => {
     const listener = () => {
-      if (battle.activeOpponent === null) {
-        // if no enemy active
-        const nextOpponent = battle.getNextOpponent();
-        if (nextOpponent) {
-          battle.logs.push(
-            `${battle.opponentLeader.name} sends out ${getGenderedString({
-              gender: battle.opponentLeader.gender,
-              type: "possesive",
-              name: battle.opponentLeader.name,
-            })} friend, ${nextOpponent.name}!`,
-          );
-          battle.activeOpponent = nextOpponent;
-        } else {
-          // victory!
-        }
-      }
-      if (battle.activePlayer === null) {
-        // if no player active
-        const nextPlayer = battle.getNextPlayer();
-        if (nextPlayer) {
-          battle.logs.push(`You got this, ${nextPlayer.name}!`);
-          battle.activePlayer = nextPlayer;
-        } else {
-          // defeat!
-        }
-      }
-      // immediately update the UI
       forceUpdate();
     };
     battle.addEventListener(BattleEvents.change, listener);
@@ -69,7 +74,9 @@ export function BattleScreenContent({
         gameManager={gameManager}
         show={showUI}
         logIndex={logIndex}
-        setLogIndex={setLogIndex}
+        onLogsRendered={() => {
+          setLogIndex(battle.logs.length);
+        }}
       />
     </div>
   );
@@ -116,14 +123,14 @@ function EnemyView({ show, activeEnemy }: EnemyViewProps) {
 interface UserViewProps extends ToggleableUIProps {
   gameManager: GameManager;
   logIndex: number;
-  setLogIndex: React.Dispatch<React.SetStateAction<number>>;
+  onLogsRendered: () => void;
 }
 
 function UserView({
   gameManager,
   show,
   logIndex,
-  setLogIndex,
+  onLogsRendered,
 }: UserViewProps): JSX.Element {
   return (
     <div
@@ -141,7 +148,7 @@ function UserView({
           gameManager={gameManager}
           show={show}
           logIndex={logIndex}
-          setLogIndex={setLogIndex}
+          onLogsRendered={onLogsRendered}
         />
       </div>
     </div>
@@ -162,7 +169,7 @@ function UserViewButtonController({
   gameManager,
   show,
   logIndex,
-  setLogIndex,
+  onLogsRendered,
 }: UserViewProps): JSX.Element {
   const [localLogIndex, setLocalLogIndex] = useState(logIndex);
   const [state, setState] = useState(UserViewControllerState.index);
@@ -223,9 +230,8 @@ function UserViewButtonController({
                 setLocalLogIndex(localLogIndex + 1);
               } else {
                 setState(UserViewControllerState.index);
-                setTimeout(() => {
-                  setLogIndex(localLogIndex);
-                });
+                onLogsRendered();
+                gameManager.gameData.battle!.triggerChange();
               }
             }, 1000);
           }}
