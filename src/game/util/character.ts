@@ -105,6 +105,7 @@ export interface CharacterInfo {
   statusEffects: { effect: StatusEffect; duration: number }[];
   gender: Gender;
   knownMoves: string[];
+  isActive: boolean;
 }
 
 export class Character implements CharacterInfo, Saveable<CharacterInfo> {
@@ -128,6 +129,7 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
   gender: Gender;
   knownMoves: string[];
   statusEffects: { effect: StatusEffect; duration: number }[];
+  isActive: boolean;
 
   constructor({
     id,
@@ -143,6 +145,7 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
     statusEffects,
   }: Partial<CharacterInfo> = {}) {
     this.id = id;
+    this.isActive = false;
     this.hp = hp ?? 1;
     this.name = name ?? "Unnamed";
     this.types = types ?? [];
@@ -177,6 +180,7 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
       statusEffects: this.statusEffects,
       gender: this.gender,
       knownMoves: this.knownMoves,
+      isActive: this.isActive,
     };
   }
 

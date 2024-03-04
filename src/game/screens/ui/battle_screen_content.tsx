@@ -397,14 +397,7 @@ function ActionsButton(): JSX.Element {
         <TextActionButton className="min-w-24">Pass</TextActionButton>
       </div>
       <h4 className="text-left">Items</h4>
-      <div className="grid grid-cols-4 gap-2">
-        <TextActionButton>Item</TextActionButton>
-        <TextActionButton>Item</TextActionButton>
-        <TextActionButton>Item</TextActionButton>
-        <TextActionButton>Item</TextActionButton>
-        <TextActionButton>Item</TextActionButton>
-        <TextActionButton>Item</TextActionButton>
-      </div>
+      <div className="grid grid-cols-4 gap-2">{/* items here */}</div>
     </div>
   );
 }

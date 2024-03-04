@@ -50,7 +50,9 @@ export function getRandomMoveIds(
   const moveKeys = Object.keys(movesets);
   const matchingMoves = moveKeys.filter((move) => {
     return (
-      weightedTypes.includes(movesets[move].type) && !ignoreMoves.includes(move)
+      (weightedTypes.includes(movesets[move].type) ||
+        movesets[move].type === DereType.normal) &&
+      !ignoreMoves.includes(move)
     );
   });
   const nonMatchingMoves = moveKeys.filter((move) => {

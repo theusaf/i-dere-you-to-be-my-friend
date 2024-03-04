@@ -14,7 +14,6 @@ export interface WorldMapData {
 
 export interface GameDataContent {
   friends: Character[];
-  activeFriends: Character[];
   you: Character;
   worldMapData: WorldMapData;
   mainNPC: Character;
@@ -23,7 +22,6 @@ export interface GameDataContent {
 
 export interface RawGameDataContent {
   friends: CharacterInfo[];
-  activeFriends: CharacterInfo[];
   you: CharacterInfo;
   worldMapData: WorldMapData;
   version?: string;
@@ -34,9 +32,12 @@ export interface RawGameDataContent {
 export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
   worldMapData: WorldMapData;
   friends: Character[];
-  activeFriends: Character[];
   you: Character;
   mainNPC: Character;
+
+  get activeFriends(): Character[] {
+    return this.friends.filter((friend) => friend.isActive);
+  }
 
   battle?: Battle;
   saveId: string;
@@ -44,7 +45,6 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
   constructor({
     worldMapData,
     friends,
-    activeFriends,
     you,
     mainNPC,
     saveId,
@@ -55,7 +55,6 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
       playerY: 64,
     };
     this.friends = friends ?? [];
-    this.activeFriends = activeFriends ?? [];
     this.you = you ?? new Character();
     this.mainNPC = mainNPC ?? new Character();
   }
@@ -64,7 +63,6 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
     return {
       worldMapData: this.worldMapData,
       friends: this.friends.map((friend) => friend.toMap()),
-      activeFriends: this.activeFriends.map((friend) => friend.toMap()),
       you: this.you,
       mainNPC: this.mainNPC,
       version,
@@ -88,7 +86,6 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
     return new GameData({
       worldMapData: map.worldMapData,
       friends: map.friends.map((friend) => new Character(friend)),
-      activeFriends: map.activeFriends.map((friend) => new Character(friend)),
       you: new Character(map.you),
       mainNPC: new Character(map.mainNPC),
       saveId: map.saveId,

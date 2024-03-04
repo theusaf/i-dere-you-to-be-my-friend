@@ -96,10 +96,10 @@ export class Battle extends EventTarget implements BattleData {
       throw new Error("Not implemented");
     }
     // TODO: remove this later when we have a way to add friends
-    if (gameManager.gameData.activeFriends.length === 0) {
-      gameManager.gameData.activeFriends.push(
-        Character.createRandomCharacter(1),
-      );
+    if (gameManager.gameData.friends.length === 0) {
+      const character = Character.createRandomCharacter(1);
+      character.isActive = true;
+      gameManager.gameData.friends.push(character);
     }
     return new Battle({
       playerTeam: gameManager.gameData.activeFriends,
