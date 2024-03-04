@@ -9,7 +9,7 @@ export function HealthBar({
 }: HealthBarProps): JSX.Element {
   return (
     <div
-      className={`h-2 outline-1 outline relative w-full pointer-events-all ${className ?? ""}`}
+      className={`h-2 outline-1 outline relative w-full pointer-events-all list-item ${className ?? ""}`}
     >
       <span
         className="absolute z-10 h-full bg-green-500 transition-all duration-500 ease-in-out"
