@@ -807,9 +807,9 @@ export class Battle extends EventTarget implements BattleData {
     const playback: BattlePlayback = [];
     const hpUnder = Math.abs(character.hp);
     const isPlayer = realCharacter === this.activePlayer;
-    let deathChance = (0.25 / character.love);
+    let deathChance = 0.25 / character.love;
     if (isCrit) deathChance *= 4;
-    deathChance += (hpUnder / character.stats.maxHealth) / 2;
+    deathChance += hpUnder / character.stats.maxHealth / 2;
     console.log(`Death Chance: ${deathChance * 100}%`);
     if (chance.bool({ likelihood: Math.min(deathChance * 100, 100) })) {
       character.isDead = true;
@@ -891,7 +891,10 @@ export class Battle extends EventTarget implements BattleData {
     let enemyTeam: Character[] = [];
     let love: number | null = null;
     if (level === null) {
-      love = chance.integer({ min: playerLove - 1, max: playerLove + 2 });
+      love = chance.integer({
+        min: chance.bool() ? Math.max(playerLove - 4, 1) : 1,
+        max: playerLove + 2,
+      });
     }
     if (against === "random") {
       const enemySize = Array.isArray(size)
