@@ -10,6 +10,7 @@ import {
   SettingsPagePhone,
 } from "./map_screen_pages/settings";
 import { Battle } from "../../util/battle";
+import { chance } from "../../util/chance";
 
 interface MapScreenContentProps {
   state: MapScreen;
@@ -59,6 +60,7 @@ export function MapScreenContent({
       {phoneVisible && <PhoneLargeDisplay />}
       {battleStartState === EnterBattleAnimationState.running && (
         <BattleAnimationDisplay
+          key={chance.guid()}
           onDone={() => {
             const { gameData } = state.gameManager;
             setBattleStartState(EnterBattleAnimationState.done);

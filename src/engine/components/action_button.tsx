@@ -6,6 +6,7 @@ export interface ActionButtonProps {
   onMouseOver?: React.MouseEventHandler<HTMLSpanElement>;
   onMouseOut?: React.MouseEventHandler<HTMLSpanElement>;
   children: React.ReactNode;
+  disabled?: boolean;
 }
 
 export function TextActionButton({
@@ -14,11 +15,12 @@ export function TextActionButton({
   onMouseOver,
   onMouseOut,
   children,
+  disabled,
 }: ActionButtonProps): JSX.Element {
   return (
     <span
-      className={`bg-neutral-400 active:bg-neutral-600 outline-neutral-600 active:outline-neutral-400 text-white outline outline-4 p-2 m-1 ${className ?? ""}`}
-      onClick={onClick}
+      className={`outline-neutral-600 active:outline-neutral-400 text-white outline outline-4 p-2 m-1 ${disabled ? "bg-neutral-500 text-neutral-300 cursor-not-allowed" : "bg-neutral-400 active:bg-neutral-600"} ${className ?? ""}`}
+      onClick={!disabled ? onClick : undefined}
       onMouseOver={onMouseOver}
       onMouseOut={onMouseOut}
     >

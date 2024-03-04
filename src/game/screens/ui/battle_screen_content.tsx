@@ -470,6 +470,7 @@ function FightButtons({
             onMouseOver={() => onHover(moveData)}
             onMouseOut={onUnhover}
             onClick={() => onMoveSelected(moveData)}
+            disabled={character.moveUses[move] <= 0}
           >
             <div className="flex flex-col align-middle h-full">
               <div>{moveData.name}</div>

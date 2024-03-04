@@ -51,7 +51,6 @@ export function CreateSavePage({
       myFriend.current.id = "ura_bosu";
       const gameData: RawGameDataContent = {
         friends: [],
-        activeFriends: [],
         you: myCharacter.current,
         worldMapData: {
           playerX: 72,
