@@ -1,7 +1,9 @@
 import { GameManager } from "../../engine/game_manager";
 import { chance } from "./chance";
-import { Character } from "./character";
+import { Character, getGenderedString } from "./character";
 import { MapSpecialActionBattle } from "./map_types";
+import { MoveData, getMovesets } from "./moves";
+import { DereType, TYPE_ADV_BOOST, TYPE_DISADV_BOOST } from "./types";
 
 interface BattleData {
   opponentLeader: Character;
@@ -42,8 +44,56 @@ export class Battle extends EventTarget implements BattleData {
     this.rewardTable = rewardTable ?? null;
   }
 
+  addLog(log: string) {
+    this.logs.push(log);
+  }
+
+  /**
+   * Triggers a change event to notify listeners that the battle has been updated.
+   *
+   * Typically called by outside classes.
+   */
   triggerChange() {
     this.dispatchEvent(new CustomEvent(BattleEvents.change));
+  }
+
+  // start of battle
+
+  noteIntro(): void {
+    const isEnemyAlone = this.opponentTeam.length === 1;
+    const { name } = this.opponentLeader;
+    this.addLog(
+      isEnemyAlone
+        ? `A wild ${name} appeared!`
+        : `${name}'s friend group appeared!`,
+    );
+  }
+
+  updateNextOpponent(): void {
+    const isEnemyAlone = this.opponentTeam.length === 1;
+    const { name, gender } = this.opponentLeader;
+    this.activeOpponent = this.getNextOpponent();
+    // TODO: handle null (end of battle)
+    this.addLog(
+      isEnemyAlone
+        ? `${name} may have no friends, but ${getGenderedString({
+            gender: gender,
+            type: "pronoun",
+            name: name,
+          })} can still fight!`
+        : `${name} sends out ${getGenderedString({
+            gender: gender,
+            type: "possesive",
+            name: name,
+          })} friend, ${this.activeOpponent!.name}!`,
+    );
+  }
+
+  updateNextPlayer(): void {
+    const nextPlayer = this.getNextPlayer();
+    this.activePlayer = nextPlayer;
+    // TODO: handle null (end of battle)
+    this.addLog(`You got this, ${nextPlayer!.name}!`);
   }
 
   getNextOpponent(): Character | null {
@@ -62,6 +112,50 @@ export class Battle extends EventTarget implements BattleData {
 
   isCharacterValidBattleCandidate(character: Character): boolean {
     return !character.isDead && character.hp > 0;
+  }
+
+  // combat simulations
+
+  simulateMove(playerMove: MoveData) {
+    const {
+      statusEffects: statusEffectsPlayer,
+      hp: hpPlayer,
+      moveUses: moveUsesPlayer,
+      stats: statsPlayer,
+    } = this.activePlayer!;
+    const {
+      statusEffects: statusEffectsOpponent,
+      hp: hpOpponent,
+      moveUses: moveUsesOpponent,
+      stats: statsOpponent,
+      knownMoves: knownMovesOpponent,
+    } = this.activeOpponent!;
+
+    // calculate speed
+    let playerSpeed = this.calculateMoveBaseSpeed(
+      this.activePlayer!,
+      playerMove,
+    );
+  }
+
+  getOpponentMove(): MoveData {
+    const { knownMoves } = this.activeOpponent!;
+    const move = chance.pickone(knownMoves);
+    return getMovesets()[move];
+  }
+
+  calculateMoveBaseSpeed(character: Character, move: MoveData) {
+    const { types } = character;
+    const { speed: moveSpeed, type: moveType } = move;
+    let speed = character.stats.speed;
+    if (types.includes(move.type)) {
+      speed += moveSpeed * TYPE_ADV_BOOST;
+    } else if (moveType === DereType.normal) {
+      speed += moveSpeed;
+    } else {
+      speed += moveSpeed * TYPE_DISADV_BOOST;
+    }
+    return speed;
   }
 
   static fromBattleData(

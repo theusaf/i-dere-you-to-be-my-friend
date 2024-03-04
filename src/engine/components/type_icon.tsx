@@ -1,4 +1,3 @@
-import { getMovesets } from "../../game/util/moves";
 import { ColorSchemeString } from "../../game/util/style";
 import { DereType, getTypeData } from "../../game/util/types";
 
@@ -16,7 +15,6 @@ const TypeIconColors: Record<DereType, [string, string]> = {
 };
 
 export function TypeIcon({ type }: { type: DereType }): JSX.Element {
-  const movesets = getMovesets();
   const color = TypeIconColors[type];
   return (
     <span

@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { BattleScreen, BattleScreenState } from "../battle_screen";
@@ -8,14 +8,13 @@ import { AnimatedTextController } from "../../../engine/components/animated_text
 import { GameManager } from "../../../engine/game_manager";
 import { MapScreen } from "../map_screen";
 import { ConfirmationButton } from "../../../engine/components/confirmation_button";
-import { Character, getGenderedString } from "../../util/character";
+import { Character } from "../../util/character";
 import { Battle, BattleEvents } from "../../util/battle";
 import { MoveData, getMovesets } from "../../util/moves";
 import { RichTextSpan } from "../../../engine/components/rich_text_span";
 import { TypeIcon } from "../../../engine/components/type_icon";
 import { NumberSpan } from "../../../engine/components/numer_span";
 
-// TODO: clean up this code...
 export interface BattleScreenContentProps {
   state: BattleScreen;
 }
@@ -27,37 +26,32 @@ export function BattleScreenContent({
   const [logIndex, setLogIndex] = useState(0);
   const { gameManager } = state;
   const battle = gameManager.gameData.battle!;
+  const afterLogRenderCallbacks = useRef<Set<() => void>>(new Set());
+  const registerAfterLogRenderCallback = (cb: () => void) => {
+    afterLogRenderCallbacks.current.add(cb);
+  };
 
   // handle other updates dependent on log timing
   if (logIndex >= battle.logs.length) {
-    if (battle.activeOpponent === null) {
-      // if no enemy active
-      const nextOpponent = battle.getNextOpponent();
-      if (nextOpponent) {
-        battle.logs.push(
-          `${battle.opponentLeader.name} sends out ${getGenderedString({
-            gender: battle.opponentLeader.gender,
-            type: "possesive",
-            name: battle.opponentLeader.name,
-          })} friend, ${nextOpponent.name}!`,
-        );
-        battle.activeOpponent = nextOpponent;
-      } else {
-        // victory!
-      }
-    } else if (battle.activePlayer === null) {
-      // if no player active
-      const nextPlayer = battle.getNextPlayer();
-      if (nextPlayer) {
-        battle.logs.push(`You got this, ${nextPlayer.name}!`);
-        battle.activePlayer = nextPlayer;
-      } else {
-        // defeat!
-      }
-    }
+    const callbacks = [...afterLogRenderCallbacks.current];
+    callbacks.forEach((cb) => {
+      cb();
+      afterLogRenderCallbacks.current.delete(cb);
+    });
   }
 
   useEffect(() => {
+    registerAfterLogRenderCallback(() => {
+      if (battle.activeOpponent) return;
+      battle.updateNextOpponent();
+      battle.triggerChange();
+      registerAfterLogRenderCallback(() => {
+        // if no player active
+        if (battle.activePlayer) return;
+        battle.updateNextPlayer();
+        battle.triggerChange();
+      });
+    });
     const listener = () => {
       forceUpdate();
     };
@@ -79,6 +73,7 @@ export function BattleScreenContent({
         onLogsRendered={() => {
           setLogIndex(battle.logs.length);
         }}
+        callbackRegister={registerAfterLogRenderCallback}
       />
     </div>
   );
@@ -127,6 +122,7 @@ interface UserViewProps extends ToggleableUIProps {
   gameManager: GameManager;
   logIndex: number;
   onLogsRendered: () => void;
+  callbackRegister: (cb: () => void) => void;
 }
 
 function UserView({
@@ -134,6 +130,7 @@ function UserView({
   show,
   logIndex,
   onLogsRendered,
+  callbackRegister,
 }: UserViewProps): JSX.Element {
   return (
     <div
@@ -153,6 +150,7 @@ function UserView({
           show={show}
           logIndex={logIndex}
           onLogsRendered={onLogsRendered}
+          callbackRegister={callbackRegister}
         />
       </div>
     </div>
@@ -174,12 +172,14 @@ function UserViewButtonController({
   show,
   logIndex,
   onLogsRendered,
+  callbackRegister,
 }: UserViewProps): JSX.Element {
   const [localLogIndex, setLocalLogIndex] = useState(logIndex);
   const [state, setState] = useState(UserViewControllerState.index);
   const className =
     "align-middle flex flex-col place-content-center cursor-pointer";
-  const logs = gameManager.gameData.battle!.logs;
+  const battle = gameManager.gameData.battle!;
+  const logs = battle.logs;
   useEffect(() => {
     if (logs.length > localLogIndex) {
       setState(UserViewControllerState.logs);
@@ -191,20 +191,18 @@ function UserViewButtonController({
   switch (state) {
     case UserViewControllerState.index:
       buttons = <IndexButtons className={className} setState={setState} />;
-      if (gameManager.gameData.battle!.activePlayer === null) {
+      if (battle.activePlayer === null) {
         message = "What do you want to do?";
       } else {
-        message = `What should ${gameManager.gameData.battle!.activePlayer.name} do?`;
+        message = `What should ${battle!.activePlayer.name} do?`;
       }
       break;
     case UserViewControllerState.fight:
       buttons = (
         <FightButtons
-          character={gameManager.gameData.battle!.activePlayer!}
-          moves={gameManager.gameData.battle!.activePlayer?.knownMoves ?? []}
-          onMoveSelected={(move: MoveData) => {
-            // TODO: implement move selection
-          }}
+          character={battle.activePlayer!}
+          moves={battle.activePlayer?.knownMoves ?? []}
+          onMoveSelected={(move: MoveData) => {}}
         />
       );
       message = "Fight";
@@ -246,9 +244,7 @@ function UserViewButtonController({
               if (localLogIndex < logs.length - 1) {
                 setLocalLogIndex(localLogIndex + 1);
               } else {
-                // setState(UserViewControllerState.index);
                 onLogsRendered();
-                gameManager.gameData.battle!.triggerChange();
               }
             }, 1000);
           }}
@@ -457,6 +453,7 @@ function FightButtons({
             className={className}
             onMouseOver={() => onHover(moveData)}
             onMouseOut={onUnhover}
+            onClick={() => onMoveSelected(moveData)}
           >
             <div className="flex flex-col align-middle h-full">
               <div>{moveData.name}</div>

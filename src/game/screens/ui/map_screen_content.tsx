@@ -66,14 +66,8 @@ export function MapScreenContent({
               battleData!,
               state.gameManager,
             );
-            const isAlone = battle.opponentTeam.length > 1;
-            const { name } = battle.opponentLeader;
             gameData.battle = battle;
-            battle.logs.push(
-              isAlone
-                ? `${name}'s friend group appeared!`
-                : `A wild ${name} appeared!`,
-            );
+            battle.noteIntro();
             state.gameManager.gameData.save();
             state.gameManager.changeScreen(new BattleScreen());
           }}
