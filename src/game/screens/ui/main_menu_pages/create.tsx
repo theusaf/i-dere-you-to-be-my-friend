@@ -77,33 +77,39 @@ export function CreateSavePage({
         <div className="row-span-6 grid grid-cols-5">
           <div className="flex flex-col gap-2">
             <TextActionButton
-              className={currentGender === Gender.she ? "bg-slate-300 text-black" : ""}
+              className={
+                currentGender === Gender.she ? "bg-slate-300 text-black" : ""
+              }
               onClick={() => setCurrentGender(Gender.she)}
             >
               She/Her
             </TextActionButton>
             <TextActionButton
-              className={currentGender === Gender.they ? "bg-slate-300 text-black" : ""}
+              className={
+                currentGender === Gender.they ? "bg-slate-300 text-black" : ""
+              }
               onClick={() => setCurrentGender(Gender.they)}
             >
               They/Them
             </TextActionButton>
             <TextActionButton
-              className={currentGender === Gender.he ? "bg-slate-300 text-black" : ""}
+              className={
+                currentGender === Gender.he ? "bg-slate-300 text-black" : ""
+              }
               onClick={() => setCurrentGender(Gender.he)}
             >
               He/Him
             </TextActionButton>
             <TextActionButton
-              className={currentGender === Gender.none ? "bg-slate-300 text-black" : ""}
+              className={
+                currentGender === Gender.none ? "bg-slate-300 text-black" : ""
+              }
               onClick={() => setCurrentGender(Gender.none)}
             >
               {currentName}
             </TextActionButton>
           </div>
-          <div className="col-span-3 mx-2 p-2 rounded">
-            THIS CONTENT NOT IMPLEMENTED
-          </div>
+          <div className="col-span-3 mx-2 p-2 rounded"></div>
           <div className="flex flex-col gap-2"></div>
         </div>
         <div className="flex row-start-7 h-full">

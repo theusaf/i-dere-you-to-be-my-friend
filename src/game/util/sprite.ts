@@ -1,18 +1,24 @@
 import {
   Assets,
+  BaseTexture,
   ExtensionFormatLoose,
   ExtensionType,
   LoaderParser,
   LoaderParserPriority,
+  SCALE_MODES,
+  Texture,
   extensions,
 } from "pixi.js";
+import { constrain } from "./math";
 
 const SIZE = 256;
 
 const baseRecolorable = 0x00ff13;
 const baseRecolorableList = convertToColorList(baseRecolorable);
+const baseRecolorableListInverse = baseRecolorableList.map((c) => 255 - c);
 const baseSkinColorable = 0x828282;
 const baseSkinColorableList = convertToColorList(baseSkinColorable);
+const baseSkinColorableListInverse = baseSkinColorableList.map((c) => 255 - c);
 
 const spriteCanvas = document.createElement("canvas");
 const spriteContext = spriteCanvas.getContext("2d")!;
@@ -20,7 +26,7 @@ const spriteContext = spriteCanvas.getContext("2d")!;
 spriteCanvas.width = SIZE;
 spriteCanvas.height = SIZE;
 
-export interface BaseSpriteCache {
+export interface BaseSprite {
   frontHead: ImageData | null;
   frontBody: ImageData | null;
   frontRightThigh: ImageData | null;
@@ -43,7 +49,7 @@ export interface BaseSpriteCache {
   backLeftArm: ImageData | null;
 }
 
-function parseSprite(image: Blob): Promise<BaseSpriteCache> {
+function parseSprite(image: Blob): Promise<BaseSprite> {
   return new Promise((resolve) => {
     const url = URL.createObjectURL(image);
     const img = new Image();
@@ -98,7 +104,7 @@ function parseSprite(image: Blob): Promise<BaseSpriteCache> {
         backBodyData = spriteContext.getImageData(151, 93, 82, 76);
       }
 
-      const cache: BaseSpriteCache = {
+      const cache: BaseSprite = {
         frontHead: frontHeadData,
         frontBody: frontBodyData,
         frontRightThigh: frontRightThighData,
@@ -125,11 +131,11 @@ function parseSprite(image: Blob): Promise<BaseSpriteCache> {
   });
 }
 
-const recolorCache: Map<string, ImageData> = new Map();
+const recolorCache: Map<string, Promise<Texture>> = new Map();
 
 export interface RecolorSpriteOpts {
   id: string;
-  part: keyof BaseSpriteCache;
+  part: keyof BaseSprite;
   skinColor: number;
   mainColor: number;
   treatWhiteAsMain: boolean;
@@ -141,10 +147,10 @@ export function recolorSprite({
   skinColor,
   mainColor,
   treatWhiteAsMain,
-}: RecolorSpriteOpts): ImageData {
+}: RecolorSpriteOpts): Promise<Texture> {
   const key = `${id}-${part}-${skinColor}-${mainColor}`;
-  if (recolorCache.has(key)) return recolorCache.get(key)!;
-  const data = Assets.get<BaseSpriteCache>(`sprite/${id}`)[part]!;
+  if (recolorCache.has(key)) return Promise.resolve(recolorCache.get(key)!);
+  const data = Assets.get<BaseSprite>(`sprite/${id}`)[part]!;
   const pixels = compressImageData(data);
   const skinColorList = convertToColorList(skinColor);
   const mainColorList = convertToColorList(mainColor);
@@ -157,7 +163,6 @@ export function recolorSprite({
         pixel.r = mainColorList[0];
         pixel.g = mainColorList[1];
         pixel.b = mainColorList[2];
-      } else {
         continue;
       }
     }
@@ -166,28 +171,44 @@ export function recolorSprite({
       if (r + b + g === 0) continue;
       // skin color
       const pixelDiff = [
-        r - baseSkinColorableList[0],
-        g - baseSkinColorableList[1],
-        b - baseSkinColorableList[2],
+        baseSkinColorableList[0] - r,
+        baseSkinColorableList[1] - g,
+        baseSkinColorableList[2] - b,
       ];
-      pixel.r = Math.min(skinColorList[0] + pixelDiff[0], 0);
-      pixel.g = Math.min(skinColorList[1] + pixelDiff[1], 0);
-      pixel.b = Math.min(skinColorList[2] + pixelDiff[2], 0);
+      pixel.r = constrain(skinColorList[0] + pixelDiff[0], 0, 255);
+      pixel.g = constrain(skinColorList[1] + pixelDiff[1], 0, 255);
+      pixel.b = constrain(skinColorList[2] + pixelDiff[2], 0, 255);
     } else if (r === 0 && g !== 0 && b !== 0) {
       // main color
       const pixelDiff = [
-        r - baseRecolorableList[0],
-        g - baseRecolorableList[1],
-        b - baseRecolorableList[2],
+        baseRecolorableList[0] - r,
+        baseRecolorableList[1] - g,
+        baseRecolorableList[2] - b,
       ];
-      pixel.r = Math.min(mainColorList[0] + pixelDiff[0], 0);
-      pixel.g = Math.min(mainColorList[1] + pixelDiff[1], 0);
-      pixel.b = Math.min(mainColorList[2] + pixelDiff[2], 0);
+      pixel.r = constrain(mainColorList[0] + pixelDiff[0], 0, 255);
+      pixel.g = constrain(mainColorList[1] + pixelDiff[1], 0, 255);
+      pixel.b = constrain(mainColorList[2] + pixelDiff[2], 0, 255);
     }
   }
   const output = decompressPixels(pixels, data.width, data.height);
-  recolorCache.set(key, output);
-  return output;
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d")!;
+  canvas.width = data.width;
+  canvas.height = data.height;
+  context.putImageData(output, 0, 0);
+  const base64 = canvas.toDataURL();
+  const image = new Image();
+  image.src = base64;
+  const promise = new Promise<Texture>((resolve) => {
+    image.onload = () => {
+      const baseTexture = new BaseTexture(image);
+      baseTexture.scaleMode = SCALE_MODES.NEAREST;
+      const texture = new Texture(baseTexture);
+      resolve(texture);
+    };
+  });
+  recolorCache.set(key, promise);
+  return promise;
 }
 
 interface Pixel {
