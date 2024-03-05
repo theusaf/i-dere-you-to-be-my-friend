@@ -64,7 +64,7 @@ export class MainMenuScreen extends GameScreen {
       id: "1",
       part: "frontHead",
       mainColor: 0xff0000,
-      skinColor: 0x00ff00,
+      skinColor: 0x75593e,
       treatWhiteAsMain: true,
     });
     const sprite = new PIXI.Sprite(image);

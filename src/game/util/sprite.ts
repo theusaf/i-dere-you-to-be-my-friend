@@ -15,10 +15,8 @@ const SIZE = 256;
 
 const baseRecolorable = 0x00ff13;
 const baseRecolorableList = convertToColorList(baseRecolorable);
-const baseRecolorableListInverse = baseRecolorableList.map((c) => 255 - c);
 const baseSkinColorable = 0x828282;
 const baseSkinColorableList = convertToColorList(baseSkinColorable);
-const baseSkinColorableListInverse = baseSkinColorableList.map((c) => 255 - c);
 
 const spriteCanvas = document.createElement("canvas");
 const spriteContext = spriteCanvas.getContext("2d")!;
@@ -158,11 +156,11 @@ export function recolorSprite({
     const { r, g, b, a } = pixel;
     // check for patterns
     if (a === 0) continue;
-    if (r === 255 && g === 0 && b === 255) {
+    if (r === 255 && g === 255 && b === 255) {
       if (treatWhiteAsMain) {
-        pixel.r = mainColorList[0];
-        pixel.g = mainColorList[1];
-        pixel.b = mainColorList[2];
+        pixel.r = skinColorList[0];
+        pixel.g = skinColorList[1];
+        pixel.b = skinColorList[2];
         continue;
       }
     }
@@ -175,9 +173,10 @@ export function recolorSprite({
         baseSkinColorableList[1] - g,
         baseSkinColorableList[2] - b,
       ];
-      pixel.r = constrain(skinColorList[0] + pixelDiff[0], 0, 255);
-      pixel.g = constrain(skinColorList[1] + pixelDiff[1], 0, 255);
-      pixel.b = constrain(skinColorList[2] + pixelDiff[2], 0, 255);
+      const results = recolorHandleOverflow(skinColorList, pixelDiff);
+      pixel.r = results[0];
+      pixel.g = results[1];
+      pixel.b = results[2];
     } else if (r === 0 && g !== 0 && b !== 0) {
       // main color
       const pixelDiff = [
@@ -185,9 +184,10 @@ export function recolorSprite({
         baseRecolorableList[1] - g,
         baseRecolorableList[2] - b,
       ];
-      pixel.r = constrain(mainColorList[0] + pixelDiff[0], 0, 255);
-      pixel.g = constrain(mainColorList[1] + pixelDiff[1], 0, 255);
-      pixel.b = constrain(mainColorList[2] + pixelDiff[2], 0, 255);
+      const results = recolorHandleOverflow(mainColorList, pixelDiff);
+      pixel.r = results[0];
+      pixel.g = results[1];
+      pixel.b = results[2];
     }
   }
   const output = decompressPixels(pixels, data.width, data.height);
@@ -209,6 +209,27 @@ export function recolorSprite({
   });
   recolorCache.set(key, promise);
   return promise;
+}
+
+// TODO: Confirm algorithm does what I want it to do
+function recolorHandleOverflow(
+  replacementColors: number[],
+  colorDiff: number[],
+): number[] {
+  const colors = [
+    replacementColors[0] - colorDiff[0],
+    replacementColors[1] - colorDiff[1],
+    replacementColors[2] - colorDiff[2],
+  ];
+  if (colors.some((c) => c < 0 || c > 255)) {
+    let netChange = colors
+      .filter((c) => c < 0 || c > 255)
+      .reduce((a, b) => a + b, 0);
+    for (let i = 0; i < colors.length; i++) {
+      colors[i] = constrain(colors[i] + netChange, 0, 255);
+    }
+  }
+  return colors;
 }
 
 interface Pixel {
