@@ -27,6 +27,8 @@ export class CharacterSprite {
 
   mainContainer: Container;
 
+  // Note: The positional (right, left) parts are based on the character's right and left when viewning the character from the front.
+  // When the character is viewed from the back, right and left are not actually accurate.
   headFront: Texture | null = null;
   headBack: Texture | null = null;
   bodyFront: Texture | null = null;
