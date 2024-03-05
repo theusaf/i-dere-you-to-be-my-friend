@@ -521,13 +521,13 @@ function FightButtons({
 }): JSX.Element {
   const [hoverTip, setHoverTip] = useState<MoveData | null>(null);
   const movesets = getMovesets();
-  const className = "min-h-14 cursor-pointer";
+  const className = "min-h-14 cursor-pointer overflow-y-auto";
   const onHover = (move: MoveData) => {
     setHoverTip(move);
   };
   const onUnhover = () => setHoverTip(null);
   return (
-    <div className="grid grid-cols-3 gap-2 text-center h-full relative">
+    <div className="grid grid-cols-3 gap-2 text-center h-full relative overflow-y-auto">
       {hoverTip && (
         <div
           className="absolute right-4 bg-slate-600 outline outline-2 outline-slate-900 w-96"
