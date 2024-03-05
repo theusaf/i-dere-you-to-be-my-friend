@@ -187,9 +187,8 @@ export function registerSpriteParsingExtension(): void {
       if (!((asset as { blob?: Blob })?.blob instanceof Blob)) return false;
       return true;
     },
-    parse<T>(asset: Blob): Promise<T> {
-      // TODO: parse the sprite
-      return Promise.resolve({} as T);
+    parse<T>(asset: { blob: Blob; id: string }): Promise<T> {
+      return Promise.resolve(parseSprite(asset.blob, asset.id) as T);
     },
   };
   const spriteParserExtension: ExtensionFormatLoose = {
