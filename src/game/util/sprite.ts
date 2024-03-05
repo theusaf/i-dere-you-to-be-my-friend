@@ -41,7 +41,7 @@ export interface BaseSpriteCache {
   backLeftArm: ImageData | null;
 }
 
-function parseSprite(image: Blob, id: string): Promise<BaseSpriteCache> {
+function parseSprite(image: Blob): Promise<BaseSpriteCache> {
   return new Promise((resolve) => {
     const url = URL.createObjectURL(image);
     const img = new Image();
@@ -69,7 +69,8 @@ function parseSprite(image: Blob, id: string): Promise<BaseSpriteCache> {
       let frontBodyData = spriteContext.getImageData(22, 93, 82, 139);
       let backBodyData = spriteContext.getImageData(151, 93, 82, 139);
 
-      const pantCheckIndex = getIndexFromPosition(61, 171, 82);
+      // Note to self: This is a relative position to the front body, not the entire image
+      const pantCheckIndex = getIndexFromPosition(39, 78, 82);
       const pantCheck = frontBodyData.data[pantCheckIndex * 4 + 3] === 0;
       let frontRightThighData: ImageData | null = null;
       let frontRightLegData: ImageData | null = null;
@@ -185,9 +186,7 @@ export function registerSpriteParsingExtension(): void {
       return true;
     },
     async parse<T>(asset: { blob: Blob; id: string }): Promise<T> {
-      console.log("Parsing sprite", asset.id);
-      const data = await parseSprite(asset.blob, asset.id);
-      console.log("Parsed sprite", data);
+      const data = await parseSprite(asset.blob);
       return data as T;
     },
   };
