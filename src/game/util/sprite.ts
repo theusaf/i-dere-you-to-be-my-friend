@@ -1,4 +1,5 @@
 import {
+  Assets,
   ExtensionFormatLoose,
   ExtensionType,
   LoaderParser,
@@ -9,8 +10,9 @@ import {
 const SIZE = 256;
 
 const baseRecolorable = 0x00ff13;
+const baseRecolorableList = convertToColorList(baseRecolorable);
 const baseSkinColorable = 0x828282;
-const baseEyes = 0xffffff; // only applies to the head
+const baseSkinColorableList = convertToColorList(baseSkinColorable);
 
 const spriteCanvas = document.createElement("canvas");
 const spriteContext = spriteCanvas.getContext("2d")!;
@@ -123,6 +125,71 @@ function parseSprite(image: Blob): Promise<BaseSpriteCache> {
   });
 }
 
+const recolorCache: Map<string, ImageData> = new Map();
+
+export interface RecolorSpriteOpts {
+  id: string;
+  part: keyof BaseSpriteCache;
+  skinColor: number;
+  mainColor: number;
+  treatWhiteAsMain: boolean;
+}
+
+export function recolorSprite({
+  id,
+  part,
+  skinColor,
+  mainColor,
+  treatWhiteAsMain,
+}: RecolorSpriteOpts): ImageData {
+  const key = `${id}-${part}-${skinColor}-${mainColor}`;
+  if (recolorCache.has(key)) return recolorCache.get(key)!;
+  const data = Assets.get<BaseSpriteCache>(`sprite/${id}`)[part]!;
+  const pixels = compressImageData(data);
+  const skinColorList = convertToColorList(skinColor);
+  const mainColorList = convertToColorList(mainColor);
+  for (const pixel of pixels) {
+    const { r, g, b, a } = pixel;
+    // check for patterns
+    if (a === 0) continue;
+    if (r === 255 && g === 0 && b === 255) {
+      if (treatWhiteAsMain) {
+        pixel.r = mainColorList[0];
+        pixel.g = mainColorList[1];
+        pixel.b = mainColorList[2];
+      } else {
+        continue;
+      }
+    }
+    if (r === b && b === g) {
+      // ignore black
+      if (r + b + g === 0) continue;
+      // skin color
+      const pixelDiff = [
+        r - baseSkinColorableList[0],
+        g - baseSkinColorableList[1],
+        b - baseSkinColorableList[2],
+      ];
+      pixel.r = Math.min(skinColorList[0] + pixelDiff[0], 0);
+      pixel.g = Math.min(skinColorList[1] + pixelDiff[1], 0);
+      pixel.b = Math.min(skinColorList[2] + pixelDiff[2], 0);
+    } else if (r === 0 && g !== 0 && b !== 0) {
+      // main color
+      const pixelDiff = [
+        r - baseRecolorableList[0],
+        g - baseRecolorableList[1],
+        b - baseRecolorableList[2],
+      ];
+      pixel.r = Math.min(mainColorList[0] + pixelDiff[0], 0);
+      pixel.g = Math.min(mainColorList[1] + pixelDiff[1], 0);
+      pixel.b = Math.min(mainColorList[2] + pixelDiff[2], 0);
+    }
+  }
+  const output = decompressPixels(pixels, data.width, data.height);
+  recolorCache.set(key, output);
+  return output;
+}
+
 interface Pixel {
   r: number;
   g: number;
@@ -143,7 +210,11 @@ function compressImageData(data: ImageData): Pixel[] {
   return pixels;
 }
 
-function decompressPixels(pixels: Pixel[]): ImageData {
+function decompressPixels(
+  pixels: Pixel[],
+  width = SIZE,
+  height = SIZE,
+): ImageData {
   const output = new Uint8ClampedArray(pixels.length * 4);
   for (let i = 0; i < pixels.length; i++) {
     const pixel = pixels[i];
@@ -152,18 +223,25 @@ function decompressPixels(pixels: Pixel[]): ImageData {
     output[i * 4 + 2] = pixel.b;
     output[i * 4 + 3] = pixel.a;
   }
-  return new ImageData(output, SIZE, SIZE);
+  return new ImageData(output, width, height);
 }
 
 export function convertToColorList(color: number): number[] {
   return [color >> 16, (color >> 8) & 0xff, color & 0xff];
 }
 
-function getIndexFromPosition(x: number, y: number, size = SIZE): number {
+export function getIndexFromPosition(
+  x: number,
+  y: number,
+  size = SIZE,
+): number {
   return y * size + x;
 }
 
-function getPositionFromIndex(index: number, size = SIZE): [number, number] {
+export function getPositionFromIndex(
+  index: number,
+  size = SIZE,
+): [number, number] {
   return [index % size, Math.floor(index / size)];
 }
 
