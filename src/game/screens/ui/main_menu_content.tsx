@@ -22,7 +22,7 @@ export function MainMenuLogo() {
     <div className="grid grid-rows-5 h-full">
       <Unselectable className="h-full row-start-2 row-span-4">
         <PixelImage
-          src="/assets/images/logo-banner.png"
+          src="./assets/images/logo-banner.png"
           className="h-full m-auto"
         />
       </Unselectable>

@@ -216,7 +216,7 @@ function PhoneWidget({ onClick }: PhoneWidgetProps) {
     >
       <Unselectable className="flex flex-col h-full items-end">
         <PixelImage
-          src="/assets/images/ui/phone.png"
+          src="./assets/images/ui/phone.png"
           className="flex-1 m-auto"
         />
       </Unselectable>
@@ -238,7 +238,7 @@ function PhoneLargeDisplay() {
     >
       <Unselectable className="w-full h-full">
         <PixelImage
-          src={`/assets/images/ui/apps/${app}.png`}
+          src={`./assets/images/ui/apps/${app}.png`}
           className={className}
         />
       </Unselectable>
@@ -257,7 +257,7 @@ function PhoneLargeDisplay() {
         className="h-full flex-auto relative pointer-events-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <PixelImage src="/assets/images/ui/phone.png" className="h-full" />
+        <PixelImage src="./assets/images/ui/phone.png" className="h-full" />
         <div className="absolute h-full w-full top-0 left-0 p-6 grid grid-rows-12 text-white">
           <span className="text-sm flex items-center pb-2">XX:XX</span>
           <div
