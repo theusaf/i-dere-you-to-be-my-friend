@@ -11,6 +11,8 @@ export interface CharacterSpriteOpts {
   legId: string;
 }
 
+type PartConstructionList = [keyof BaseSprite, string, number, boolean?][];
+
 /**
  * A character sprite. The various parts are connected together and can be rotated.
  *
@@ -26,6 +28,7 @@ export class CharacterSprite {
   legId: string;
 
   mainContainer: Container;
+  facingForward: boolean = true;
 
   // Note: The positional (right, left) parts are based on the character's right and left when viewning the character from the front.
   // When the character is viewed from the back, right and left are not actually accurate.
@@ -186,8 +189,16 @@ export class CharacterSprite {
       this.armLeftSprite,
       this.armLeftLink,
     );
-    this.linkSprites(this.thighRightSprite, this.legRightSprite, this.legRightLink);
-    this.linkSprites(this.thighLeftSprite, this.legLeftSprite, this.legLeftLink);
+    this.linkSprites(
+      this.thighRightSprite,
+      this.legRightSprite,
+      this.legRightLink,
+    );
+    this.linkSprites(
+      this.thighLeftSprite,
+      this.legLeftSprite,
+      this.legLeftLink,
+    );
   }
 
   linkSprites(origin: Sprite, connecting: Sprite, via: Container): void {
@@ -205,11 +216,23 @@ export class CharacterSprite {
   }
 
   async initSprite(): Promise<void> {
-    const partList: [keyof BaseSprite, string, number, boolean?][] = [
-      ["frontHead", this.headId, this.headColor, true],
-      ["backHead", this.headId, this.headColor, true],
-      ["frontBody", this.bodyId, this.bodyColor],
-      ["backBody", this.bodyId, this.bodyColor],
+    await this.updateSkinColor(this.skinColor);
+    this.setInitialPositions();
+  }
+
+  async updateSkinColor(color: number): Promise<void> {
+    this.skinColor = color;
+    await Promise.all([
+      this.updateLegTexture(this.legId, this.legColor),
+      this.updateBodyTexture(this.bodyId, this.bodyColor),
+      this.updateHeadTexture(this.headId, this.headColor),
+    ]);
+  }
+
+  async updateLegTexture(id: string, color: number): Promise<void> {
+    this.legId = id;
+    this.legColor = color;
+    const partList: PartConstructionList = [
       ["frontRightThigh", this.legId, this.legColor],
       ["backRightThigh", this.legId, this.legColor],
       ["frontLeftThigh", this.legId, this.legColor],
@@ -218,6 +241,46 @@ export class CharacterSprite {
       ["backRightLeg", this.legId, this.legColor],
       ["frontLeftLeg", this.legId, this.legColor],
       ["backLeftLeg", this.legId, this.legColor],
+    ];
+    const [
+      thighRightFront,
+      thighRightBack,
+      thighLeftFront,
+      thighLeftBack,
+      legRightFront,
+      legRightBack,
+      legLeftFront,
+      legLeftBack,
+    ] = await this.mapAndRecolor(partList);
+    this.thighRightFront = thighRightFront;
+    this.thighRightBack = thighRightBack;
+    this.thighLeftFront = thighLeftFront;
+    this.thighLeftBack = thighLeftBack;
+    this.legRightFront = legRightFront;
+    this.legRightBack = legRightBack;
+    this.legLeftFront = legLeftFront;
+    this.legLeftBack = legLeftBack;
+    this.updateSpriteTextures(this.thighRightSprite, [
+      thighRightFront,
+      thighRightBack,
+    ]);
+    this.updateSpriteTextures(this.thighLeftSprite, [
+      thighLeftFront,
+      thighLeftBack,
+    ]);
+    this.updateSpriteTextures(this.legRightSprite, [
+      legRightFront,
+      legRightBack,
+    ]);
+    this.updateSpriteTextures(this.legLeftSprite, [legLeftFront, legLeftBack]);
+  }
+
+  async updateBodyTexture(id: string, color: number): Promise<void> {
+    this.bodyId = id;
+    this.bodyColor = color;
+    const partList: PartConstructionList = [
+      ["frontBody", this.bodyId, this.bodyColor],
+      ["backBody", this.bodyId, this.bodyColor],
       ["frontRightShoulder", this.bodyId, this.bodyColor],
       ["backRightShoulder", this.bodyId, this.bodyColor],
       ["frontLeftShoulder", this.bodyId, this.bodyColor],
@@ -227,28 +290,66 @@ export class CharacterSprite {
       ["frontLeftArm", this.bodyId, this.bodyColor],
       ["backLeftArm", this.bodyId, this.bodyColor],
     ];
-    [
-      this.headFront,
-      this.headBack,
-      this.bodyFront,
-      this.bodyBack,
-      this.thighRightFront,
-      this.thighRightBack,
-      this.thighLeftFront,
-      this.thighLeftBack,
-      this.legRightFront,
-      this.legRightBack,
-      this.legLeftFront,
-      this.legLeftBack,
-      this.shoulderRightFront,
-      this.shoulderRightBack,
-      this.shoulderLeftFront,
-      this.shoulderLeftBack,
-      this.armRightFront,
-      this.armRightBack,
-      this.armLeftFront,
-      this.armLeftBack,
-    ] = await Promise.all(
+    const [
+      bodyFront,
+      bodyBack,
+      shoulderRightFront,
+      shoulderRightBack,
+      shoulderLeftFront,
+      shoulderLeftBack,
+      armRightFront,
+      armRightBack,
+      armLeftFront,
+      armLeftBack,
+    ] = await this.mapAndRecolor(partList);
+    this.bodyFront = bodyFront;
+    this.bodyBack = bodyBack;
+    this.shoulderRightFront = shoulderRightFront;
+    this.shoulderRightBack = shoulderRightBack;
+    this.shoulderLeftFront = shoulderLeftFront;
+    this.shoulderLeftBack = shoulderLeftBack;
+    this.armRightFront = armRightFront;
+    this.armRightBack = armRightBack;
+    this.armLeftFront = armLeftFront;
+    this.armLeftBack = armLeftBack;
+    this.updateSpriteTextures(this.bodySprite, [bodyFront, bodyBack]);
+    this.updateSpriteTextures(this.shoulderRightSprite, [
+      shoulderRightFront,
+      shoulderRightBack,
+    ]);
+    this.updateSpriteTextures(this.shoulderLeftSprite, [
+      shoulderLeftFront,
+      shoulderLeftBack,
+    ]);
+    this.updateSpriteTextures(this.armRightSprite, [
+      armRightFront,
+      armRightBack,
+    ]);
+    this.updateSpriteTextures(this.armLeftSprite, [armLeftFront, armLeftBack]);
+  }
+
+  async updateHeadTexture(id: string, color: number): Promise<void> {
+    this.headId = id;
+    this.headColor = color;
+    const partList: PartConstructionList = [
+      ["frontHead", this.headId, this.headColor, true],
+      ["backHead", this.headId, this.headColor, true],
+    ];
+    const [front, back] = await this.mapAndRecolor(partList);
+    this.headFront = front;
+    this.headBack = back;
+    this.updateSpriteTextures(this.headSprite, [front, back]);
+  }
+
+  updateSpriteTextures(sprite: Sprite, textures: [Texture, Texture]): void {
+    const checkTexture = this.facingForward ? textures[0] : textures[1];
+    if (sprite.texture !== checkTexture) {
+      sprite.texture = checkTexture;
+    }
+  }
+
+  mapAndRecolor(partList: PartConstructionList): Promise<Texture[]> {
+    return Promise.all(
       partList.map(([part, id, color, treatWhiteAsMain]) =>
         recolorSprite({
           id,
@@ -259,18 +360,5 @@ export class CharacterSprite {
         }),
       ),
     );
-
-    this.headSprite.texture = this.headFront;
-    this.bodySprite.texture = this.bodyFront;
-    this.shoulderRightSprite.texture = this.shoulderRightFront;
-    this.shoulderLeftSprite.texture = this.shoulderLeftFront;
-    this.armRightSprite.texture = this.armRightFront;
-    this.armLeftSprite.texture = this.armLeftFront;
-    this.thighRightSprite.texture = this.thighRightFront;
-    this.thighLeftSprite.texture = this.thighLeftFront;
-    this.legRightSprite.texture = this.legRightFront;
-    this.legLeftSprite.texture = this.legLeftFront;
-
-    this.setInitialPositions();
   }
 }

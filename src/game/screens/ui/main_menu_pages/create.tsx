@@ -8,12 +8,8 @@ import {
   faCircle,
   faCircleDot,
   faDice,
-  faPaintBrush,
-  faPaintRoller,
   faPalette,
-  faPallet,
   faPerson,
-  faShirt,
   faSquareCheck,
 } from "@fortawesome/free-solid-svg-icons";
 import { getRandomName } from "../../../util/random";
@@ -143,7 +139,9 @@ export function CreateSavePage({
                 <span className="h-12 bg-green-600 border-4 border-black"></span>
                 <span className="h-12 bg-orange-500 border-4 border-black"></span>
                 <span className="h-12 bg-pink-600 border-4 border-black"></span>
+                <span className="h-12 bg-yellow-800 border-4 border-black"></span>
                 <span className="h-12 bg-white border-4 border-black"></span>
+                <span className="h-12 bg-slate-700 border-4 border-black"></span>
               </div>
               <div className="flex flex-col gap-2">
                 <span className="h-12" title="Choose the skin color">
@@ -193,7 +191,7 @@ function GenderSelector({
   currentName: string;
 }) {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 overflow-y-auto">
       <GenderSelectorButton
         currentGender={currentGender}
         testGender={Gender.she}
