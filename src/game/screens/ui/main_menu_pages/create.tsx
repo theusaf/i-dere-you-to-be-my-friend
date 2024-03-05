@@ -5,6 +5,8 @@ import { Unselectable } from "../../../../engine/components/unselectable";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   IconDefinition,
+  faCircle,
+  faCircleDot,
   faDice,
   faPaintBrush,
   faPaintRoller,
@@ -89,21 +91,51 @@ export function CreateSavePage({
           <div className="col-span-3 mx-2 p-2 rounded grid grid-rows-5 text-4xl">
             <div className="row-start-2 flex items-center justify-between">
               <span className="p-2 cursor-pointer">&lt;</span>
-              <span className="p-2 cursor-pointer">&gt;</span>
+              <span>
+                <span>
+                  <FontAwesomeIcon
+                    icon={faCircleDot}
+                    color="blue"
+                    className="w-8 h-8"
+                  />
+                </span>
+                <span className="p-2 cursor-pointer">&gt;</span>
+              </span>
             </div>
             <div className="row-start-3 flex items-center justify-between">
               <span className="p-2 cursor-pointer">&lt;</span>
-              <span className="p-2 cursor-pointer">&gt;</span>
+              <span>
+                <span>
+                  <FontAwesomeIcon
+                    icon={faCircle}
+                    color="blue"
+                    className="w-8 h-8"
+                  />
+                </span>
+                <span className="p-2 cursor-pointer">&gt;</span>
+              </span>
             </div>
             <div className="row-start-4 flex items-center justify-between">
               <span className="p-2 cursor-pointer">&lt;</span>
-              <span className="p-2 cursor-pointer">&gt;</span>
+              <span>
+                <span>
+                  <FontAwesomeIcon
+                    icon={faCircle}
+                    color="blue"
+                    className="w-8 h-8"
+                  />
+                </span>
+                <span className="p-2 cursor-pointer">&gt;</span>
+              </span>
             </div>
           </div>
           <div className="flex flex-col overflow-y-auto">
             <div className="grid grid-cols-2 gap-2">
               <div className="flex flex-col gap-2">
-                <span className="h-12" title="Choose the color for the selected item">
+                <span
+                  className="h-12"
+                  title="Choose the color for the selected item"
+                >
                   <FontAwesomeIcon icon={faPalette} className="w-full h-full" />
                 </span>
                 <span className="h-12 bg-red-600 border-4 border-black"></span>
