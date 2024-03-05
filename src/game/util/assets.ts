@@ -73,6 +73,15 @@ export const assetList: AssetsManifest = {
       ],
     },
     {
+      name: "data-sprites",
+      assets: [
+        { src: "./assets/character/character-1.sprite", alias: "sprite/1" },
+        { src: "./assets/character/character-2.sprite", alias: "sprite/2" },
+        { src: "./assets/character/character-3.sprite", alias: "sprite/3" },
+        { src: "./assets/character/character-4.sprite", alias: "sprite/4" },
+      ],
+    },
+    {
       name: "data-map",
       assets: [
         { src: "./assets/maps/0,0.map", alias: "map/0,0" },
