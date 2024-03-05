@@ -15,15 +15,61 @@ import {
 import { getRandomName } from "../../../util/random";
 import { chance } from "../../../util/chance";
 import { TextActionButton } from "../../../../engine/components/action_button";
+import { MainMenuScreen } from "../../main_menu_screen";
+import {
+  BaseSprite,
+  getNextAvailablePartIndex,
+  getPreviousAvailablePartIndex,
+} from "../../../util/sprite";
+import { MutableRefObject } from "react";
+
+export enum CreateMainColors {
+  red = 0xdc2626,
+  blue = 0x2563eb,
+  green = 0x16a34a,
+  orange = 0xf97316,
+  pink = 0xdb2777,
+  brown = 0x854d0e,
+  white = 0xffffff,
+  dark = 0x334155,
+}
+
+export enum CreateSkinColors {
+  dark = 0x431407,
+  redBrown = 0x9a3412,
+  amber = 0x92400e,
+  golden = 0x854d0e,
+  tan = 0xfdba74,
+  light = 0xfed7aa,
+}
+
+enum CreatePartSelection {
+  head,
+  body,
+  legs,
+}
 
 export function CreateSavePage({
   onSaveCreated,
+  screen,
 }: {
   onSaveCreated: (save: RawGameDataContent) => void;
+  screen: MainMenuScreen;
 }): JSX.Element {
   const [creationState, setCreationState] = useState<boolean>(false);
   const [currentName, setCurrentName] = useState<string>("");
   const [currentGender, setCurrentGender] = useState<Gender>(Gender.none);
+  const [currentPartSelection, setCurrentPartSelection] =
+    useState<CreatePartSelection>(CreatePartSelection.head);
+  const [currentMainColor, setCurrentMainColor] = useState<CreateMainColors>(
+    CreateMainColors.red,
+  );
+  const [currentSkinColor, setCurrentSkinColor] = useState<CreateSkinColors>(
+    CreateSkinColors.dark,
+  );
+  const headId = useRef<number>(1);
+  const bodyId = useRef<number>(1);
+  const legsId = useRef<number>(1);
   const myCharacter = useRef<CharacterInfo>(new Character().toMap()),
     myFriend = useRef<CharacterInfo>(new Character().toMap());
   const genderMap: Partial<Record<Gender, "male" | "female" | undefined>> = {
@@ -69,6 +115,7 @@ export function CreateSavePage({
       setCreationState(true);
     }
   };
+  const sprite = screen.sprite!;
 
   return (
     <div className="col-span-3 row-span-5 row-start-1 col-start-2 grid grid-rows-8">
@@ -85,45 +132,27 @@ export function CreateSavePage({
             currentName={currentName}
           />
           <div className="col-span-3 mx-2 p-2 rounded grid grid-rows-5 text-4xl">
-            <div className="row-start-2 flex items-center justify-between">
-              <span className="p-2 cursor-pointer">&lt;</span>
-              <span>
-                <span>
-                  <FontAwesomeIcon
-                    icon={faCircleDot}
-                    color="blue"
-                    className="w-8 h-8"
-                  />
-                </span>
-                <span className="p-2 cursor-pointer">&gt;</span>
-              </span>
-            </div>
-            <div className="row-start-3 flex items-center justify-between">
-              <span className="p-2 cursor-pointer">&lt;</span>
-              <span>
-                <span>
-                  <FontAwesomeIcon
-                    icon={faCircle}
-                    color="blue"
-                    className="w-8 h-8"
-                  />
-                </span>
-                <span className="p-2 cursor-pointer">&gt;</span>
-              </span>
-            </div>
-            <div className="row-start-4 flex items-center justify-between">
-              <span className="p-2 cursor-pointer">&lt;</span>
-              <span>
-                <span>
-                  <FontAwesomeIcon
-                    icon={faCircle}
-                    color="blue"
-                    className="w-8 h-8"
-                  />
-                </span>
-                <span className="p-2 cursor-pointer">&gt;</span>
-              </span>
-            </div>
+            <PartSwitcher
+              id={headId}
+              testPart="frontHead"
+              currentMainColor={currentMainColor}
+              updater={sprite.updateHeadTexture.bind(sprite)}
+              className="row-start-2"
+            />
+            <PartSwitcher
+              id={bodyId}
+              testPart="frontBody"
+              currentMainColor={currentMainColor}
+              updater={sprite.updateBodyTexture.bind(sprite)}
+              className="row-start-3"
+            />
+            <PartSwitcher
+              id={legsId}
+              testPart="frontLeftLeg"
+              currentMainColor={currentMainColor}
+              updater={sprite.updateLegTexture.bind(sprite)}
+              className="row-start-4"
+            />
           </div>
           <div className="flex flex-col overflow-y-auto">
             <div className="grid grid-cols-2 gap-2">
@@ -177,6 +206,59 @@ export function CreateSavePage({
           <CenteredIcon icon={faSquareCheck} onClick={onSubmit} />
         </div>
       </div>
+    </div>
+  );
+}
+
+function PartSwitcher({
+  id,
+  testPart,
+  currentMainColor,
+  updater,
+  className,
+}: {
+  id: MutableRefObject<number>;
+  testPart: keyof BaseSprite;
+  currentMainColor: CreateMainColors;
+  updater: (id: string, color: number) => Promise<void>;
+  className: string;
+}) {
+  return (
+    <div className={`flex items-center justify-between ${className}`}>
+      <span className="p-2 cursor-pointer">
+        <span
+          onClick={() => {
+            id.current = getPreviousAvailablePartIndex(id.current, testPart);
+            updater(`${id.current}`, currentMainColor);
+          }}
+        >
+          <Unselectable className="inline">
+            <span className="p-2">&lt;</span>
+          </Unselectable>
+        </span>
+      </span>
+      <span className="p-2 cursor-pointer">
+        <span>
+          <FontAwesomeIcon
+            icon={faCircleDot}
+            color="blue"
+            className="w-8 h-8 cursor-pointer"
+          />
+        </span>
+        <span
+          className="cursor-pointer"
+          onClick={() => {
+            console.log(id.current);
+            id.current = getNextAvailablePartIndex(id.current, testPart);
+            console.log(id.current);
+            updater(`${id.current}`, currentMainColor);
+          }}
+        >
+          <Unselectable className="inline">
+            <span className="p-2">&gt;</span>
+          </Unselectable>
+        </span>
+      </span>
     </div>
   );
 }

@@ -10,6 +10,7 @@ import { SavesPage } from "./main_menu_pages/saves";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { CreateSavePage } from "./main_menu_pages/create";
+import { MainMenuScreen } from "../main_menu_screen";
 
 export enum MainMenuPageState {
   index = "index",
@@ -33,9 +34,11 @@ export function MainMenuLogo() {
 export function MainMenuContent({
   gameManager,
   setScreenState,
+  screen,
 }: {
   gameManager: GameManager;
   setScreenState: (state: MainMenuPageState) => void;
+  screen: MainMenuScreen;
 }) {
   const [page, setPage] = useState<MainMenuPageState>(
     MainMenuPageState.newSave,
@@ -74,7 +77,10 @@ export function MainMenuContent({
         />
       ),
       [MainMenuPageState.newSave]: (
-        <CreateSavePage onSaveCreated={onSaveSelected} />
+        <CreateSavePage
+        onSaveCreated={onSaveSelected}
+        screen={screen}
+         />
       ),
     };
   const pagesWithLogo: Set<MainMenuPageState> = new Set([

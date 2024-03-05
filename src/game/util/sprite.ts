@@ -318,3 +318,37 @@ export function registerSpriteParsingExtension(): void {
   };
   extensions.add(spriteParserExtension);
 }
+
+export function getNextAvailablePartIndex(
+  index: number,
+  part: keyof BaseSprite,
+): number {
+  const asset = Assets.get<BaseSprite>(`sprite/${index + 1}`);
+  const data = asset?.[part];
+  if (asset && data) return index + 1;
+  if (!asset) return getNextAvailablePartIndex(0, part);
+  return getNextAvailablePartIndex(index + 1, part);
+}
+
+export function getPreviousAvailablePartIndex(
+  index: number,
+  part: keyof BaseSprite,
+): number {
+  if (index === 1) {
+    let lastDetectedIndex = 1;
+    while (true) {
+      const asset = Assets.get<BaseSprite>(`sprite/${index}`);
+      const data = asset?.[part];
+      if (!asset) return lastDetectedIndex;
+      if (data) lastDetectedIndex = index;
+      index++;
+    }
+  } else {
+    const data = Assets.get<BaseSprite>(`sprite/${index - 1}`)?.[part];
+    if (data) {
+      return index - 1;
+    } else {
+      return getPreviousAvailablePartIndex(index - 1, part);
+    }
+  }
+}

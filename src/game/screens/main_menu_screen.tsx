@@ -5,6 +5,10 @@ import { ColorScheme } from "../util/style";
 import { MainMenuContent, MainMenuPageState } from "./ui/main_menu_content";
 import RenderLayer from "../../engine/render_layer";
 import { CharacterSprite } from "../../engine/character_sprite";
+import {
+  CreateMainColors,
+  CreateSkinColors,
+} from "./ui/main_menu_pages/create";
 
 export class MainMenuScreen extends GameScreen {
   screenState!: MainMenuPageState;
@@ -61,12 +65,12 @@ export class MainMenuScreen extends GameScreen {
 
   async initSprite(): Promise<void> {
     const sprite = new CharacterSprite({
-      skinColor: 0x75593e,
-      headColor: 0xff0000,
+      skinColor: CreateSkinColors.dark,
+      headColor: CreateMainColors.red,
       headId: "1",
-      bodyColor: 0xff0000,
+      bodyColor: CreateMainColors.red,
       bodyId: "1",
-      legColor: 0xff0000,
+      legColor: CreateMainColors.red,
       legId: "1",
     });
     await sprite.initSprite();
@@ -97,6 +101,7 @@ export class MainMenuScreen extends GameScreen {
       main: (
         <MainMenuContent
           gameManager={this.gameManager}
+          screen={this}
           setScreenState={(state: MainMenuPageState) =>
             (this.screenState = state)
           }
