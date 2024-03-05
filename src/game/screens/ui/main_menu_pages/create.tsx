@@ -109,7 +109,20 @@ export function CreateSavePage({
               {currentName}
             </TextActionButton>
           </div>
-          <div className="col-span-3 mx-2 p-2 rounded"></div>
+          <div className="col-span-3 mx-2 p-2 rounded grid grid-rows-5 text-4xl">
+            <div className="row-start-2 flex items-center justify-between">
+              <span className="p-2 cursor-pointer">&lt;</span>
+              <span className="p-2 cursor-pointer">&gt;</span>
+            </div>
+            <div className="row-start-3 flex items-center justify-between">
+              <span className="p-2 cursor-pointer">&lt;</span>
+              <span className="p-2 cursor-pointer">&gt;</span>
+            </div>
+            <div className="row-start-4 flex items-center justify-between">
+              <span className="p-2 cursor-pointer">&lt;</span>
+              <span className="p-2 cursor-pointer">&gt;</span>
+            </div>
+          </div>
           <div className="flex flex-col gap-2"></div>
         </div>
         <div className="flex row-start-7 h-full">
