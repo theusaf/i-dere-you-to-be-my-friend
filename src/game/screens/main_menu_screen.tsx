@@ -4,14 +4,14 @@ import { GameManager } from "../../engine/game_manager";
 import { ColorScheme } from "../util/style";
 import { MainMenuContent, MainMenuPageState } from "./ui/main_menu_content";
 import RenderLayer from "../../engine/render_layer";
-import { recolorSprite } from "../util/sprite";
+import { CharacterSprite } from "../../engine/character_sprite";
 
 export class MainMenuScreen extends GameScreen {
   screenState!: MainMenuPageState;
   characterBg!: PIXI.Graphics;
   characterBgMain!: PIXI.Graphics;
   spriteRenderLayer!: RenderLayer;
-  sprite?: PIXI.Sprite;
+  sprite?: CharacterSprite;
 
   initialize(app: PIXI.Application, gameManager: GameManager): void {
     super.initialize(app, gameManager);
@@ -60,23 +60,25 @@ export class MainMenuScreen extends GameScreen {
   }
 
   async initSprite(): Promise<void> {
-    const image = await recolorSprite({
-      id: "1",
-      part: "frontHead",
-      mainColor: 0xff0000,
+    const sprite = new CharacterSprite({
       skinColor: 0x75593e,
-      treatWhiteAsMain: true,
+      headColor: 0xff0000,
+      headId: "1",
+      bodyColor: 0xff0000,
+      bodyId: "1",
+      legColor: 0xff0000,
+      legId: "1",
     });
-    const sprite = new PIXI.Sprite(image);
-    sprite.x = 0;
-    sprite.y = 0;
-    sprite.width = 2;
-    sprite.height = 2;
+    await sprite.initSprite();
+    sprite.setWidth(2);
+    sprite.x = 5;
+    sprite.y = 5;
     this.sprite = sprite;
-    this.spriteRenderLayer.addChild(sprite);
+    this.spriteRenderLayer.addChild(sprite.getView());
   }
 
-  update(): void {
+  update(delta: number): void {
+    this.sprite?.update(delta);
     if (this.screenState === MainMenuPageState.newSave) {
       this.characterBg.visible = true;
       this.characterBgMain.visible = true;
