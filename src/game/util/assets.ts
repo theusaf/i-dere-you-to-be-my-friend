@@ -57,6 +57,14 @@ export const assetList: AssetsManifest = {
           src: "/assets/images/map_structures/store_stall_2.png",
           alias: "icon/structure/store_stall_2",
         },
+        {
+          src: "/assets/images/map_structures/hospital.png",
+          alias: "icon/structure/hospital",
+        },
+        {
+          src: "/assets/images/map_structures/supermarket.png",
+          alias: "icon/structure/supermarket",
+        }
       ],
     },
     {
@@ -76,6 +84,7 @@ export const assetList: AssetsManifest = {
           alias: "map/special/default",
         },
         { src: "/assets/maps/special/-1,0.yaml", alias: "map/special/-1,0" },
+        { src: "/assets/maps/special/0,-1.yaml", alias: "map/special/0,-1" },
       ],
     },
     {

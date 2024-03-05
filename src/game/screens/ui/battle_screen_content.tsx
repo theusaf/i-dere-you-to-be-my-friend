@@ -229,12 +229,14 @@ function UserViewButtonController({
                 `Wait? What's this? It turns out that in your fear of being alone, you missed that ${currentPlayer.name} is still breathing!`,
               );
             }
-            battle.addLog("You and your friends get away to safety...");
+            battle.addLog("You and your friends escape to the hospital...");
             // TODO: heal all friends and subtract money properly
             for (const friend of gameManager.gameData.activeFriends) {
               if (friend.isDead) continue;
               friend.hp = friend.stats.maxHealth;
             }
+            gameManager.gameData.worldMapData.playerX = 26.5;
+            gameManager.gameData.worldMapData.playerY = -99.5;
           }
         }
         if (isEndOfBattle) {

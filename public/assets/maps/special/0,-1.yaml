@@ -1,0 +1,12 @@
+boxes:
+  - from: [10, 13]
+    to: [34, 36]
+    type: building
+    image: hospital
+    background_tile: null
+
+  - from: [3, 48]
+    to: [31, 73]
+    type: building
+    image: supermarket
+    background_tile: null
