@@ -60,10 +60,15 @@ export function registerSpriteParsingExtension(): void {
       return pathname.endsWith(".sprite");
     },
     async load<T>(url: string): Promise<T> {
-      return (await fetch(url).then((res) => res.blob())) as T;
+      const pathname = new URL(url).pathname;
+      const id = pathname.match(/character-(\d+)[.]/)![1];
+      return {
+        blob: await fetch(url).then((res) => res.blob()),
+        id: id,
+      } as T;
     },
     async testParse(asset: unknown): Promise<boolean> {
-      if (!(asset instanceof Blob)) return false;
+      if (!((asset as { blob?: Blob })?.blob instanceof Blob)) return false;
       return true;
     },
     parse<T>(asset: Blob): Promise<T> {
