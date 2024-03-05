@@ -6,6 +6,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   IconDefinition,
   faDice,
+  faPaintBrush,
+  faPaintRoller,
+  faPalette,
+  faPallet,
+  faPerson,
+  faShirt,
   faSquareCheck,
 } from "@fortawesome/free-solid-svg-icons";
 import { getRandomName } from "../../../util/random";
@@ -75,40 +81,11 @@ export function CreateSavePage({
       </Unselectable>
       <div className="row-span-7 shadow-2xl shadow-black grid grid-rows-7 p-2">
         <div className="row-span-6 grid grid-cols-5">
-          <div className="flex flex-col gap-2">
-            <TextActionButton
-              className={
-                currentGender === Gender.she ? "bg-slate-300 text-black" : ""
-              }
-              onClick={() => setCurrentGender(Gender.she)}
-            >
-              She/Her
-            </TextActionButton>
-            <TextActionButton
-              className={
-                currentGender === Gender.they ? "bg-slate-300 text-black" : ""
-              }
-              onClick={() => setCurrentGender(Gender.they)}
-            >
-              They/Them
-            </TextActionButton>
-            <TextActionButton
-              className={
-                currentGender === Gender.he ? "bg-slate-300 text-black" : ""
-              }
-              onClick={() => setCurrentGender(Gender.he)}
-            >
-              He/Him
-            </TextActionButton>
-            <TextActionButton
-              className={
-                currentGender === Gender.none ? "bg-slate-300 text-black" : ""
-              }
-              onClick={() => setCurrentGender(Gender.none)}
-            >
-              {currentName}
-            </TextActionButton>
-          </div>
+          <GenderSelector
+            currentGender={currentGender}
+            setCurrentGender={setCurrentGender}
+            currentName={currentName}
+          />
           <div className="col-span-3 mx-2 p-2 rounded grid grid-rows-5 text-4xl">
             <div className="row-start-2 flex items-center justify-between">
               <span className="p-2 cursor-pointer">&lt;</span>
@@ -123,7 +100,32 @@ export function CreateSavePage({
               <span className="p-2 cursor-pointer">&gt;</span>
             </div>
           </div>
-          <div className="flex flex-col gap-2"></div>
+          <div className="flex flex-col overflow-y-auto">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="flex flex-col gap-2">
+                <span className="h-12" title="Choose the color for the selected item">
+                  <FontAwesomeIcon icon={faPalette} className="w-full h-full" />
+                </span>
+                <span className="h-12 bg-red-600 border-4 border-black"></span>
+                <span className="h-12 bg-blue-600 border-4 border-black"></span>
+                <span className="h-12 bg-green-600 border-4 border-black"></span>
+                <span className="h-12 bg-orange-500 border-4 border-black"></span>
+                <span className="h-12 bg-pink-600 border-4 border-black"></span>
+                <span className="h-12 bg-white border-4 border-black"></span>
+              </div>
+              <div className="flex flex-col gap-2">
+                <span className="h-12" title="Choose the skin color">
+                  <FontAwesomeIcon icon={faPerson} className="w-full h-full" />
+                </span>
+                <span className="h-12 bg-orange-950 border-4 border-black"></span>
+                <span className="h-12 bg-orange-800 border-4 border-black"></span>
+                <span className="h-12 bg-amber-800 border-4 border-black"></span>
+                <span className="h-12 bg-yellow-800 border-4 border-black"></span>
+                <span className="h-12 bg-orange-300 border-4 border-black"></span>
+                <span className="h-12 bg-orange-200 border-4 border-black"></span>
+              </div>
+            </div>
+          </div>
         </div>
         <div className="flex row-start-7 h-full">
           <CenteredIcon icon={faDice} onClick={randomize} />
@@ -146,6 +148,70 @@ export function CreateSavePage({
         </div>
       </div>
     </div>
+  );
+}
+
+function GenderSelector({
+  currentGender,
+  setCurrentGender,
+  currentName,
+}: {
+  currentGender: Gender;
+  setCurrentGender: (gender: Gender) => void;
+  currentName: string;
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <GenderSelectorButton
+        currentGender={currentGender}
+        testGender={Gender.she}
+        setCurrentGender={setCurrentGender}
+      >
+        She/Her
+      </GenderSelectorButton>
+      <GenderSelectorButton
+        currentGender={currentGender}
+        testGender={Gender.they}
+        setCurrentGender={setCurrentGender}
+      >
+        They/Them
+      </GenderSelectorButton>
+      <GenderSelectorButton
+        currentGender={currentGender}
+        testGender={Gender.he}
+        setCurrentGender={setCurrentGender}
+      >
+        He/Him
+      </GenderSelectorButton>
+      <GenderSelectorButton
+        currentGender={currentGender}
+        testGender={Gender.none}
+        setCurrentGender={setCurrentGender}
+      >
+        {currentName}
+      </GenderSelectorButton>
+    </div>
+  );
+}
+
+function GenderSelectorButton({
+  testGender,
+  currentGender,
+  setCurrentGender,
+  children,
+}: {
+  currentGender: Gender;
+  testGender: Gender;
+  setCurrentGender: (gender: Gender) => void;
+  children: string;
+}) {
+  return (
+    <TextActionButton
+      className={`cursor-pointer ${currentGender === testGender ? "bg-slate-300 text-black" : ""}`}
+      onClick={() => setCurrentGender(testGender)}
+    >
+      {children}
+    </TextActionButton>
   );
 }
 
