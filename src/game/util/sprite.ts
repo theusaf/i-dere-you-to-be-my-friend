@@ -41,9 +41,7 @@ export interface BaseSpriteCache {
   backLeftArm: ImageData | null;
 }
 
-const baseSpriteCache: Map<string, BaseSpriteCache> = new Map();
-
-function parseSprite(image: Blob, id: string): Promise<void> {
+function parseSprite(image: Blob, id: string): Promise<BaseSpriteCache> {
   return new Promise((resolve) => {
     const url = URL.createObjectURL(image);
     const img = new Image();
@@ -119,8 +117,7 @@ function parseSprite(image: Blob, id: string): Promise<void> {
         backLeftShoulder: backLeftShoulderData,
         backLeftArm: backLeftArmData,
       };
-      baseSpriteCache.set(id, cache);
-      resolve();
+      resolve(cache);
     };
   });
 }
@@ -187,8 +184,11 @@ export function registerSpriteParsingExtension(): void {
       if (!((asset as { blob?: Blob })?.blob instanceof Blob)) return false;
       return true;
     },
-    parse<T>(asset: { blob: Blob; id: string }): Promise<T> {
-      return Promise.resolve(parseSprite(asset.blob, asset.id) as T);
+    async parse<T>(asset: { blob: Blob; id: string }): Promise<T> {
+      console.log("Parsing sprite", asset.id);
+      const data = await parseSprite(asset.blob, asset.id);
+      console.log("Parsed sprite", data);
+      return data as T;
     },
   };
   const spriteParserExtension: ExtensionFormatLoose = {
