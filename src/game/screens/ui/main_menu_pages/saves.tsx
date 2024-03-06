@@ -11,9 +11,16 @@ export function SavesPage({
   onSaveSelected: (save: RawGameDataContent) => void;
   onNewSave: () => void;
 }): JSX.Element {
-  const [saves, setSaves] = useState<string[]>([]);
+  const [saves, setSaves] = useState<RawGameDataContent[]>([]);
   useEffect(() => {
-    const saveList = getSaveList();
+    const saveList = getSaveList().then((list) => {
+      return Promise.all(
+        list.map(
+          async (save) =>
+            (await load<RawGameDataContent>(save)) as RawGameDataContent,
+        ),
+      );
+    });
     saveList.then((saves) => {
       setSaves(saves);
     });
@@ -33,16 +40,24 @@ export function SavesPage({
         {saves.map((save) => {
           return (
             <div
-              key={save}
+              key={save.saveId}
               className="flex flex-col items-center p-4 h-full cursor-pointer w-36 bg-slate-600 rounded"
               onClick={async () => {
-                const saveData = await load<RawGameDataContent>(save);
-                onSaveSelected(saveData!);
+                onSaveSelected(save);
               }}
             >
-              <div style={{
-                wordBreak: "break-all",
-              }}>{save}</div>
+              <div
+                style={{
+                  wordBreak: "break-all",
+                }}
+              >
+                <h3 className="text-xl">{save.you.name}</h3>
+                <p className="text-center">&amp;</p>
+                <h3 className="text-xl">{save.mainNPC.name}</h3>
+                <hr />
+                <p>Lov. {save.you.love}</p>
+                <p>Friends: {save.friends.length}</p>
+              </div>
             </div>
           );
         })}
