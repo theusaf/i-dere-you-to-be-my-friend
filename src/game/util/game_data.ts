@@ -18,6 +18,7 @@ export interface GameDataContent {
   worldMapData: WorldMapData;
   mainNPC: Character;
   saveId?: string;
+  gold?: number;
 }
 
 export interface RawGameDataContent {
@@ -27,6 +28,7 @@ export interface RawGameDataContent {
   version?: string;
   mainNPC: CharacterInfo;
   saveId?: string;
+  gold?: number;
 }
 
 export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
@@ -34,6 +36,7 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
   friends: Character[];
   you: Character;
   mainNPC: Character;
+  gold: number;
 
   get activeFriends(): Character[] {
     return this.friends.filter((friend) => friend.isActive);
@@ -48,6 +51,7 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
     you,
     mainNPC,
     saveId,
+    gold,
   }: Partial<GameDataContent> = {}) {
     this.saveId = saveId ?? chance.guid();
     this.worldMapData = worldMapData ?? {
@@ -57,6 +61,7 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
     this.friends = friends ?? [];
     this.you = you ?? new Character();
     this.mainNPC = mainNPC ?? new Character();
+    this.gold = gold ?? 0;
   }
 
   toMap(): RawGameDataContent {
@@ -67,6 +72,7 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
       mainNPC: this.mainNPC,
       version,
       saveId: this.saveId,
+      gold: this.gold,
     };
   }
 
@@ -93,6 +99,7 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
       you: new Character(map.you),
       mainNPC: new Character(map.mainNPC),
       saveId: map.saveId,
+      gold: map.gold,
     });
   }
 }

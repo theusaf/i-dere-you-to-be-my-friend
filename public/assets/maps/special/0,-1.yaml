@@ -5,7 +5,7 @@ boxes:
     image: hospital
     background_tile: null
 
-  - from: [3, 48]
+  - from: [3, 47]
     to: [31, 73]
     type: building
     image: supermarket

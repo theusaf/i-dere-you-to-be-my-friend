@@ -136,8 +136,8 @@ export class MapScreen extends GameScreen {
       this.characterSprite.setWidth(0.75);
     });
 
-    this.mapSpecialContainer.zIndex = 50;
-    this.characterSprite.getView().zIndex = 25;
+    this.mapSpecialContainer.zIndex = 25;
+    this.characterSprite.getView().zIndex = 30;
     this.mapContainer.zIndex = 20;
 
     this.container.sortChildren();
@@ -570,6 +570,8 @@ export class MapScreen extends GameScreen {
     this.characterSprite.x = this.characterWorldX;
     this.characterSprite.y = this.characterWorldY;
     this.characterSprite.update(delta);
+
+    // TODO: make buildings opaque when near player
 
     this.movePlayer(delta);
   }

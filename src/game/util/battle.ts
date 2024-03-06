@@ -1,3 +1,4 @@
+import { Assets } from "pixi.js";
 import { GameManager } from "../../engine/game_manager";
 import { chance } from "./chance";
 import { Character, getGenderedString } from "./character";
@@ -16,7 +17,7 @@ interface BattleData {
   opponentLeader: Character;
   opponentTeam?: Character[];
   playerTeam: Character[];
-  rewardTable: string | null;
+  rewardTableId?: string | null;
   gameData: GameData;
 }
 
@@ -25,6 +26,19 @@ export enum BattleEvents {
 }
 
 export type BattlePlayback = [string, () => void][];
+
+export interface RewardTable {
+  leader_capturable: boolean;
+  friends_caputurable: boolean;
+  gold: {
+    amount: number | number[];
+    love_multiplier: number;
+  }
+  xp: {
+    amount: number | number[];
+    love_multiplier: number;
+  }
+}
 
 /**
  * Represents a battle between the player and an enemy.
@@ -35,7 +49,7 @@ export class Battle extends EventTarget implements BattleData {
   opponentLeader: Character;
   opponentTeam: Character[];
   playerTeam: Character[];
-  rewardTable: string | null;
+  rewardTable: RewardTable | null = null;
   gameData: GameData;
 
   activeOpponent: Character | null = null;
@@ -46,15 +60,19 @@ export class Battle extends EventTarget implements BattleData {
     opponentLeader,
     opponentTeam,
     playerTeam,
-    rewardTable,
+    rewardTableId = null,
     gameData,
   }: BattleData) {
     super();
     this.opponentLeader = opponentLeader;
     this.opponentTeam = opponentTeam ?? [opponentLeader];
     this.playerTeam = playerTeam;
-    this.rewardTable = rewardTable ?? null;
     this.gameData = gameData;
+
+    const rewardTables = Assets.get<Record<string, RewardTable>>("game/rewards");
+    if (rewardTableId !== null) {
+      this.rewardTable = rewardTables[rewardTableId];
+    }
   }
 
   addLog(log: string) {
@@ -76,6 +94,7 @@ export class Battle extends EventTarget implements BattleData {
     if (this.rewardTable === null) {
       this.addLog("The opponent disappeared, leaving nothing behind.");
       return;
+    } else {
     }
   }
 
@@ -887,7 +906,7 @@ export class Battle extends EventTarget implements BattleData {
     data: MapSpecialActionBattle,
     gameManager: GameManager,
   ): Battle {
-    const { against, reward_table, size } = data;
+    const { against, reward_table: rewardTable, size } = data;
     let { level } = data;
     const playerLove = gameManager.gameData.you.love;
     let enemyLeader: Character;
@@ -925,7 +944,7 @@ export class Battle extends EventTarget implements BattleData {
       playerTeam: gameManager.gameData.activeFriends,
       opponentLeader: enemyLeader,
       opponentTeam: enemyTeam,
-      rewardTable: reward_table,
+      rewardTableId: rewardTable,
       gameData: gameManager.gameData,
     });
   }

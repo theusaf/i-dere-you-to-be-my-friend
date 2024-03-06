@@ -1,0 +1,9 @@
+default:
+  leader_capturable: true
+  friends_capturable: true
+  gold:
+    amount: [5, 40]
+    love_multiplier: 1.75
+  xp:
+    amount: [15, 60]
+    love_multiplier: 1.5
