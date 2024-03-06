@@ -11,7 +11,7 @@
     "start": "node backend/index.js",
     "build-vite": "tsc && vite build",
     "build-server": "node esbuild.js",
-    "build-exe": "./build.sh"
+    "build-exe": "./build.sh -z"
   },
   "dependencies": {
     "@gluon-framework/gluon": "^0.14.0",
