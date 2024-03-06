@@ -31,6 +31,8 @@ export interface RawGameDataContent {
   gold?: number;
 }
 
+const maxFriends = 8;
+
 export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
   worldMapData: WorldMapData;
   friends: Character[];
@@ -90,6 +92,13 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
 
   hasAnyLivingActiveFriends(): boolean {
     return this.activeFriends.some((friend) => !friend.isDead);
+  }
+
+  addCharacter(character: Character): void {
+    if (this.activeFriends.length < maxFriends) {
+      this.activeFriends.push(character);
+    }
+    this.friends.push(character);
   }
 
   static fromMap(map: RawGameDataContent): GameData {

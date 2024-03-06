@@ -14,6 +14,8 @@ import { MoveData, getMovesets } from "../../util/moves";
 import { RichTextSpan } from "../../../engine/components/rich_text_span";
 import { TypeIcon } from "../../../engine/components/type_icon";
 import { NumberSpan } from "../../../engine/components/numer_span";
+import { chance } from "../../util/chance";
+import { FriendContract } from "../../../engine/components/contract";
 
 export interface BattleScreenContentProps {
   state: BattleScreen;
@@ -165,6 +167,8 @@ enum UserViewControllerState {
   run,
   logs,
   wait,
+  rizz,
+  contract,
 }
 
 function UserViewButtonController({
@@ -289,7 +293,9 @@ function UserViewButtonController({
           onPass={() => {
             onMoveSelected(getMovesets()["_pass"]);
           }}
-          onRizz={() => {}}
+          onRizz={() => {
+            setState(UserViewControllerState.rizz);
+          }}
         />
       );
       message = "Actions";
@@ -332,6 +338,55 @@ function UserViewButtonController({
         </AnimatedTextController>
       ) : (
         <></>
+      );
+      break;
+    case UserViewControllerState.rizz:
+      message = "What do you say?";
+      buttons = (
+        <RizzButtons
+          onSelect={(message) => {
+            battle.addLog(message);
+            battle.addLog("..........");
+            const activeEnemy = battle.activeOpponent!;
+            const diceRoll = chance.d20();
+            let baseDifficulty =
+              18 * (activeEnemy.hp / activeEnemy.stats.maxHealth);
+            baseDifficulty += activeEnemy.love / 2;
+            if (diceRoll === 20 || diceRoll > baseDifficulty) {
+              battle.addLog("Okay.");
+              callbackRegister(() => {
+                setState(UserViewControllerState.contract);
+              });
+            } else {
+              battle.addLog("No thank you.");
+              callbackRegister(() => {
+                onMoveSelected(getMovesets()["_pass"]);
+              });
+            }
+            battle.triggerChange();
+          }}
+        />
+      );
+      break;
+    case UserViewControllerState.contract:
+      message = "";
+      buttons = (
+        <FriendContract
+          initialName={battle.activeOpponent!.name}
+          contractee={gameManager.gameData.you.name}
+          onContractSigned={(name) => {
+            const opponent = battle.activeOpponent!;
+            const newFriend = opponent.clone();
+            newFriend.name = name;
+            battle.addLog(`${newFriend.name} has become your friend!`);
+            battle.activeOpponent = null;
+            battle.opponentTeam.splice(
+              battle.opponentTeam.indexOf(opponent),
+              1,
+            );
+            battle.triggerChange();
+          }}
+        />
       );
       break;
   }
@@ -427,6 +482,43 @@ interface UserViewButtonProps {
   setState: React.Dispatch<React.SetStateAction<UserViewControllerState>>;
 }
 
+// really just for flavor
+const rizzMessages = [
+  "Will you be my friend?",
+  "I dare you to be my friend!",
+  "You're lookin' mighty fine!",
+  "I would be a better friend",
+  "I would like it if you were my friend",
+  "Wanna hang out with me?",
+  "We should go on an adventure, together.",
+  "I won't hurt you if you become my friend",
+  "It was like at first sight!",
+];
+
+function RizzButtons({
+  onSelect,
+}: {
+  onSelect: (message: string) => void;
+}): JSX.Element {
+  const messages = chance.pickset(rizzMessages, 4);
+  return (
+    <div className="grid grid-cols-2 gap-2 w-full h-full">
+      {messages.map((message, i) => {
+        return (
+          <TextActionButton
+            key={i}
+            onClick={() => {
+              onSelect(message);
+            }}
+          >
+            {message}
+          </TextActionButton>
+        );
+      })}
+    </div>
+  );
+}
+
 function IndexButtons({ className, setState }: UserViewButtonProps) {
   return (
     <div className="grid grid-cols-2 grid-rows-2 gap-2 text-center h-full">
@@ -493,7 +585,7 @@ function ActionsButton({
       <h4 className="text-left">Actions</h4>
       <div className="flex gap-2">
         <TextActionButton
-          disabled={battle.rewardTable === null}
+          disabled={battle.rewardTable === null} // TODO: Disable on other condition
           className="min-w-24 cursor-pointer"
           onClick={() => onRizz()}
         >
