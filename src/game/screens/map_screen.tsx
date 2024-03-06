@@ -626,7 +626,7 @@ export class MapScreen extends GameScreen {
       }
       this.updateChunks();
     } else {
-      this.characterSprite.setAnimation(CharacterSpriteAnimation.none);
+      this.characterSprite.setAnimation(CharacterSpriteAnimation.idle);
     }
   }
 

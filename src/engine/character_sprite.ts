@@ -14,7 +14,8 @@ export interface CharacterSpriteOpts {
 }
 
 export enum CharacterSpriteAnimation {
-  none,
+  idle,
+  pose,
   running,
 }
 
@@ -133,8 +134,8 @@ export class CharacterSprite {
     this.mainContainer.addChild(this.legRightLink);
     this.mainContainer.addChild(this.legLeftLink);
 
-    this.oldAnimationType = CharacterSpriteAnimation.none;
-    this.animationType = CharacterSpriteAnimation.none;
+    this.oldAnimationType = CharacterSpriteAnimation.idle;
+    this.animationType = CharacterSpriteAnimation.idle;
     this.animation = new GameAnimation({}, {}, 0);
     this.animationContext = {};
   }
@@ -297,7 +298,7 @@ export class CharacterSprite {
       }
     } else {
       switch (this.animationType) {
-        case CharacterSpriteAnimation.none:
+        case CharacterSpriteAnimation.idle:
           this.updateIdleAnimation();
           break;
         case CharacterSpriteAnimation.running:

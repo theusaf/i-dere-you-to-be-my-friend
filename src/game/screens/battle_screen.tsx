@@ -5,6 +5,7 @@ import RenderLayer from "../../engine/render_layer";
 import { ColorScheme } from "../util/style";
 import { GameAnimation, easeMethod } from "../util/animation";
 import { BattleScreenContent } from "./ui/battle_screen_content";
+import { CharacterSprite } from "../../engine/character_sprite";
 
 export const enum BattleScreenState {
   loadingIn,
@@ -27,6 +28,9 @@ export class BattleScreen extends GameScreen {
   );
   battleGraphicsCharacterShadow!: PIXI.Graphics;
   battleGraphicsEnemyShadow!: PIXI.Graphics;
+
+  battleEnemySprite?: CharacterSprite;
+  battleCharacterSprite?: CharacterSprite;
 
   private initializeTransitionGraphics() {
     this.transitionGraphicsTop = new PIXI.Graphics()
