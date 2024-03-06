@@ -1,9 +1,9 @@
 name: build-game
 on:
-  - push:
-      tags:
-        - release-*
-  - workflow_dispatch
+  push:
+    tags:
+      - release-*
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
