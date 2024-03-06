@@ -6,6 +6,7 @@ import { ColorScheme } from "../util/style";
 import { GameAnimation, easeMethod } from "../util/animation";
 import { BattleScreenContent } from "./ui/battle_screen_content";
 import { CharacterSprite } from "../../engine/character_sprite";
+import { BattleEvents } from "../util/battle";
 
 export const enum BattleScreenState {
   loadingIn,
@@ -87,6 +88,58 @@ export class BattleScreen extends GameScreen {
     super.initialize(app, gameManager, new RenderLayer(app, 40));
     this.initializeTransitionGraphics();
     this.initializeBattleGraphics();
+    const battle = this.gameManager.gameData.battle!;
+    battle.addEventListener(BattleEvents.change, async () => {
+      // TODO: Animate
+      if (battle.activeOpponent) {
+        if (!this.battleEnemySprite) {
+          const character = new CharacterSprite({
+            skinColor: battle.activeOpponent.colors.skin,
+            headColor: battle.activeOpponent.colors.head,
+            bodyColor: battle.activeOpponent.colors.body,
+            legColor: battle.activeOpponent.colors.legs,
+            headId: `${battle.activeOpponent.styles.head}`,
+            bodyId: `${battle.activeOpponent.styles.body}`,
+            legId: `${battle.activeOpponent.styles.legs}`,
+          });
+          this.battleEnemySprite = character
+          await character.initSprite();
+          this.container.addChild(character.getView());
+          character.setHeight(8);
+          character.x = 30;
+          character.y = 9;
+        }
+      } else {
+        if (this.battleEnemySprite) {
+          this.container.removeChild(this.battleEnemySprite.getView()!);
+          delete this.battleEnemySprite;
+        }
+      }
+      if (battle.activePlayer) {
+        const character = new CharacterSprite({
+          skinColor: battle.activePlayer.colors.skin,
+          headColor: battle.activePlayer.colors.head,
+          bodyColor: battle.activePlayer.colors.body,
+          legColor: battle.activePlayer.colors.legs,
+          headId: `${battle.activePlayer.styles.head}`,
+          bodyId: `${battle.activePlayer.styles.body}`,
+          legId: `${battle.activePlayer.styles.legs}`,
+        });
+        this.battleCharacterSprite = character
+        await character.initSprite();
+        character.facingForward = false;
+        character.updateSkinColor(character.skinColor);
+        this.container.addChild(character.getView());
+        character.setHeight(10);
+        character.x = 12;
+        character.y = 17;
+      } else {
+        if (this.battleCharacterSprite) {
+          this.container.removeChild(this.battleCharacterSprite.getView()!);
+          delete this.battleCharacterSprite;
+        }
+      }
+    });
   }
 
   update(delta: number): void {

@@ -829,6 +829,7 @@ export class Battle extends EventTarget implements BattleData {
           } else {
             this.activeOpponent = null;
           }
+          this.triggerChange();
         },
       ]);
     } else {
@@ -840,6 +841,7 @@ export class Battle extends EventTarget implements BattleData {
           } else {
             this.activeOpponent = null;
           }
+          this.triggerChange();
         },
       ]);
     }

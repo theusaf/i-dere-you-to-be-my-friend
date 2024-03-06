@@ -231,9 +231,13 @@ function UserViewButtonController({
             }
             battle.addLog("You and your friends escape to the hospital...");
             // TODO: heal all friends and subtract money properly
+            const movesets = getMovesets();
             for (const friend of gameManager.gameData.activeFriends) {
               if (friend.isDead) continue;
               friend.hp = friend.stats.maxHealth;
+              for (const key in friend.moveUses) {
+                friend.moveUses[key] = movesets[key].max_uses;
+              }
             }
             gameManager.gameData.worldMapData.playerX = 26.5;
             gameManager.gameData.worldMapData.playerY = -99.5;
@@ -530,9 +534,9 @@ function FightButtons({
     <div className="grid grid-cols-3 gap-2 text-center h-full relative overflow-y-auto">
       {hoverTip && (
         <div
-          className="absolute right-4 bg-slate-600 outline outline-2 outline-slate-900 w-96"
+          className="fixed right-4 bg-slate-600 outline outline-2 outline-slate-900 w-96"
           style={{
-            bottom: "calc(100% + 3rem)",
+            bottom: "calc(100% + 1rem)",
           }}
         >
           <RichTextSpan text={hoverTip.description} />
