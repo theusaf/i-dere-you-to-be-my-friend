@@ -117,6 +117,26 @@ export function CreateSavePage({
   };
   const sprite = screen.sprite!;
 
+  if (sprite) {
+    switch (currentPartSelection) {
+      case CreatePartSelection.head:
+        if (currentMainColor !== sprite.headColor) {
+          sprite.updateHeadTexture(`${headId.current}`, currentMainColor);
+        }
+        break;
+      case CreatePartSelection.body:
+        if (currentMainColor !== sprite.bodyColor) {
+          sprite.updateBodyTexture(`${bodyId.current}`, currentMainColor);
+        }
+        break;
+      case CreatePartSelection.legs:
+        if (currentMainColor !== sprite.legColor) {
+          sprite.updateLegTexture(`${legsId.current}`, currentMainColor);
+        }
+        break;
+    }
+  }
+
   return (
     <div className="col-span-3 row-span-5 row-start-1 col-start-2 grid grid-rows-8">
       <Unselectable>
@@ -135,29 +155,41 @@ export function CreateSavePage({
             <PartSwitcher
               id={headId}
               testPart="frontHead"
-              currentMainColor={currentMainColor}
-              updater={sprite?.updateHeadTexture.bind(sprite)}
+              updater={(id) => {
+                sprite?.updateHeadTexture(id, sprite.headColor);
+              }}
               className="row-start-2"
               isSelected={currentPartSelection === CreatePartSelection.head}
-              onSelected={() => setCurrentPartSelection(CreatePartSelection.head)}
+              onSelected={() => {
+                setCurrentMainColor(sprite.headColor);
+                setCurrentPartSelection(CreatePartSelection.head);
+              }}
             />
             <PartSwitcher
               id={bodyId}
               testPart="frontBody"
-              currentMainColor={currentMainColor}
-              updater={sprite?.updateBodyTexture.bind(sprite)}
+              updater={(id) => {
+                sprite?.updateBodyTexture(id, sprite.bodyColor);
+              }}
               className="row-start-3"
               isSelected={currentPartSelection === CreatePartSelection.body}
-              onSelected={() => setCurrentPartSelection(CreatePartSelection.body)}
+              onSelected={() => {
+                setCurrentMainColor(sprite.bodyColor);
+                setCurrentPartSelection(CreatePartSelection.body);
+              }}
             />
             <PartSwitcher
               id={legsId}
               testPart="frontLeftLeg"
-              currentMainColor={currentMainColor}
-              updater={sprite?.updateLegTexture.bind(sprite)}
+              updater={(id) => {
+                sprite?.updateLegTexture(id, sprite.legColor);
+              }}
               className="row-start-4"
               isSelected={currentPartSelection === CreatePartSelection.legs}
-              onSelected={() => setCurrentPartSelection(CreatePartSelection.legs)}
+              onSelected={() => {
+                setCurrentMainColor(sprite.legColor);
+                setCurrentPartSelection(CreatePartSelection.legs);
+              }}
             />
           </div>
           <div className="flex flex-col overflow-y-auto">
@@ -169,14 +201,46 @@ export function CreateSavePage({
                 >
                   <FontAwesomeIcon icon={faPalette} className="w-full h-full" />
                 </span>
-                <span className="h-12 bg-red-600 border-4 border-black"></span>
-                <span className="h-12 bg-blue-600 border-4 border-black"></span>
-                <span className="h-12 bg-green-600 border-4 border-black"></span>
-                <span className="h-12 bg-orange-500 border-4 border-black"></span>
-                <span className="h-12 bg-pink-600 border-4 border-black"></span>
-                <span className="h-12 bg-yellow-800 border-4 border-black"></span>
-                <span className="h-12 bg-white border-4 border-black"></span>
-                <span className="h-12 bg-slate-700 border-4 border-black"></span>
+                <ColorPicker
+                  className="bg-red-600"
+                  isSelected={currentMainColor === CreateMainColors.red}
+                  onSelect={() => setCurrentMainColor(CreateMainColors.red)}
+                />
+                <ColorPicker
+                  className="bg-blue-600"
+                  isSelected={currentMainColor === CreateMainColors.blue}
+                  onSelect={() => setCurrentMainColor(CreateMainColors.blue)}
+                />
+                <ColorPicker
+                  className="bg-green-600"
+                  isSelected={currentMainColor === CreateMainColors.green}
+                  onSelect={() => setCurrentMainColor(CreateMainColors.green)}
+                />
+                <ColorPicker
+                  className="bg-orange-600"
+                  isSelected={currentMainColor === CreateMainColors.orange}
+                  onSelect={() => setCurrentMainColor(CreateMainColors.orange)}
+                />
+                <ColorPicker
+                  className="bg-pink-600"
+                  isSelected={currentMainColor === CreateMainColors.pink}
+                  onSelect={() => setCurrentMainColor(CreateMainColors.pink)}
+                />
+                <ColorPicker
+                  className="bg-yellow-800"
+                  isSelected={currentMainColor === CreateMainColors.brown}
+                  onSelect={() => setCurrentMainColor(CreateMainColors.brown)}
+                />
+                <ColorPicker
+                  className="bg-white"
+                  isSelected={currentMainColor === CreateMainColors.white}
+                  onSelect={() => setCurrentMainColor(CreateMainColors.white)}
+                />
+                <ColorPicker
+                  className="bg-slate-700"
+                  isSelected={currentMainColor === CreateMainColors.dark}
+                  onSelect={() => setCurrentMainColor(CreateMainColors.dark)}
+                />
               </div>
               <div className="flex flex-col gap-2">
                 <span className="h-12" title="Choose the skin color">
@@ -216,10 +280,26 @@ export function CreateSavePage({
   );
 }
 
+function ColorPicker({
+  className,
+  isSelected,
+  onSelect,
+}: {
+  isSelected: boolean;
+  className: string;
+  onSelect: () => void;
+}) {
+  return (
+    <span
+      onClick={onSelect}
+      className={`h-12 border-4 cursor-pointer ${isSelected ? "border-white" : "border-black"} ${className}`}
+    ></span>
+  );
+}
+
 function PartSwitcher({
   id,
   testPart,
-  currentMainColor,
   isSelected,
   onSelected,
   updater,
@@ -227,10 +307,9 @@ function PartSwitcher({
 }: {
   id: MutableRefObject<number>;
   testPart: keyof BaseSprite;
-  currentMainColor: CreateMainColors;
   isSelected: boolean;
   onSelected: () => void;
-  updater?: (id: string, color: number) => Promise<void>;
+  updater?: (id: string) => void;
   className: string;
 }) {
   return (
@@ -239,7 +318,7 @@ function PartSwitcher({
         <span
           onClick={() => {
             id.current = getPreviousAvailablePartIndex(id.current, testPart);
-            updater?.(`${id.current}`, currentMainColor);
+            updater?.(`${id.current}`);
           }}
         >
           <Unselectable className="inline">
@@ -262,7 +341,7 @@ function PartSwitcher({
             console.log(id.current);
             id.current = getNextAvailablePartIndex(id.current, testPart);
             console.log(id.current);
-            updater?.(`${id.current}`, currentMainColor);
+            updater?.(`${id.current}`);
           }}
         >
           <Unselectable className="inline">
