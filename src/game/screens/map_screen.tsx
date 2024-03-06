@@ -9,7 +9,10 @@ import { MapSpecialActionBattle, MapSpecialData } from "../util/map_types";
 import { AnimatedSprite } from "../../engine/animated_sprite";
 import { lerp } from "../util/animation";
 import { chance } from "../util/chance";
-import { CharacterSprite, CharacterSpriteAnimation } from "../../engine/character_sprite";
+import {
+  CharacterSprite,
+  CharacterSpriteAnimation,
+} from "../../engine/character_sprite";
 
 export enum MapScreenEvents {
   /**
@@ -107,7 +110,6 @@ export class MapScreen extends GameScreen {
     this.mapContainer = new PIXI.Container();
     this.mapBgContainer = new PIXI.Container();
     this.mapSpecialContainer = new PIXI.Container();
-    this.mapSpecialContainer.zIndex = 50;
     this.mapSpecialContainer.sortableChildren = true;
     this.mapContainer.sortableChildren = true;
 
@@ -129,11 +131,16 @@ export class MapScreen extends GameScreen {
     this.mapContainer.addChild(this.mapBgContainer);
     this.mapContainer.addChild(this.mapSpecialContainer);
     this.container.addChild(this.mapContainer);
-    this.container.addChild(this.characterSprite.getView());
+    this.mapContainer.addChild(this.characterSprite.getView());
     this.characterSprite.initSprite().then(() => {
-      this.characterSprite.setWidth(1);
+      this.characterSprite.setWidth(0.75);
     });
 
+    this.mapSpecialContainer.zIndex = 50;
+    this.characterSprite.getView().zIndex = 25;
+    this.mapContainer.zIndex = 20;
+
+    this.container.sortChildren();
     this.updateChunks();
 
     window.addEventListener("keydown", (e) => this.onKeyDown(e.code));
@@ -560,6 +567,8 @@ export class MapScreen extends GameScreen {
     this.lerpWorldY = lerp(this.lerpWorldY, targetY, 0.2);
     this.mapContainer.x = this.lerpWorldX;
     this.mapContainer.y = this.lerpWorldY;
+    this.characterSprite.x = this.characterWorldX;
+    this.characterSprite.y = this.characterWorldY;
     this.characterSprite.update(delta);
 
     this.movePlayer(delta);
