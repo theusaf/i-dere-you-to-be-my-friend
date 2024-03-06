@@ -40,9 +40,7 @@ export function MainMenuContent({
   setScreenState: (state: MainMenuPageState) => void;
   screen: MainMenuScreen;
 }) {
-  const [page, setPage] = useState<MainMenuPageState>(
-    MainMenuPageState.newSave,
-  );
+  const [page, setPage] = useState<MainMenuPageState>(MainMenuPageState.index);
   setScreenState(page);
 
   const onContinue = async () => {
@@ -77,10 +75,7 @@ export function MainMenuContent({
         />
       ),
       [MainMenuPageState.newSave]: (
-        <CreateSavePage
-        onSaveCreated={onSaveSelected}
-        screen={screen}
-         />
+        <CreateSavePage onSaveCreated={onSaveSelected} screen={screen} />
       ),
     };
   const pagesWithLogo: Set<MainMenuPageState> = new Set([

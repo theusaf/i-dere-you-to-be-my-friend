@@ -115,6 +115,9 @@ export function CreateSavePage({
     headId.current = chance.pickone([1, 2, 3, 4]);
     bodyId.current = chance.pickone([1, 2, 3, 4]);
     legsId.current = chance.pickone([1, 3, 4]);
+    screen.sprite?.updateHeadTexture(`${headId.current}`, currentMainColor);
+    screen.sprite?.updateBodyTexture(`${bodyId.current}`, currentMainColor);
+    screen.sprite?.updateLegTexture(`${legsId.current}`, currentMainColor);
   };
 
   const onSubmit = () => {
@@ -122,6 +125,17 @@ export function CreateSavePage({
       .current;
     character.name = currentName;
     character.gender = currentGender;
+    character.colors = {
+      head: currentMainColor,
+      body: currentMainColor,
+      legs: currentMainColor,
+      skin: currentSkinColor,
+    };
+    character.styles = {
+      head: headId.current,
+      body: bodyId.current,
+      legs: legsId.current,
+    };
     if (creationState) {
       myFriend.current.id = "ura_bosu";
       const gameData: RawGameDataContent = {
@@ -135,6 +149,7 @@ export function CreateSavePage({
       };
       onSaveCreated(gameData);
     } else {
+      randomize();
       setCurrentGender(Gender.none);
       setCurrentName("");
       setCreationState(true);
@@ -392,9 +407,7 @@ function PartSwitcher({
         <span
           className="cursor-pointer"
           onClick={() => {
-            console.log(id.current);
             id.current = getNextAvailablePartIndex(id.current, testPart);
-            console.log(id.current);
             updater?.(`${id.current}`);
           }}
         >
