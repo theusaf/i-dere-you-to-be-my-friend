@@ -114,7 +114,7 @@ export function CreateSavePage({
     );
     headId.current = chance.pickone([1, 2, 3, 4]);
     bodyId.current = chance.pickone([1, 2, 3, 4]);
-    legsId.current = chance.pickone([1, 2, 3, 4]);
+    legsId.current = chance.pickone([1, 3, 4]);
   };
 
   const onSubmit = () => {

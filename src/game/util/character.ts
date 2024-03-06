@@ -1,3 +1,7 @@
+import {
+  CreateMainColors,
+  CreateSkinColors,
+} from "../screens/ui/main_menu_pages/create";
 import { chance } from "./chance";
 import { ActiveStatusEffect, StatusEffect } from "./effects";
 import { getMovesets, getRandomMoveIds } from "./moves";
@@ -92,6 +96,17 @@ export interface CharacterInfo {
   knownMoves: string[];
   moveUses: Record<string, number>;
   isActive: boolean;
+  colors: {
+    head: number;
+    body: number;
+    legs: number;
+    skin: number;
+  };
+  styles: {
+    head: number;
+    body: number;
+    legs: number;
+  };
 }
 
 export class Character implements CharacterInfo, Saveable<CharacterInfo> {
@@ -132,6 +147,8 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
     moveUses,
     statusEffects,
     isActive,
+    colors,
+    styles,
   }: Partial<CharacterInfo> = {}) {
     this.id = id;
     this.isActive = false;
@@ -153,7 +170,39 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
     this.moveUses = moveUses ?? {};
     this.statusEffects = statusEffects ?? [];
     this.isActive = isActive ?? false;
+
+    const availableMainColors = [
+      CreateMainColors.red,
+      CreateMainColors.blue,
+      CreateMainColors.green,
+      CreateMainColors.orange,
+      CreateMainColors.pink,
+      CreateMainColors.brown,
+      CreateMainColors.white,
+      CreateMainColors.dark,
+    ];
+    const availableSkinColors = [
+      CreateSkinColors.dark,
+      CreateSkinColors.redBrown,
+      CreateSkinColors.amber,
+      CreateSkinColors.golden,
+      CreateSkinColors.tan,
+      CreateSkinColors.light,
+    ];
+    this.colors = colors ?? {
+      head: chance.pickone(availableMainColors),
+      body: chance.pickone(availableMainColors),
+      legs: chance.pickone(availableMainColors),
+      skin: chance.pickone(availableSkinColors),
+    };
+    this.styles = styles ?? {
+      head: 0,
+      body: 0,
+      legs: 0,
+    };
   }
+  colors: { head: number; body: number; legs: number; skin: number };
+  styles: { head: number; body: number; legs: number };
 
   clone(): Character {
     return new Character(JSON.parse(JSON.stringify(this.toMap())));
@@ -178,6 +227,8 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
       knownMoves: this.knownMoves,
       moveUses: this.moveUses,
       isActive: this.isActive,
+      colors: this.colors,
+      styles: this.styles,
     };
   }
 
@@ -276,6 +327,13 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
     for (const move of moves) {
       moveUses[move] = movesets[move].max_uses;
     }
+
+    const styles = {
+      head: chance.pickone([1, 2, 3, 4]),
+      body: chance.pickone([1, 2, 3, 4]),
+      legs: chance.pickone([1, 3, 4]),
+    };
+
     const character = new Character({
       love: 1,
       name,
@@ -289,6 +347,7 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
       },
       knownMoves: moves,
       moveUses: moveUses,
+      styles,
     });
     for (let i = 1; i < love; i++) {
       character.loveUp();
