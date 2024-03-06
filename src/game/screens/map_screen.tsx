@@ -9,6 +9,7 @@ import { MapSpecialActionBattle, MapSpecialData } from "../util/map_types";
 import { AnimatedSprite } from "../../engine/animated_sprite";
 import { lerp } from "../util/animation";
 import { chance } from "../util/chance";
+import { CharacterSprite } from "../../engine/character_sprite";
 
 export enum MapScreenEvents {
   /**
@@ -22,7 +23,7 @@ export enum MapScreenEvents {
 export class MapScreen extends GameScreen {
   mapBgContainer!: PIXI.Container;
   chunks: Record<`${number},${number}`, MapData | null> = {};
-  characterSprite!: PIXI.Sprite;
+  characterSprite!: CharacterSprite;
   collisionCacheX: number = 0;
   collisionCacheY: number = 0;
   lerpWorldY: number = 0;
@@ -110,16 +111,17 @@ export class MapScreen extends GameScreen {
     this.mapSpecialContainer.sortableChildren = true;
     this.mapContainer.sortableChildren = true;
 
-    this.characterSprite = new PIXI.Sprite(
-      PIXI.Assets.get("icon/structure/store_stall")!,
-    );
-    this.characterSprite.width = 1;
-    this.characterSprite.height = 1;
+    this.characterSprite = new CharacterSprite({
+      skinColor: this.gameManager.gameData.you.colors.skin,
+      headColor: this.gameManager.gameData.you.colors.head,
+      bodyColor: this.gameManager.gameData.you.colors.body,
+      legColor: this.gameManager.gameData.you.colors.legs,
+      headId: `${this.gameManager.gameData.you.styles.head}`,
+      bodyId: `${this.gameManager.gameData.you.styles.body}`,
+      legId: `${this.gameManager.gameData.you.styles.legs}`,
+    })
     this.characterSprite.x = this.container.worldWidth! / 2 - 0.5;
     this.characterSprite.y = this.container.worldHeight! / 2 - 0.5;
-    this.characterSprite.texture.baseTexture.scaleMode =
-      PIXI.SCALE_MODES.NEAREST;
-    this.characterSprite.zIndex = 100;
 
     this.lerpWorldX = -(this.characterWorldX - this.container.worldWidth! / 2);
     this.lerpWorldY = -(this.characterWorldY - this.container.worldWidth! / 2);
@@ -127,7 +129,10 @@ export class MapScreen extends GameScreen {
     this.mapContainer.addChild(this.mapBgContainer);
     this.mapContainer.addChild(this.mapSpecialContainer);
     this.container.addChild(this.mapContainer);
-    this.container.addChild(this.characterSprite);
+    this.container.addChild(this.characterSprite.getView());
+    this.characterSprite.initSprite().then(() => {
+      this.characterSprite.setWidth(1);
+    });
 
     this.updateChunks();
 
@@ -555,6 +560,7 @@ export class MapScreen extends GameScreen {
     this.lerpWorldY = lerp(this.lerpWorldY, targetY, 0.2);
     this.mapContainer.x = this.lerpWorldX;
     this.mapContainer.y = this.lerpWorldY;
+    this.characterSprite.update(delta);
 
     this.movePlayer(delta);
   }
