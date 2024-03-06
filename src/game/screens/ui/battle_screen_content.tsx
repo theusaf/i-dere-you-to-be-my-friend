@@ -189,10 +189,62 @@ function UserViewButtonController({
       setState(UserViewControllerState.logs);
     }
   }, [logs.length, localLogIndex]);
-  const onMoveSelected = (move: MoveData) => {
-    const playback = battle.simulateTurn(move);
+  const checkForBattleEnd = () => {
     const currentOpponent = battle.activeOpponent!;
     const currentPlayer = battle.activePlayer!;
+    let isEndOfBattle = false;
+    // end of turn, check for ko/win/loss
+    if (!battle.activeOpponent) {
+      battle.getExperience(currentOpponent, currentPlayer);
+      const nextOpponent = battle.getNextOpponent();
+      if (nextOpponent) {
+        battle.updateNextOpponent();
+      } else {
+        // TODO: if rewards apply, allow player to potentially capture opponent leader
+        battle.getRewards();
+        isEndOfBattle = true;
+      }
+    }
+    if (!battle.activePlayer) {
+      const nextPlayer = battle.getNextPlayer();
+      if (nextPlayer) {
+        battle.updateNextPlayer();
+      } else {
+        isEndOfBattle = true;
+        // TODO: move player to hospital
+        const hasLivingFriends =
+          gameManager.gameData.hasAnyLivingActiveFriends();
+        if (currentPlayer.isDead && !hasLivingFriends) {
+          currentPlayer.isDead = false;
+          battle.addLog(
+            `Wait? What's this? It turns out that in your fear of being alone, you missed that ${currentPlayer.name} is still breathing!`,
+          );
+        }
+        battle.addLog("You and your friends escape to the hospital...");
+        // TODO: heal all friends and subtract money properly
+        const movesets = getMovesets();
+        for (const friend of gameManager.gameData.activeFriends) {
+          if (friend.isDead) continue;
+          friend.hp = friend.stats.maxHealth;
+          for (const key in friend.moveUses) {
+            friend.moveUses[key] = movesets[key].max_uses;
+          }
+        }
+        gameManager.gameData.worldMapData.playerX = 26.5;
+        gameManager.gameData.worldMapData.playerY = -99.5;
+      }
+    }
+    if (isEndOfBattle) {
+      callbackRegister(() => {
+        gameManager.gameData.save().finally(() => {
+          gameManager.changeScreen(new MapScreen());
+        });
+      });
+    }
+    battle.triggerChange();
+  };
+  const onMoveSelected = (move: MoveData) => {
+    const playback = battle.simulateTurn(move);
     let playbackIndex = 0;
     const callback = () => {
       if (playbackIndex < playback.length) {
@@ -205,55 +257,7 @@ function UserViewButtonController({
         playbackIndex++;
         callbackRegister(callback);
       } else {
-        let isEndOfBattle = false;
-        // end of turn, check for ko/win/loss
-        if (!battle.activeOpponent) {
-          battle.getExperience(currentOpponent, currentPlayer);
-          const nextOpponent = battle.getNextOpponent();
-          if (nextOpponent) {
-            battle.updateNextOpponent();
-          } else {
-            // TODO: if rewards apply, allow player to potentially capture opponent leader
-            battle.getRewards();
-            isEndOfBattle = true;
-          }
-        }
-        if (!battle.activePlayer) {
-          const nextPlayer = battle.getNextPlayer();
-          if (nextPlayer) {
-            battle.updateNextPlayer();
-          } else {
-            isEndOfBattle = true;
-            // TODO: move player to hospital
-            const hasLivingFriends =
-              gameManager.gameData.hasAnyLivingActiveFriends();
-            if (currentPlayer.isDead && !hasLivingFriends) {
-              currentPlayer.isDead = false;
-              battle.addLog(
-                `Wait? What's this? It turns out that in your fear of being alone, you missed that ${currentPlayer.name} is still breathing!`,
-              );
-            }
-            battle.addLog("You and your friends escape to the hospital...");
-            // TODO: heal all friends and subtract money properly
-            const movesets = getMovesets();
-            for (const friend of gameManager.gameData.activeFriends) {
-              if (friend.isDead) continue;
-              friend.hp = friend.stats.maxHealth;
-              for (const key in friend.moveUses) {
-                friend.moveUses[key] = movesets[key].max_uses;
-              }
-            }
-            gameManager.gameData.worldMapData.playerX = 26.5;
-            gameManager.gameData.worldMapData.playerY = -99.5;
-          }
-        }
-        if (isEndOfBattle) {
-          callbackRegister(() => {
-            gameManager.gameData.save().finally(() => {
-              gameManager.changeScreen(new MapScreen());
-            });
-          });
-        }
+        checkForBattleEnd();
         battle.triggerChange();
       }
     };
@@ -307,10 +311,12 @@ function UserViewButtonController({
           key="run"
           className="w-full"
           onCompleteAction={() => {
-            gameManager.changeScreen(new MapScreen());
+            gameManager.gameData.save().finally(() => {
+              gameManager.changeScreen(new MapScreen());
+            });
           }}
         >
-          Your power of friendship is too weak.
+          Your power of friendship is too weak for this! You run away.
         </AnimatedTextController>
       );
       break;
@@ -384,6 +390,7 @@ function UserViewButtonController({
               battle.opponentTeam.indexOf(opponent),
               1,
             );
+            callbackRegister(() => checkForBattleEnd());
             battle.triggerChange();
           }}
         />
