@@ -136,7 +136,7 @@ export function CreateSavePage({
               id={headId}
               testPart="frontHead"
               currentMainColor={currentMainColor}
-              updater={sprite.updateHeadTexture.bind(sprite)}
+              updater={sprite?.updateHeadTexture.bind(sprite)}
               className="row-start-2"
               isSelected={currentPartSelection === CreatePartSelection.head}
               onSelected={() => setCurrentPartSelection(CreatePartSelection.head)}
@@ -145,7 +145,7 @@ export function CreateSavePage({
               id={bodyId}
               testPart="frontBody"
               currentMainColor={currentMainColor}
-              updater={sprite.updateBodyTexture.bind(sprite)}
+              updater={sprite?.updateBodyTexture.bind(sprite)}
               className="row-start-3"
               isSelected={currentPartSelection === CreatePartSelection.body}
               onSelected={() => setCurrentPartSelection(CreatePartSelection.body)}
@@ -154,7 +154,7 @@ export function CreateSavePage({
               id={legsId}
               testPart="frontLeftLeg"
               currentMainColor={currentMainColor}
-              updater={sprite.updateLegTexture.bind(sprite)}
+              updater={sprite?.updateLegTexture.bind(sprite)}
               className="row-start-4"
               isSelected={currentPartSelection === CreatePartSelection.legs}
               onSelected={() => setCurrentPartSelection(CreatePartSelection.legs)}
@@ -230,7 +230,7 @@ function PartSwitcher({
   currentMainColor: CreateMainColors;
   isSelected: boolean;
   onSelected: () => void;
-  updater: (id: string, color: number) => Promise<void>;
+  updater?: (id: string, color: number) => Promise<void>;
   className: string;
 }) {
   return (
@@ -239,7 +239,7 @@ function PartSwitcher({
         <span
           onClick={() => {
             id.current = getPreviousAvailablePartIndex(id.current, testPart);
-            updater(`${id.current}`, currentMainColor);
+            updater?.(`${id.current}`, currentMainColor);
           }}
         >
           <Unselectable className="inline">
@@ -262,7 +262,7 @@ function PartSwitcher({
             console.log(id.current);
             id.current = getNextAvailablePartIndex(id.current, testPart);
             console.log(id.current);
-            updater(`${id.current}`, currentMainColor);
+            updater?.(`${id.current}`, currentMainColor);
           }}
         >
           <Unselectable className="inline">

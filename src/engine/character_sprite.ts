@@ -164,6 +164,17 @@ export class CharacterSprite {
     this.legRightSprite.anchor.set(0.5, 0);
     this.legLeftSprite.anchor.set(0.5, 0);
 
+    this.headSprite.zIndex = 10;
+    this.bodySprite.zIndex = 8;
+    this.shoulderRightSprite.zIndex = 9;
+    this.shoulderLeftSprite.zIndex = 9;
+    this.armRightSprite.zIndex = 9;
+    this.armLeftSprite.zIndex = 9;
+    this.thighRightSprite.zIndex = 7;
+    this.thighLeftSprite.zIndex = 7;
+    this.legRightSprite.zIndex = 7;
+    this.legLeftSprite.zIndex = 7;
+
     // unfortunately, PIXI doesn't really have good dynamic sizing of containers and sprites
     // the following uses hard-coded values to position the sprites
     this.bodySprite.y = -135;
