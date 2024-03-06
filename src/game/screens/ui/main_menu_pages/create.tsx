@@ -138,6 +138,8 @@ export function CreateSavePage({
               currentMainColor={currentMainColor}
               updater={sprite.updateHeadTexture.bind(sprite)}
               className="row-start-2"
+              isSelected={currentPartSelection === CreatePartSelection.head}
+              onSelected={() => setCurrentPartSelection(CreatePartSelection.head)}
             />
             <PartSwitcher
               id={bodyId}
@@ -145,6 +147,8 @@ export function CreateSavePage({
               currentMainColor={currentMainColor}
               updater={sprite.updateBodyTexture.bind(sprite)}
               className="row-start-3"
+              isSelected={currentPartSelection === CreatePartSelection.body}
+              onSelected={() => setCurrentPartSelection(CreatePartSelection.body)}
             />
             <PartSwitcher
               id={legsId}
@@ -152,6 +156,8 @@ export function CreateSavePage({
               currentMainColor={currentMainColor}
               updater={sprite.updateLegTexture.bind(sprite)}
               className="row-start-4"
+              isSelected={currentPartSelection === CreatePartSelection.legs}
+              onSelected={() => setCurrentPartSelection(CreatePartSelection.legs)}
             />
           </div>
           <div className="flex flex-col overflow-y-auto">
@@ -214,12 +220,16 @@ function PartSwitcher({
   id,
   testPart,
   currentMainColor,
+  isSelected,
+  onSelected,
   updater,
   className,
 }: {
   id: MutableRefObject<number>;
   testPart: keyof BaseSprite;
   currentMainColor: CreateMainColors;
+  isSelected: boolean;
+  onSelected: () => void;
   updater: (id: string, color: number) => Promise<void>;
   className: string;
 }) {
@@ -240,8 +250,9 @@ function PartSwitcher({
       <span className="p-2 cursor-pointer">
         <span>
           <FontAwesomeIcon
-            icon={faCircleDot}
-            color="blue"
+            onClick={onSelected}
+            icon={isSelected ? faCircleDot : faCircle}
+            color={isSelected ? "blue" : ""}
             className="w-8 h-8 cursor-pointer"
           />
         </span>
