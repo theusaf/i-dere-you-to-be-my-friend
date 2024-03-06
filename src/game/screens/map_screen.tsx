@@ -9,7 +9,7 @@ import { MapSpecialActionBattle, MapSpecialData } from "../util/map_types";
 import { AnimatedSprite } from "../../engine/animated_sprite";
 import { lerp } from "../util/animation";
 import { chance } from "../util/chance";
-import { CharacterSprite } from "../../engine/character_sprite";
+import { CharacterSprite, CharacterSpriteAnimation } from "../../engine/character_sprite";
 
 export enum MapScreenEvents {
   /**
@@ -119,9 +119,9 @@ export class MapScreen extends GameScreen {
       headId: `${this.gameManager.gameData.you.styles.head}`,
       bodyId: `${this.gameManager.gameData.you.styles.body}`,
       legId: `${this.gameManager.gameData.you.styles.legs}`,
-    })
-    this.characterSprite.x = this.container.worldWidth! / 2 - 0.5;
-    this.characterSprite.y = this.container.worldHeight! / 2 - 0.5;
+    });
+    this.characterSprite.x = this.container.worldWidth! / 2;
+    this.characterSprite.y = this.container.worldHeight! / 2;
 
     this.lerpWorldX = -(this.characterWorldX - this.container.worldWidth! / 2);
     this.lerpWorldY = -(this.characterWorldY - this.container.worldWidth! / 2);
@@ -547,7 +547,7 @@ export class MapScreen extends GameScreen {
   }
 
   getSpeed(): number {
-    const base = 0.008;
+    const base = 0.006;
     const mult =
       this.keysDown.has("ShiftLeft") || this.keysDown.has("ShiftRight") ? 2 : 1;
     return base * mult;
@@ -565,9 +565,34 @@ export class MapScreen extends GameScreen {
     this.movePlayer(delta);
   }
 
+  animatePlayer(delta: number): void {
+    this.characterSprite.update(delta);
+    switch (this.direction) {
+      case Direction.up:
+      case Direction.upLeft:
+      case Direction.upRight:
+        this.characterSprite.facingForward = false;
+        this.characterSprite.updateSkinColor(
+          this.gameManager.gameData.you.colors.skin,
+        );
+        break;
+      case Direction.down:
+      case Direction.downLeft:
+      case Direction.downRight:
+        this.characterSprite.facingForward = true;
+        this.characterSprite.updateSkinColor(
+          this.gameManager.gameData.you.colors.skin,
+        );
+        break;
+    }
+  }
+
   private movePlayer(delta: number) {
     if (this.paused) return;
+    this.animatePlayer(delta);
     if (this.direction !== Direction.none) {
+      this.characterSprite.setAnimation(CharacterSpriteAnimation.running);
+      this.characterSprite.animationContext.direction = this.direction;
       const distance = this.getSpeed() * delta;
       switch (this.direction) {
         case Direction.up:
@@ -600,6 +625,8 @@ export class MapScreen extends GameScreen {
           break;
       }
       this.updateChunks();
+    } else {
+      this.characterSprite.setAnimation(CharacterSpriteAnimation.none);
     }
   }
 

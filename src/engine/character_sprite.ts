@@ -1,5 +1,7 @@
 import { Container, Sprite, Texture } from "pixi.js";
 import { BaseSprite, recolorSprite } from "../game/util/sprite";
+import { GameAnimation, easeMethod, lerp } from "../game/util/animation";
+import { Direction } from "../game/util/direction";
 
 export interface CharacterSpriteOpts {
   skinColor: number;
@@ -9,6 +11,11 @@ export interface CharacterSpriteOpts {
   bodyId: string;
   legColor: number;
   legId: string;
+}
+
+export enum CharacterSpriteAnimation {
+  none,
+  running,
 }
 
 type PartConstructionList = [keyof BaseSprite, string, number, boolean?][];
@@ -68,6 +75,10 @@ export class CharacterSprite {
   armLeftLink: Container;
   legRightLink: Container;
   legLeftLink: Container;
+  animationType: CharacterSpriteAnimation;
+  animation: GameAnimation;
+  oldAnimationType: CharacterSpriteAnimation;
+  animationContext: Record<string, any>;
 
   constructor({
     skinColor,
@@ -116,6 +127,11 @@ export class CharacterSprite {
     this.mainContainer.addChild(this.armLeftLink);
     this.mainContainer.addChild(this.legRightLink);
     this.mainContainer.addChild(this.legLeftLink);
+
+    this.oldAnimationType = CharacterSpriteAnimation.none;
+    this.animationType = CharacterSpriteAnimation.none;
+    this.animation = new GameAnimation({}, {}, 0);
+    this.animationContext = {};
   }
 
   get x(): number {
@@ -164,16 +180,7 @@ export class CharacterSprite {
     this.legRightSprite.anchor.set(0.5, 0);
     this.legLeftSprite.anchor.set(0.5, 0);
 
-    this.headSprite.zIndex = 10;
-    this.bodySprite.zIndex = 8;
-    this.shoulderRightSprite.zIndex = 9;
-    this.shoulderLeftSprite.zIndex = 9;
-    this.armRightSprite.zIndex = 9;
-    this.armLeftSprite.zIndex = 9;
-    this.thighRightSprite.zIndex = 7;
-    this.thighLeftSprite.zIndex = 7;
-    this.legRightSprite.zIndex = 7;
-    this.legLeftSprite.zIndex = 7;
+    this.setZIndex();
 
     // unfortunately, PIXI doesn't really have good dynamic sizing of containers and sprites
     // the following uses hard-coded values to position the sprites
@@ -219,11 +226,114 @@ export class CharacterSprite {
     connecting.position.set(0, height);
   }
 
-  update(_?: number): void {
+  setZIndex(): void {
+    this.headSprite.zIndex = 10;
+    this.bodySprite.zIndex = 8;
+    this.shoulderRightSprite.zIndex = 9;
+    this.shoulderLeftSprite.zIndex = 9;
+    this.armRightSprite.zIndex = 9;
+    this.armLeftSprite.zIndex = 9;
+    if (this.facingForward) {
+      this.thighRightSprite.zIndex = 7;
+      this.thighLeftSprite.zIndex = 7;
+      this.legRightLink.zIndex = 6;
+      this.legLeftLink.zIndex = 6;
+    } else {
+      this.thighRightSprite.zIndex = 6;
+      this.thighLeftSprite.zIndex = 6;
+      this.legRightLink.zIndex = 7;
+      this.legLeftLink.zIndex = 7;
+    }
+  }
+
+  setAnimation(animation: CharacterSpriteAnimation): void {
+    this.animationType = animation;
+    this.updateAnimation(0);
+  }
+
+  updateAnimation(delta: number): void {
+    if (this.oldAnimationType !== this.animationType) {
+      this.oldAnimationType = this.animationType;
+      switch (this.animationType) {
+        case CharacterSpriteAnimation.running:
+          this.animation = new GameAnimation(
+            {
+              rightThigh: 0,
+              rightLeg: 0,
+              leftThigh: 0,
+              leftLeg: 0,
+            },
+            {
+              rightThigh: 20,
+              rightLeg: 140,
+              leftThigh: -25,
+              leftLeg: 10,
+            },
+            500,
+            easeMethod.easeInQuart,
+          );
+          break;
+      }
+    } else {
+      switch (this.animationType) {
+        case CharacterSpriteAnimation.none:
+          this.thighRightSprite.angle = lerp(
+            this.thighRightSprite.angle,
+            0,
+            0.1,
+          );
+          this.legRightSprite.angle = lerp(this.legRightSprite.angle, 0, 0.1);
+          this.thighLeftSprite.angle = lerp(this.thighLeftSprite.angle, 0, 0.1);
+          this.legLeftSprite.angle = lerp(this.legLeftSprite.angle, 0, 0.1);
+          break;
+        case CharacterSpriteAnimation.running:
+          this.animation.update(delta);
+          const isLeft =
+            this.animationContext.direction === Direction.left ||
+            this.animationContext.direction === Direction.downLeft ||
+            this.animationContext.direction === Direction.upLeft;
+          const isRight =
+            this.animationContext.direction === Direction.right ||
+            this.animationContext.direction === Direction.downRight ||
+            this.animationContext.direction === Direction.upRight;
+          const directionMultiple = isLeft
+            ? -1
+            : isRight
+              ? 1
+              : this.animationContext.directionMultiple ?? 1;
+          if (directionMultiple !== this.animationContext.directionMultiple) {
+            this.animationContext.directionMultiple = directionMultiple;
+          }
+          this.thighRightSprite.angle =
+            this.animation.currentValues.rightThigh * directionMultiple;
+          this.legRightSprite.angle =
+            this.animation.currentValues.rightLeg * directionMultiple;
+          this.thighLeftSprite.angle =
+            this.animation.currentValues.leftThigh * directionMultiple;
+          this.legLeftSprite.angle =
+            this.animation.currentValues.leftLeg * directionMultiple;
+          if (this.animation.isDone) {
+            const endValues = this.animation.endValues;
+            this.animation.startValues = endValues;
+            this.animation.endValues = {
+              rightThigh: this.animation.startValues.leftThigh,
+              rightLeg: this.animation.startValues.leftLeg,
+              leftThigh: this.animation.startValues.rightThigh,
+              leftLeg: this.animation.startValues.rightLeg,
+            };
+            this.animation.reset();
+          }
+          break;
+      }
+    }
+  }
+
+  update(delta: number): void {
+    this.updateAnimation(delta);
     this.armRightLink.rotation = this.shoulderRightSprite.rotation;
     this.armLeftLink.rotation = this.shoulderLeftSprite.rotation;
-    this.legRightLink.rotation = this.bodySprite.rotation;
-    this.legLeftLink.rotation = this.bodySprite.rotation;
+    this.legRightLink.rotation = this.thighRightSprite.rotation;
+    this.legLeftLink.rotation = this.thighLeftSprite.rotation;
   }
 
   async initSprite(): Promise<void> {
@@ -356,6 +466,8 @@ export class CharacterSprite {
     const checkTexture = this.facingForward ? textures[0] : textures[1];
     if (sprite.texture !== checkTexture) {
       sprite.texture = checkTexture;
+      this.setZIndex();
+      this.mainContainer.sortChildren();
     }
   }
 

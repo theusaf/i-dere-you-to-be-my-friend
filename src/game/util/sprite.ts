@@ -66,7 +66,7 @@ function parseSprite(image: Blob): Promise<BaseSprite> {
       const frontLeftShoulderData = spriteContext.getImageData(107, 94, 14, 37);
       const frontLeftArmData = spriteContext.getImageData(107, 131, 14, 41);
 
-      const backHeadData = spriteContext.getImageData(131, 4, 106, 82);
+      const backHeadData = spriteContext.getImageData(139, 4, 106, 82);
       const backLeftShoulderData = spriteContext.getImageData(134, 94, 14, 37);
       const backLeftArmData = spriteContext.getImageData(134, 131, 14, 41);
       const backRightShoulderData = spriteContext.getImageData(236, 94, 14, 37);
