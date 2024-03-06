@@ -78,6 +78,11 @@ export class CharacterSprite {
   animationType: CharacterSpriteAnimation;
   animation: GameAnimation;
   oldAnimationType: CharacterSpriteAnimation;
+  /**
+   * A hacky object to store state abut the current animation
+   *
+   * Really not how TypeScript is supposed to be used...
+   */
   animationContext: Record<string, any>;
 
   constructor({
@@ -229,10 +234,40 @@ export class CharacterSprite {
   setZIndex(): void {
     this.headSprite.zIndex = 10;
     this.bodySprite.zIndex = 8;
-    this.shoulderRightSprite.zIndex = 9;
-    this.shoulderLeftSprite.zIndex = 9;
-    this.armRightSprite.zIndex = 9;
-    this.armLeftSprite.zIndex = 9;
+    if (this.animationType === CharacterSpriteAnimation.running) {
+      const isLeft = this.animationContext.directionMultiple === -1;
+      if (this.facingForward) {
+        if (isLeft) {
+          this.shoulderRightSprite.zIndex = 7;
+          this.armRightLink.zIndex = 7;
+          this.shoulderLeftSprite.zIndex = 9;
+          this.armLeftLink.zIndex = 9;
+        } else {
+          this.shoulderRightSprite.zIndex = 9;
+          this.armRightLink.zIndex = 9;
+          this.shoulderLeftSprite.zIndex = 9;
+          this.armLeftLink.zIndex = 9;
+        }
+      } else {
+        if (isLeft) {
+          // left
+          this.shoulderRightSprite.zIndex = 9;
+          this.armRightLink.zIndex = 9;
+          this.shoulderLeftSprite.zIndex = 7;
+          this.armLeftLink.zIndex = 7;
+        } else {
+          this.shoulderRightSprite.zIndex = 7;
+          this.armRightLink.zIndex = 7;
+          this.shoulderLeftSprite.zIndex = 9;
+          this.armLeftLink.zIndex = 9;
+        }
+      }
+    } else {
+      this.shoulderRightSprite.zIndex = 9;
+      this.armRightLink.zIndex = 9;
+      this.shoulderLeftSprite.zIndex = 9;
+      this.armLeftLink.zIndex = 9;
+    }
     if (this.facingForward) {
       this.thighRightSprite.zIndex = 7;
       this.thighLeftSprite.zIndex = 7;
@@ -244,6 +279,7 @@ export class CharacterSprite {
       this.legRightLink.zIndex = 7;
       this.legLeftLink.zIndex = 7;
     }
+    this.mainContainer.sortChildren();
   }
 
   setAnimation(animation: CharacterSpriteAnimation): void {
@@ -256,76 +292,112 @@ export class CharacterSprite {
       this.oldAnimationType = this.animationType;
       switch (this.animationType) {
         case CharacterSpriteAnimation.running:
-          this.animation = new GameAnimation(
-            {
-              rightThigh: 0,
-              rightLeg: 0,
-              leftThigh: 0,
-              leftLeg: 0,
-            },
-            {
-              rightThigh: 20,
-              rightLeg: 140,
-              leftThigh: -25,
-              leftLeg: 10,
-            },
-            500,
-            easeMethod.easeInQuart,
-          );
+          this.setupRunningAnimation();
           break;
       }
     } else {
       switch (this.animationType) {
         case CharacterSpriteAnimation.none:
-          this.thighRightSprite.angle = lerp(
-            this.thighRightSprite.angle,
-            0,
-            0.1,
-          );
-          this.legRightSprite.angle = lerp(this.legRightSprite.angle, 0, 0.1);
-          this.thighLeftSprite.angle = lerp(this.thighLeftSprite.angle, 0, 0.1);
-          this.legLeftSprite.angle = lerp(this.legLeftSprite.angle, 0, 0.1);
+          this.updateIdleAnimation();
           break;
         case CharacterSpriteAnimation.running:
-          this.animation.update(delta);
-          const isLeft =
-            this.animationContext.direction === Direction.left ||
-            this.animationContext.direction === Direction.downLeft ||
-            this.animationContext.direction === Direction.upLeft;
-          const isRight =
-            this.animationContext.direction === Direction.right ||
-            this.animationContext.direction === Direction.downRight ||
-            this.animationContext.direction === Direction.upRight;
-          const directionMultiple = isLeft
-            ? -1
-            : isRight
-              ? 1
-              : this.animationContext.directionMultiple ?? 1;
-          if (directionMultiple !== this.animationContext.directionMultiple) {
-            this.animationContext.directionMultiple = directionMultiple;
-          }
-          this.thighRightSprite.angle =
-            this.animation.currentValues.rightThigh * directionMultiple;
-          this.legRightSprite.angle =
-            this.animation.currentValues.rightLeg * directionMultiple;
-          this.thighLeftSprite.angle =
-            this.animation.currentValues.leftThigh * directionMultiple;
-          this.legLeftSprite.angle =
-            this.animation.currentValues.leftLeg * directionMultiple;
-          if (this.animation.isDone) {
-            const endValues = this.animation.endValues;
-            this.animation.startValues = endValues;
-            this.animation.endValues = {
-              rightThigh: this.animation.startValues.leftThigh,
-              rightLeg: this.animation.startValues.leftLeg,
-              leftThigh: this.animation.startValues.rightThigh,
-              leftLeg: this.animation.startValues.rightLeg,
-            };
-            this.animation.reset();
-          }
+          this.updateRunningAnimation(delta);
           break;
       }
     }
+  }
+
+  private updateRunningAnimation(delta: number) {
+    this.animation.update(delta);
+    const isLeft =
+      this.animationContext.direction === Direction.left ||
+      this.animationContext.direction === Direction.downLeft ||
+      this.animationContext.direction === Direction.upLeft;
+    const isRight =
+      this.animationContext.direction === Direction.right ||
+      this.animationContext.direction === Direction.downRight ||
+      this.animationContext.direction === Direction.upRight;
+    const directionMultiple = isLeft
+      ? -1
+      : isRight
+        ? 1
+        : this.animationContext.directionMultiple ?? 1;
+    if (directionMultiple !== this.animationContext.directionMultiple) {
+      this.animationContext.directionMultiple = directionMultiple;
+    }
+    this.thighRightSprite.angle =
+      this.animation.currentValues.rightThigh * directionMultiple;
+    this.legRightSprite.angle =
+      this.animation.currentValues.rightLeg * directionMultiple;
+    this.thighLeftSprite.angle =
+      this.animation.currentValues.leftThigh * directionMultiple;
+    this.legLeftSprite.angle =
+      this.animation.currentValues.leftLeg * directionMultiple;
+
+    this.shoulderRightSprite.angle = this.animation.currentValues.rightShoulder;
+    this.armRightSprite.angle = this.animation.currentValues.rightArm;
+    this.shoulderLeftSprite.angle = this.animation.currentValues.leftShoulder;
+    this.armLeftSprite.angle = this.animation.currentValues.leftArm;
+    if (this.animation.isDone) {
+      this.setZIndex();
+      const endValues = this.animation.endValues;
+      const armRunningToggle = !this.animationContext.armRunningToggle;
+      this.animationContext.armRunningToggle = armRunningToggle;
+      this.animation.startValues = endValues;
+      this.animation.endValues = {
+        rightThigh: endValues.leftThigh,
+        rightLeg: endValues.leftLeg,
+        leftThigh: endValues.rightThigh,
+        leftLeg: endValues.rightLeg,
+        rightShoulder: (armRunningToggle ? 45 : 10) * directionMultiple,
+        leftShoulder: (armRunningToggle ? -45 : 10) * directionMultiple,
+        rightArm: (armRunningToggle ? -20 : -100) * directionMultiple,
+        leftArm: (armRunningToggle ? -80 : -30) * directionMultiple,
+      };
+      this.animation.reset();
+    }
+  }
+
+  private setupRunningAnimation() {
+    this.animation = new GameAnimation(
+      {
+        rightThigh: 0,
+        rightLeg: 0,
+        leftThigh: 0,
+        leftLeg: 0,
+        rightShoulder: 0,
+        rightArm: 0,
+        leftShoulder: 0,
+        leftArm: 0,
+      },
+      {
+        rightThigh: 20,
+        rightLeg: 140,
+        leftThigh: -25,
+        leftLeg: 10,
+        rightShoulder: -20,
+        rightArm: 20,
+        leftShoulder: 20,
+        leftArm: -20,
+      },
+      500,
+      easeMethod.easeInQuart,
+    );
+  }
+
+  private updateIdleAnimation() {
+    this.thighRightSprite.angle = lerp(this.thighRightSprite.angle, 0, 0.1);
+    this.legRightSprite.angle = lerp(this.legRightSprite.angle, 0, 0.1);
+    this.thighLeftSprite.angle = lerp(this.thighLeftSprite.angle, 0, 0.1);
+    this.legLeftSprite.angle = lerp(this.legLeftSprite.angle, 0, 0.1);
+    this.shoulderRightSprite.angle = lerp(
+      this.shoulderRightSprite.angle,
+      0,
+      0.1,
+    );
+    this.armRightSprite.angle = lerp(this.armRightSprite.angle, 0, 0.1);
+    this.shoulderLeftSprite.angle = lerp(this.shoulderLeftSprite.angle, 0, 0.1);
+    this.armLeftSprite.angle = lerp(this.armLeftSprite.angle, 0, 0.1);
   }
 
   update(delta: number): void {
@@ -467,7 +539,6 @@ export class CharacterSprite {
     if (sprite.texture !== checkTexture) {
       sprite.texture = checkTexture;
       this.setZIndex();
-      this.mainContainer.sortChildren();
     }
   }
 
