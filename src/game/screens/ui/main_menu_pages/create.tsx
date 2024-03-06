@@ -90,6 +90,31 @@ export function CreateSavePage({
         gender: genderMap[gender],
       }),
     );
+    setCurrentMainColor(
+      chance.pickone([
+        CreateMainColors.red,
+        CreateMainColors.blue,
+        CreateMainColors.green,
+        CreateMainColors.orange,
+        CreateMainColors.pink,
+        CreateMainColors.brown,
+        CreateMainColors.white,
+        CreateMainColors.dark,
+      ]),
+    );
+    setCurrentSkinColor(
+      chance.pickone([
+        CreateSkinColors.dark,
+        CreateSkinColors.redBrown,
+        CreateSkinColors.amber,
+        CreateSkinColors.golden,
+        CreateSkinColors.tan,
+        CreateSkinColors.light,
+      ]),
+    );
+    headId.current = chance.pickone([1, 2, 3, 4]);
+    bodyId.current = chance.pickone([1, 2, 3, 4]);
+    legsId.current = chance.pickone([1, 2, 3, 4]);
   };
 
   const onSubmit = () => {
@@ -115,25 +140,28 @@ export function CreateSavePage({
       setCreationState(true);
     }
   };
-  const sprite = screen.sprite!;
-
+  const sprite = screen.sprite;
   if (sprite) {
-    switch (currentPartSelection) {
-      case CreatePartSelection.head:
-        if (currentMainColor !== sprite.headColor) {
-          sprite.updateHeadTexture(`${headId.current}`, currentMainColor);
-        }
-        break;
-      case CreatePartSelection.body:
-        if (currentMainColor !== sprite.bodyColor) {
-          sprite.updateBodyTexture(`${bodyId.current}`, currentMainColor);
-        }
-        break;
-      case CreatePartSelection.legs:
-        if (currentMainColor !== sprite.legColor) {
-          sprite.updateLegTexture(`${legsId.current}`, currentMainColor);
-        }
-        break;
+    if (sprite.skinColor !== currentSkinColor) {
+      sprite.updateSkinColor(currentSkinColor);
+    } else {
+      switch (currentPartSelection) {
+        case CreatePartSelection.head:
+          if (currentMainColor !== sprite.headColor) {
+            sprite.updateHeadTexture(`${headId.current}`, currentMainColor);
+          }
+          break;
+        case CreatePartSelection.body:
+          if (currentMainColor !== sprite.bodyColor) {
+            sprite.updateBodyTexture(`${bodyId.current}`, currentMainColor);
+          }
+          break;
+        case CreatePartSelection.legs:
+          if (currentMainColor !== sprite.legColor) {
+            sprite.updateLegTexture(`${legsId.current}`, currentMainColor);
+          }
+          break;
+      }
     }
   }
 
@@ -156,12 +184,12 @@ export function CreateSavePage({
               id={headId}
               testPart="frontHead"
               updater={(id) => {
-                sprite?.updateHeadTexture(id, sprite.headColor);
+                screen.sprite?.updateHeadTexture(id, screen.sprite.headColor);
               }}
               className="row-start-2"
               isSelected={currentPartSelection === CreatePartSelection.head}
               onSelected={() => {
-                setCurrentMainColor(sprite.headColor);
+                setCurrentMainColor(screen.sprite!.headColor);
                 setCurrentPartSelection(CreatePartSelection.head);
               }}
             />
@@ -169,12 +197,12 @@ export function CreateSavePage({
               id={bodyId}
               testPart="frontBody"
               updater={(id) => {
-                sprite?.updateBodyTexture(id, sprite.bodyColor);
+                screen.sprite?.updateBodyTexture(id, screen.sprite.bodyColor);
               }}
               className="row-start-3"
               isSelected={currentPartSelection === CreatePartSelection.body}
               onSelected={() => {
-                setCurrentMainColor(sprite.bodyColor);
+                setCurrentMainColor(screen.sprite!.bodyColor);
                 setCurrentPartSelection(CreatePartSelection.body);
               }}
             />
@@ -182,12 +210,12 @@ export function CreateSavePage({
               id={legsId}
               testPart="frontLeftLeg"
               updater={(id) => {
-                sprite?.updateLegTexture(id, sprite.legColor);
+                sprite?.updateLegTexture(id, screen.sprite!.legColor);
               }}
               className="row-start-4"
               isSelected={currentPartSelection === CreatePartSelection.legs}
               onSelected={() => {
-                setCurrentMainColor(sprite.legColor);
+                setCurrentMainColor(screen.sprite!.legColor);
                 setCurrentPartSelection(CreatePartSelection.legs);
               }}
             />
@@ -246,12 +274,38 @@ export function CreateSavePage({
                 <span className="h-12" title="Choose the skin color">
                   <FontAwesomeIcon icon={faPerson} className="w-full h-full" />
                 </span>
-                <span className="h-12 bg-orange-950 border-4 border-black"></span>
-                <span className="h-12 bg-orange-800 border-4 border-black"></span>
-                <span className="h-12 bg-amber-800 border-4 border-black"></span>
-                <span className="h-12 bg-yellow-800 border-4 border-black"></span>
-                <span className="h-12 bg-orange-300 border-4 border-black"></span>
-                <span className="h-12 bg-orange-200 border-4 border-black"></span>
+                <ColorPicker
+                  className="bg-orange-950"
+                  isSelected={currentSkinColor === CreateSkinColors.dark}
+                  onSelect={() => setCurrentSkinColor(CreateSkinColors.dark)}
+                />
+                <ColorPicker
+                  className="bg-orange-800"
+                  isSelected={currentSkinColor === CreateSkinColors.redBrown}
+                  onSelect={() =>
+                    setCurrentSkinColor(CreateSkinColors.redBrown)
+                  }
+                />
+                <ColorPicker
+                  className="bg-amber-800"
+                  isSelected={currentSkinColor === CreateSkinColors.amber}
+                  onSelect={() => setCurrentSkinColor(CreateSkinColors.amber)}
+                />
+                <ColorPicker
+                  className="bg-yellow-800"
+                  isSelected={currentSkinColor === CreateSkinColors.golden}
+                  onSelect={() => setCurrentSkinColor(CreateSkinColors.golden)}
+                />
+                <ColorPicker
+                  className="bg-orange-300"
+                  isSelected={currentSkinColor === CreateSkinColors.tan}
+                  onSelect={() => setCurrentSkinColor(CreateSkinColors.tan)}
+                />
+                <ColorPicker
+                  className="bg-orange-200"
+                  isSelected={currentSkinColor === CreateSkinColors.light}
+                  onSelect={() => setCurrentSkinColor(CreateSkinColors.light)}
+                />
               </div>
             </div>
           </div>

@@ -40,7 +40,7 @@ export class MainMenuScreen extends GameScreen {
     this.characterBg.visible = false;
 
     this.characterBgMain = new PIXI.Graphics()
-      .beginFill(0x92400e)
+      .beginFill(0xfcba03)
       .drawRect(
         worldWidth / 3,
         worldHeight / 7,
