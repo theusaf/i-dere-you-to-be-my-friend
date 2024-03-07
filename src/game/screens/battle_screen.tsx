@@ -102,7 +102,7 @@ export class BattleScreen extends GameScreen {
             bodyId: `${battle.activeOpponent.styles.body}`,
             legId: `${battle.activeOpponent.styles.legs}`,
           });
-          this.battleEnemySprite = character
+          this.battleEnemySprite = character;
           await character.initSprite();
           this.container.addChild(character.getView());
           character.setHeight(8);
@@ -125,7 +125,7 @@ export class BattleScreen extends GameScreen {
           bodyId: `${battle.activePlayer.styles.body}`,
           legId: `${battle.activePlayer.styles.legs}`,
         });
-        this.battleCharacterSprite = character
+        this.battleCharacterSprite = character;
         await character.initSprite();
         character.facingForward = false;
         character.updateSkinColor(character.skinColor);

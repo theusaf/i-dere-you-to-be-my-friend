@@ -1,7 +1,7 @@
 import { PixelImage } from "../../../engine/components/pixel_image";
 import { Unselectable } from "../../../engine/components/unselectable";
 import { useState } from "react";
-import { getLatestSave } from "../../util/saves";
+import { getLatestSave, isSaveCompatible } from "../../util/saves";
 import { GameData, RawGameDataContent } from "../../util/game_data";
 import { GameManager } from "../../../engine/game_manager";
 import { MapScreen } from "../map_screen";
@@ -11,12 +11,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { CreateSavePage } from "./main_menu_pages/create";
 import { MainMenuScreen } from "../main_menu_screen";
-
-export enum MainMenuPageState {
-  index = "index",
-  saves = "saves",
-  newSave = "newSave",
-}
+import { MainMenuPageState } from "../../util/enums";
 
 export function MainMenuLogo() {
   return (
@@ -45,7 +40,7 @@ export function MainMenuContent({
 
   const onContinue = async () => {
     const latestSave = await getLatestSave<RawGameDataContent>();
-    if (latestSave) {
+    if (latestSave && isSaveCompatible(latestSave.saveId ?? "")) {
       onSaveSelected(latestSave);
     } else {
       navigateToSaveList();

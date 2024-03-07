@@ -71,5 +71,6 @@ export interface MapSpecialActionBattle extends MapSpecialActionBase {
 
 export interface MapSpecialData {
   boxes: (MapSpecialActionBox | MapSpecialBuildingBox)[];
-  npcs: []; // not implemented yet
+  npcs: []; // TODO: not implemented yet
+  cutscenes?: Record<string, string>;
 }

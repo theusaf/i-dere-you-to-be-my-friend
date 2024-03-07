@@ -116,7 +116,7 @@ export const assetList: AssetsManifest = {
         {
           src: "./assets/game/rewards.yaml",
           alias: "game/rewards",
-        }
+        },
       ],
     },
   ],

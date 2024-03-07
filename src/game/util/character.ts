@@ -1,12 +1,9 @@
-import {
-  CreateMainColors,
-  CreateSkinColors,
-} from "../screens/ui/main_menu_pages/create";
 import { chance } from "./chance";
 import { ActiveStatusEffect, StatusEffect } from "./effects";
 import { getMovesets, getRandomMoveIds } from "./moves";
 import { getRandomName } from "./random";
 import { Saveable } from "./saves";
+import { CreateMainColors, CreateSkinColors } from "./style";
 import { DereType } from "./types";
 
 export interface CharacterStats {

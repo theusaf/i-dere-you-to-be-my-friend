@@ -22,26 +22,7 @@ import {
   getPreviousAvailablePartIndex,
 } from "../../../util/sprite";
 import { MutableRefObject } from "react";
-
-export enum CreateMainColors {
-  red = 0xdc2626,
-  blue = 0x2563eb,
-  green = 0x16a34a,
-  orange = 0xf97316,
-  pink = 0xdb2777,
-  brown = 0x854d0e,
-  white = 0xffffff,
-  dark = 0x334155,
-}
-
-export enum CreateSkinColors {
-  dark = 0x431407,
-  redBrown = 0x9a3412,
-  amber = 0x92400e,
-  golden = 0x854d0e,
-  tan = 0xfdba74,
-  light = 0xfed7aa,
-}
+import { CreateMainColors, CreateSkinColors } from "../../../util/style";
 
 enum CreatePartSelection {
   head,
@@ -400,7 +381,7 @@ function PartSwitcher({
           <FontAwesomeIcon
             onClick={onSelected}
             icon={isSelected ? faCircleDot : faCircle}
-            color={isSelected ? "blue" : ""}
+            color={isSelected ? "black" : ""}
             className="w-8 h-8 cursor-pointer"
           />
         </span>
@@ -457,7 +438,7 @@ function GenderSelector({
         testGender={Gender.none}
         setCurrentGender={setCurrentGender}
       >
-        {currentName}
+        {currentName || "(None)"}
       </GenderSelectorButton>
     </div>
   );

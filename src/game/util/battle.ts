@@ -33,11 +33,11 @@ export interface RewardTable {
   gold: {
     amount: number | number[];
     love_multiplier: number;
-  }
+  };
   xp: {
     amount: number | number[];
     love_multiplier: number;
-  }
+  };
 }
 
 /**
@@ -69,7 +69,8 @@ export class Battle extends EventTarget implements BattleData {
     this.playerTeam = playerTeam;
     this.gameData = gameData;
 
-    const rewardTables = Assets.get<Record<string, RewardTable>>("game/rewards");
+    const rewardTables =
+      Assets.get<Record<string, RewardTable>>("game/rewards");
     if (rewardTableId !== null) {
       this.rewardTable = rewardTables[rewardTableId];
     }
@@ -341,10 +342,10 @@ export class Battle extends EventTarget implements BattleData {
     const { might, type, targets, traits } = move;
     const target = targets === "self" ? user : opponent;
     const realTarget = targets === "self" ? realUser : realOpponent;
+    const typeMultiplier = calculateDamageMultiplier(type, target.types);
 
     let critChance = 1 / 20,
       isCrit = false,
-      typeMultiplier = calculateDamageMultiplier(type, target.types),
       damage = typeMultiplier * might,
       numberOfMultiHits = 0;
 
@@ -766,7 +767,7 @@ export class Battle extends EventTarget implements BattleData {
         }
         case TraitKind.heal: {
           if (user.hp <= 0) break;
-          let healAmount = 10;
+          const healAmount = 10;
           let triggerChance = 1;
           if (typeof trait === "object") {
             triggerChance = trait.chance ?? triggerChance;
@@ -910,7 +911,7 @@ export class Battle extends EventTarget implements BattleData {
     let { level } = data;
     const playerLove = gameManager.gameData.you.love;
     let enemyLeader: Character;
-    let enemyTeam: Character[] = [];
+    const enemyTeam: Character[] = [];
     let love: number | null = null;
     if (level === null) {
       level = [chance.bool() ? Math.max(playerLove - 4, 1) : 1, playerLove + 2];

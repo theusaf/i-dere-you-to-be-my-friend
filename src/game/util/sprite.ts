@@ -222,7 +222,7 @@ function recolorHandleOverflow(
     replacementColors[2] - colorDiff[2],
   ];
   if (colors.some((c) => c < 0 || c > 255)) {
-    let netChange = colors
+    const netChange = colors
       .filter((c) => c < 0 || c > 255)
       .reduce((a, b) => a + b, 0);
     for (let i = 0; i < colors.length; i++) {

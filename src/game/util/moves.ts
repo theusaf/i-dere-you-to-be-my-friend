@@ -67,7 +67,7 @@ export function getRandomMoveIds(
     );
   });
   if (count === 0) count = chance.integer({ min: 2, max: 6 });
-  let moves: string[] = [];
+  const moves: string[] = [];
   for (let i = 0; i < count; i++) {
     const move = chance.weighted(
       [...matchingMoves, ...nonMatchingMoves],

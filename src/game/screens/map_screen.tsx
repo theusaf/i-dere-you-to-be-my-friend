@@ -496,7 +496,7 @@ export class MapScreen extends GameScreen {
       case MapTile.tallgrass:
         sprite.texture = PIXI.Assets.get("icon/map/thick_grass")!;
         break;
-      case MapTile.water:
+      case MapTile.water: {
         sprite.destroy();
         let oldTexture: PIXI.Texture = PIXI.Assets.get("icon/map/water1");
         sprite = new AnimatedSprite({
@@ -517,6 +517,7 @@ export class MapScreen extends GameScreen {
           },
         });
         break;
+      }
       default:
         sprite.texture = PIXI.Texture.WHITE;
     }

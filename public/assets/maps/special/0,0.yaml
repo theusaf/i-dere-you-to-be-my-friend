@@ -1,0 +1,12 @@
+cutscenes:
+  main:
+    actions:
+      - [blank_screen, true]
+      # - [music TODO]
+      - [text, "How can this be?"]
+      - - text
+        - >-
+          I have no friends... I've been searching for so many years for someone,
+          anyone to be my friend.
+
+    conditions: []

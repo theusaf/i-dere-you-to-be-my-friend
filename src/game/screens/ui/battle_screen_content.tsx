@@ -61,7 +61,7 @@ export function BattleScreenContent({
     return () => {
       battle.removeEventListener(BattleEvents.change, listener);
     };
-  }, []);
+  }, [battle]);
 
   const showUI = state.state === BattleScreenState.battle;
 
@@ -369,7 +369,7 @@ function UserViewButtonController({
       message = "...";
       buttons = <></>;
       break;
-    case UserViewControllerState.logs:
+    case UserViewControllerState.logs: {
       message = "";
       const log = logs[localLogIndex];
       buttons = show ? (
@@ -391,6 +391,7 @@ function UserViewButtonController({
         <></>
       );
       break;
+    }
     case UserViewControllerState.rizz:
       message = "What do you say?";
       buttons = (

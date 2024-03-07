@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 export interface AnimatedTextControllerProps {
   className?: string;
   children: string;
+  speaker?: string;
   onComplete?: () => void;
   onCompleteAction?: () => void;
   key: any;
@@ -18,6 +19,7 @@ export interface AnimatedTextControllerProps {
  */
 export function AnimatedTextController({
   children: finalText,
+  speaker,
   className,
   onComplete,
   onCompleteAction,
@@ -32,10 +34,10 @@ export function AnimatedTextController({
       }
     }, 25);
     return () => clearInterval(timeout);
-  }, [index]);
+  }, [index, onComplete, finalText.length]);
   return (
     <div
-      className={`text-left h-full ${className}`}
+      className={`text-left h-full relative ${className}`}
       onClick={() => {
         if (index === finalText.length) {
           onCompleteAction?.();
@@ -45,7 +47,8 @@ export function AnimatedTextController({
         }
       }}
     >
-      {finalText.substring(0, index)}
+      {speaker && <div className="p-2">{speaker}</div>}
+      <div>{finalText.substring(0, index)}</div>
     </div>
   );
 }

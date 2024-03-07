@@ -17,7 +17,7 @@ export function LoadingScreenContent({
       }
     }, 250);
     return () => clearInterval(checker);
-  }, []);
+  }, [data.progress]);
 
   return (
     <div

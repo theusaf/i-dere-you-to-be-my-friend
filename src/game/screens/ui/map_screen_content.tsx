@@ -50,7 +50,7 @@ export function MapScreenContent({
         battleStartListener,
       );
     };
-  }, []);
+  }, [state.eventNotifier]);
 
   return (
     <div
@@ -150,7 +150,7 @@ function BattleAnimationDisplay({
       return () => (shouldStop = true);
     };
     requestAnimationFrame(animationRunner);
-  }, [currentAnimation, state]);
+  }, [currentAnimation, state, onDone]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -158,7 +158,7 @@ function BattleAnimationDisplay({
       onDone();
     }, 5000);
     return () => clearTimeout(timeout);
-  }, []);
+  }, [onDone]);
 
   const mask = (
     <svg className="absolute w-full h-full z-50">
