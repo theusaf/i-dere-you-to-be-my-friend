@@ -3,10 +3,76 @@ cutscenes:
     actions:
       - [blank_screen, true]
       # - [music TODO]
-      - [text, "How can this be?"]
+      - - text
+        - How can this be?
       - - text
         - >-
           I have no friends... I've been searching for so many years for someone,
           anyone to be my friend.
+      - - text
+        - <Your vision begins to fade...>
+      - - text
+        - This can't be! I can't be dying of loneliness, can I?
+      - - text
+        - <You see a figure in the distance coming towards you.>
+      - - text
+        - §player.name§?
+      - - text
+        - Wait, is that $friend.name§? Someone actually knows me?
+      - - text
+        - Oh no, I'm so close to getting a friend, but I'm dying...
+      - - text
+        - <You die...>
+      - - text
+        - <...of loneliness>
+      - [blank_screen, false]
+      - - text
+        - What? Where is this place?
+      - - text
+        - Is this... one of those 'isekai' things?
+      - - text
+        - <A person, seemingly desperate, quickly approaches you.>
+      - - animate
+        - id: intro
+          start_x: 74
+          start_y: 43
+          end_x: 74
+          end_y: 63
+          time: 5000
+      - - text
+        - Hey, you! Can I be your friend?
+      - - text
+        - ... Huh? Uh, sure?
+      - - text
+        - Nevermind, just take this!
+      - - text
+        - <You get a strange piece of paper.>
+      - - text
+        - Okay, now give them back to me!
+      - - text
+        - <They take out a pen and start writing on the paper.>
+      - [contract, intro]
+      - - text
+        - There! Now we're friends!
+      - - text
+        - <Two people appear out of nowhere.>
+      - - text
+        - >-
+          How could you run off like that? Don't tell me... No...
+          You became friends with that person to avoid me?!
+      - - text
+        - Fine, I'll just have to make you my friend again with force!
+      - - enter_battle
+        - against: random
+          size: 2
+          level: 1
+          reward_table: default
+          popup: tutorial
 
     conditions: []
+
+npcs:
+  intro:
+    type: random
+    love: 1
+    hp: 40

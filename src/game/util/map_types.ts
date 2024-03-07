@@ -67,10 +67,43 @@ export interface MapSpecialActionBattle extends MapSpecialActionBase {
    * If `null`, level is based off the player's level.
    */
   level: number | number[] | null;
+  /**
+   * The popup UI to show before the battle starts.
+   */
+  popup?: string;
 }
 
+export enum CutsceneAction {
+  blankScreen = "blank_screen",
+  animate = "animate",
+  dialog = "text",
+  battle = "enter_battle",
+  contract = "contract",
+}
+
+type BlankScreenCutsceneAction = [CutsceneAction, boolean];
+type AnimateCutsceneAction = [
+  CutsceneAction.animate,
+  {
+    id: string;
+    start_x: number;
+    start_y: number;
+    end_x: number;
+    end_y: number;
+    time: number;
+  },
+];
+type DialogCutsceneAction = [CutsceneAction.dialog, string];
+type BattleCutsceneAction = [CutsceneAction.battle, MapSpecialActionBattle];
+
+export type Cutscene =
+  | BlankScreenCutsceneAction
+  | AnimateCutsceneAction
+  | DialogCutsceneAction
+  | BattleCutsceneAction;
+
 export interface MapSpecialData {
-  boxes: (MapSpecialActionBox | MapSpecialBuildingBox)[];
-  npcs: []; // TODO: not implemented yet
-  cutscenes?: Record<string, string>;
+  boxes?: (MapSpecialActionBox | MapSpecialBuildingBox)[];
+  npcs?: []; // TODO: not implemented yet
+  cutscenes?: Record<string, Cutscene>;
 }

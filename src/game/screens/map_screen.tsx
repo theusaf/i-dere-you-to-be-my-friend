@@ -304,7 +304,7 @@ export class MapScreen extends GameScreen {
     if (!chunkData) return;
 
     const { boxes } = chunkData;
-    for (const box of boxes) {
+    for (const box of boxes!) {
       const { from, to, type } = box;
       if (from === null || to === null) continue;
       if (type === "building") {
@@ -767,7 +767,7 @@ export class MapScreen extends GameScreen {
     const { x: chunkX, y: chunkY } = this.getLocalChunkPosition(worldX, worldY);
     if (chunkData) {
       const { boxes } = chunkData;
-      for (const box of boxes) {
+      for (const box of boxes!) {
         const { type } = box;
         let { from, to } = box;
         if (from === null || to === null) {
