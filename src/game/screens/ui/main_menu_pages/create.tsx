@@ -318,12 +318,17 @@ export function CreateSavePage({
                 <input
                   className="h-full w-full outline-none bg-transparent text-xl text-center border-b-white border-b-2"
                   value={currentName}
+                  placeholder="Enter a name..."
                   onChange={(e) => setCurrentName(e.target.value)}
                 />
               </div>
             </div>
           </div>
-          <CenteredIcon icon={faSquareCheck} onClick={onSubmit} />
+          <CenteredIcon
+            disabled={!currentName}
+            icon={faSquareCheck}
+            onClick={onSubmit}
+          />
         </div>
       </div>
     </div>
@@ -466,19 +471,27 @@ function GenderSelectorButton({
 }
 
 function CenteredIcon({
+  disabled,
+  className,
   icon,
   onClick,
 }: {
+  disabled?: boolean;
+  className?: string;
   icon: IconDefinition;
   onClick?: () => void;
 }) {
   return (
-    <div className="flex-1 flex flex-row items-center">
+    <div className={`flex-1 flex flex-row items-center ${className ?? ""}`}>
       <div className="flex-1 flex flex-col items-center">
         <FontAwesomeIcon
           icon={icon}
-          className="w-16 h-16 cursor-pointer"
-          onClick={onClick}
+          className={`w-16 h-16 ${disabled ? "cursor-not-allowed" : "cursor-pointer"}`}
+          onClick={() => {
+            if (!disabled) {
+              onClick?.();
+            }
+          }}
         />
       </div>
     </div>
