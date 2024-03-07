@@ -1,4 +1,4 @@
-import { Application } from "pixi.js";
+import { Application, DisplayObject } from "pixi.js";
 import { GameScreen } from "./screen";
 import { GameData } from "../game/util/game_data";
 
@@ -32,5 +32,9 @@ export class GameManager {
     this.currentScreen = screen;
     this.currentScreen.initialize(this.app, this);
     this.onScreenChange();
+  }
+
+  convertSpriteToImage(sprite: DisplayObject): Promise<Blob> {
+    return this.app.renderer.extract.canvas(sprite).convertToBlob!();
   }
 }

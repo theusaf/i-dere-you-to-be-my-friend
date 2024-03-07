@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { GameManagerContext } from "./App";
+import { GameManagerContext } from "./game/util/game_manager_context";
 
 function Game() {
   const gameManager = useContext(GameManagerContext),
