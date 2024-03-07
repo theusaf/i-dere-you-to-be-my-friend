@@ -26,6 +26,8 @@ export function MapScreenContent({
   state,
 }: MapScreenContentProps): JSX.Element {
   const [phoneVisible, setPhoneVisible] = useState(false);
+  const [blankScreen, setBlankScreen] = useState(true);
+  const [dialog, setDialog] = useState("");
   const [battleStartState, setBattleStartState] = useState(
     EnterBattleAnimationState.none,
   );
@@ -44,6 +46,15 @@ export function MapScreenContent({
       MapScreenEvents.battleStart,
       battleStartListener,
     );
+    state.eventNotifier.addEventListener(
+      MapScreenEvents.blankScreen,
+      (event) => {
+        setBlankScreen((event as CustomEvent<boolean>).detail);
+      },
+    );
+    state.eventNotifier.addEventListener(MapScreenEvents.dialog, (data) =>
+      setDialog((data as CustomEvent<string>).detail),
+    );
     return () => {
       state.eventNotifier.removeEventListener(
         MapScreenEvents.battleStart,
@@ -53,38 +64,45 @@ export function MapScreenContent({
   }, [state.eventNotifier]);
 
   return (
-    <div
-      className={`grid grid-rows-8 relative h-full ${phoneVisible ? "pointer-events-auto" : ""}`}
-      onClick={phoneVisible ? () => setPhoneVisible(false) : undefined}
-    >
-      {phoneVisible && <PhoneLargeDisplay />}
-      {battleStartState === EnterBattleAnimationState.running && (
-        <BattleAnimationDisplay
-          key={chance.guid()}
-          onDone={() => {
-            const { gameData } = state.gameManager;
-            setBattleStartState(EnterBattleAnimationState.done);
-            const battle = Battle.fromBattleData(
-              battleData!,
-              state.gameManager,
-            );
-            gameData.battle = battle;
-            battle.noteIntro();
-            state.gameManager.gameData.save();
-            state.gameManager.changeScreen(new BattleScreen());
-          }}
-        />
-      )}
-      <div className="row-span-2 row-start-1 col-start-1"></div>
-      <div className="row-span-3 row-start-6 grid grid-cols-12 col-start-1">
-        <div className="col-span-2 px-4 relative h-full">
-          {!phoneVisible &&
-            battleStartState === EnterBattleAnimationState.none && (
-              <PhoneWidget onClick={() => setPhoneVisible(true)} />
-            )}
+    <>
+      <div
+        className={`absolute h-full w-full top-0 left-0 bg-black transition-opacity z-50 duration-700 ${
+          blankScreen ? "opacity-0" : "pointer-events-auto opacity-100"
+        }`}
+      ></div>
+      <div
+        className={`grid grid-rows-8 relative h-full ${phoneVisible ? "pointer-events-auto" : ""}`}
+        onClick={phoneVisible ? () => setPhoneVisible(false) : undefined}
+      >
+        {phoneVisible && <PhoneLargeDisplay />}
+        {battleStartState === EnterBattleAnimationState.running && (
+          <BattleAnimationDisplay
+            key={chance.guid()}
+            onDone={() => {
+              const { gameData } = state.gameManager;
+              setBattleStartState(EnterBattleAnimationState.done);
+              const battle = Battle.fromBattleData(
+                battleData!,
+                state.gameManager,
+              );
+              gameData.battle = battle;
+              battle.noteIntro();
+              state.gameManager.gameData.save();
+              state.gameManager.changeScreen(new BattleScreen());
+            }}
+          />
+        )}
+        <div className="row-span-2 row-start-1 col-start-1"></div>
+        <div className="row-span-3 row-start-6 grid grid-cols-12 col-start-1">
+          <div className="col-span-2 px-4 relative h-full">
+            {!phoneVisible &&
+              battleStartState === EnterBattleAnimationState.none && (
+                <PhoneWidget onClick={() => setPhoneVisible(true)} />
+              )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

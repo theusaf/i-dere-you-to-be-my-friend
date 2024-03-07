@@ -1,4 +1,12 @@
-import { Application, Assets, Container, DisplayObject, ParticleContainer, Sprite, Texture } from "pixi.js";
+import {
+  Application,
+  Assets,
+  Container,
+  DisplayObject,
+  ParticleContainer,
+  Sprite,
+  Texture,
+} from "pixi.js";
 import { GameScreen, UIOutput } from "../../engine/screen";
 import { GameManager } from "../../engine/game_manager";
 import { MapScreenContent } from "./ui/map_screen_content";
@@ -21,6 +29,8 @@ export enum MapScreenEvents {
    * @param {MapSpecialActionBattle} detail - The battle data.
    */
   battleStart = "battleStart",
+  blankScreen = "blankScreen",
+  dialog = "dialog",
 }
 
 export class MapScreen extends GameScreen {
@@ -97,8 +107,7 @@ export class MapScreen extends GameScreen {
 
   keysDown: Set<string> = new Set();
 
-  textureParticleContainerMap: Map<Texture, ParticleContainer> =
-    new Map();
+  textureParticleContainerMap: Map<Texture, ParticleContainer> = new Map();
   static SPRITE_SIZE = 4096;
 
   eventNotifier: EventTarget = new EventTarget();
@@ -847,6 +856,12 @@ export class MapScreen extends GameScreen {
       }
     }
     return false;
+  }
+
+  notify<T>(event: MapScreenEvents, data: T): void {
+    this.eventNotifier.dispatchEvent(
+      new CustomEvent<T>(event, { detail: data }),
+    );
   }
 
   getUI(): UIOutput | null {

@@ -34,11 +34,13 @@ export class GameManager {
   async executeCutsceneLoop(): Promise<void> {
     const cutsceneData = this.cutsceneData;
     let index = this.cutsceneIndex;
+    let cleanup: (() => void) | null = null;
     for (const action of cutsceneData) {
       // data changed, stop this loop
       if (this.cutsceneData !== cutsceneData) return;
       // waiting for cutscene actions to finish
       if (index === this.cutsceneIndex) {
+        // TODO: check for changes
         await sleep(250);
         continue;
       }
@@ -46,10 +48,15 @@ export class GameManager {
         await sleep(500);
         continue;
       }
+      if (cleanup) {
+        cleanup();
+        cleanup = null;
+      }
       index = this.cutsceneIndex;
       const [type, data] = action;
       switch (type) {
         case CutsceneAction.blankScreen: {
+          cleanup = () => {}
           break;
         }
         case CutsceneAction.animate: {
