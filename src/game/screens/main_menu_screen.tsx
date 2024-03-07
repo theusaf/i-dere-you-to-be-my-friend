@@ -1,15 +1,11 @@
 import * as PIXI from "pixi.js";
 import { GameScreen, UIOutput } from "../../engine/screen";
 import { GameManager } from "../../engine/game_manager";
-import { ColorScheme } from "../util/style";
-import { MainMenuContent, MainMenuPageState } from "./ui/main_menu_content";
+import { ColorScheme, CreateMainColors, CreateSkinColors } from "../util/style";
+import { MainMenuContent } from "./ui/main_menu_content";
 import RenderLayer from "../../engine/render_layer";
 import { CharacterSprite } from "../../engine/character_sprite";
-import {
-  CreateMainColors,
-  CreateSkinColors,
-} from "./ui/main_menu_pages/create";
-
+import { MainMenuPageState } from "../util/enums";
 export class MainMenuScreen extends GameScreen {
   screenState!: MainMenuPageState;
   characterBg!: PIXI.Graphics;
