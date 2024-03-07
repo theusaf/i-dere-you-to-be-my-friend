@@ -26,7 +26,7 @@ export function MapScreenContent({
   state,
 }: MapScreenContentProps): JSX.Element {
   const [phoneVisible, setPhoneVisible] = useState(false);
-  const [blankScreen, setBlankScreen] = useState(true);
+  const [blankScreen, setBlankScreen] = useState(false);
   const [dialog, setDialog] = useState("");
   const [battleStartState, setBattleStartState] = useState(
     EnterBattleAnimationState.none,
@@ -67,7 +67,7 @@ export function MapScreenContent({
     <>
       <div
         className={`absolute h-full w-full top-0 left-0 bg-black transition-opacity z-50 duration-700 ${
-          blankScreen ? "opacity-0" : "pointer-events-auto opacity-100"
+          blankScreen ? "opacity-100 pointer-events-auto" : "pointer-events-none opacity-0"
         }`}
       ></div>
       <div

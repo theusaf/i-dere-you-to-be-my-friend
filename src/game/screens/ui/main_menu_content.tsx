@@ -40,7 +40,7 @@ export function MainMenuContent({
 
   const onContinue = async () => {
     const latestSave = await getLatestSave<RawGameDataContent>();
-    if (latestSave && isSaveCompatible(latestSave.saveId ?? "")) {
+    if (latestSave && isSaveCompatible(latestSave.version ?? "")) {
       onSaveSelected(latestSave);
     } else {
       navigateToSaveList();
