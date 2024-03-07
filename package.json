@@ -1,8 +1,8 @@
 {
   "name": "i-dere-you-to-be-my-friend",
   "private": true,
-  "version": "0.2.0",
-  "compatibleWith": ">=0.2.0",
+  "version": "0.3.0",
+  "compatibleWith": ">=0.3.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -16,16 +16,20 @@
     "build-web": "mkdir -p build && zip -r build/i-dere-you-to-be-my-friend-web.zip dist"
   },
   "dependencies": {
-    "@gluon-framework/gluon": "^0.14.0",
-    "archiver": "^7.0.0",
-    "express": "^4.18.3",
-    "yaml": "^2.4.0",
-    "yauzl": "^3.1.2"
-  },
-  "devDependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.5.1",
     "@fortawesome/free-solid-svg-icons": "^6.5.1",
     "@fortawesome/react-fontawesome": "^0.2.0",
+    "@gluon-framework/gluon": "^0.14.0",
+    "archiver": "^7.0.0",
+    "pixi.js": "^7.4.0",
+    "chance": "^1.1.11",
+    "express": "^4.18.3",
+    "semver": "^7.6.0",
+    "yauzl": "^3.1.2",
+    "vite": "^5.1.5",
+    "yaml": "^2.4.0"
+  },
+  "devDependencies": {
     "@types/archiver": "^6.0.2",
     "@types/chance": "^1.1.6",
     "@types/express": "^4.17.21",
@@ -37,21 +41,16 @@
     "@typescript-eslint/parser": "^7.1.1",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.18",
-    "chance": "^1.1.11",
     "esbuild": "^0.20.1",
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
-    "pixi.js": "^7.4.0",
     "postcss": "^8.4.35",
     "prettier": "^3.2.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "semver": "^7.6.0",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5.3.3",
-    "uuid": "^9.0.1",
-    "vite": "^5.1.5"
+    "typescript": "^5.3.3"
   },
   "engines": {
     "node": ">=20.0.0"
