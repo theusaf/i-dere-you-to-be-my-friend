@@ -287,10 +287,10 @@ function UserViewButtonController({
   }, [logs.length, localLogIndex]);
   const onMoveSelected = (move: MoveData) => {
     const playback = battle.simulateTurn(move);
+    const currentOpponent = battle.activeOpponent!;
+    const currentPlayer = battle.activePlayer!;
     let playbackIndex = 0;
     const callback = () => {
-      const currentOpponent = battle.activeOpponent!;
-      const currentPlayer = battle.activePlayer!;
       console.log(currentOpponent, currentPlayer);
       if (playbackIndex < playback.length) {
         const [log, applyAction] = playback[playbackIndex];
