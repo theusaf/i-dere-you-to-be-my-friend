@@ -105,5 +105,5 @@ export type Cutscene =
 export interface MapSpecialData {
   boxes?: (MapSpecialActionBox | MapSpecialBuildingBox)[];
   npcs?: []; // TODO: not implemented yet
-  cutscenes?: Record<string, Cutscene>;
+  cutscenes?: Record<string, Cutscene[]>;
 }

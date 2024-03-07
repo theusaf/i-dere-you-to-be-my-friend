@@ -188,6 +188,7 @@ function UserView({
       callbackRegister(() => {
         gameManager.gameData.save().finally(() => {
           gameManager.changeScreen(new MapScreen());
+          gameManager.gameData.battle = null;
         });
       });
     }

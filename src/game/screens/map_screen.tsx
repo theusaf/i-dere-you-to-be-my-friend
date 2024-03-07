@@ -1,4 +1,4 @@
-import * as PIXI from "pixi.js";
+import { Application, Assets, Container, DisplayObject, ParticleContainer, Sprite, Texture } from "pixi.js";
 import { GameScreen, UIOutput } from "../../engine/screen";
 import { GameManager } from "../../engine/game_manager";
 import { MapScreenContent } from "./ui/map_screen_content";
@@ -24,15 +24,15 @@ export enum MapScreenEvents {
 }
 
 export class MapScreen extends GameScreen {
-  mapBgContainer!: PIXI.Container;
+  mapBgContainer!: Container;
   chunks: Record<`${number},${number}`, MapData | null> = {};
   characterSprite!: CharacterSprite;
   collisionCacheX: number = 0;
   collisionCacheY: number = 0;
   lerpWorldY: number = 0;
   lerpWorldX: number = 0;
-  mapSpecialContainer!: PIXI.Container<PIXI.DisplayObject>;
-  mapContainer!: PIXI.Container<PIXI.DisplayObject>;
+  mapSpecialContainer!: Container<DisplayObject>;
+  mapContainer!: Container<DisplayObject>;
   paused: boolean = false;
   get currentChunk(): MapData | null {
     return this.chunks[`${this.chunkX},${this.chunkY}`];
@@ -97,19 +97,19 @@ export class MapScreen extends GameScreen {
 
   keysDown: Set<string> = new Set();
 
-  textureParticleContainerMap: Map<PIXI.Texture, PIXI.ParticleContainer> =
+  textureParticleContainerMap: Map<Texture, ParticleContainer> =
     new Map();
   static SPRITE_SIZE = 4096;
 
   eventNotifier: EventTarget = new EventTarget();
 
-  initialize(app: PIXI.Application, gameManager: GameManager): void {
+  initialize(app: Application, gameManager: GameManager): void {
     // intialize world size in terms of "blocks" (about 0.5 meters)
     super.initialize(app, gameManager, new RenderLayer(app, 30));
 
-    this.mapContainer = new PIXI.Container();
-    this.mapBgContainer = new PIXI.Container();
-    this.mapSpecialContainer = new PIXI.Container();
+    this.mapContainer = new Container();
+    this.mapBgContainer = new Container();
+    this.mapSpecialContainer = new Container();
     this.mapSpecialContainer.sortableChildren = true;
     this.mapContainer.sortableChildren = true;
 
@@ -219,7 +219,7 @@ export class MapScreen extends GameScreen {
       const x = this.chunkX + (i % 3) - 1;
       const y = this.chunkY + Math.floor(i / 3) - 1;
       if (`${x},${y}` in this.chunks) continue;
-      const chunk = PIXI.Assets.get<MapData>(`map/${x},${y}`) ?? null;
+      const chunk = Assets.get<MapData>(`map/${x},${y}`) ?? null;
       this.chunks[`${x},${y}`] = chunk;
     }
 
@@ -298,20 +298,20 @@ export class MapScreen extends GameScreen {
   }
 
   updateSpecialsChunk(chunkX: number, chunkY: number): void {
-    const chunkData = PIXI.Assets.get<MapSpecialData | null>(
+    const chunkData = Assets.get<MapSpecialData | null>(
       `map/special/${chunkX},${chunkY}`,
     );
     if (!chunkData) return;
 
-    const { boxes } = chunkData;
-    for (const box of boxes!) {
+    const { boxes, cutscenes } = chunkData;
+    for (const box of boxes ?? []) {
       const { from, to, type } = box;
       if (from === null || to === null) continue;
       if (type === "building") {
         const width = to[0] - from[0],
           height = to[1] - from[1];
-        const buildingSprite = new PIXI.Sprite(
-          PIXI.Assets.get(`icon/structure/${box.image}`),
+        const buildingSprite = new Sprite(
+          Assets.get(`icon/structure/${box.image}`),
         );
         const { x, y } = this.getChunkGlobalPosition(
           chunkX,
@@ -348,14 +348,20 @@ export class MapScreen extends GameScreen {
         }
       }
     }
+    for (const cutsceneId in cutscenes ?? {}) {
+      if (this.gameManager.gameData.cutscenes.has(cutsceneId)) continue;
+      const cutscene = cutscenes![cutsceneId];
+      this.gameManager.applyCutsceneData(cutscene, cutsceneId);
+      break;
+    }
   }
 
-  addSpriteParticle(sprite: PIXI.Sprite) {
+  addSpriteParticle(sprite: Sprite) {
     const container = this.textureParticleContainerMap.get(sprite.texture);
     if (container) {
       container.addChild(sprite);
     } else {
-      const newContainer = new PIXI.ParticleContainer(MapScreen.SPRITE_SIZE);
+      const newContainer = new ParticleContainer(MapScreen.SPRITE_SIZE);
       newContainer.addChild(sprite);
       this.textureParticleContainerMap.set(sprite.texture, newContainer);
       this.mapBgContainer.addChild(newContainer);
@@ -475,34 +481,34 @@ export class MapScreen extends GameScreen {
     };
   }
 
-  getSpriteFromTile(tile: MapTile): PIXI.Sprite {
-    let sprite = new PIXI.Sprite();
+  getSpriteFromTile(tile: MapTile): Sprite {
+    let sprite = new Sprite();
     switch (tile) {
       case MapTile.bridge:
-        sprite.texture = PIXI.Assets.get("icon/map/wood")!;
+        sprite.texture = Assets.get("icon/map/wood")!;
         break;
       case MapTile.dirtRoad:
-        sprite.texture = PIXI.Assets.get("icon/map/dirt")!;
+        sprite.texture = Assets.get("icon/map/dirt")!;
         break;
       case MapTile.grass:
-        sprite.texture = PIXI.Assets.get("icon/map/grass")!;
+        sprite.texture = Assets.get("icon/map/grass")!;
         break;
       case MapTile.pavedRoad:
-        sprite.texture = PIXI.Assets.get("icon/map/rock")!;
+        sprite.texture = Assets.get("icon/map/rock")!;
         break;
       case MapTile.sand:
-        sprite.texture = PIXI.Assets.get("icon/map/sand")!;
+        sprite.texture = Assets.get("icon/map/sand")!;
         break;
       case MapTile.tallgrass:
-        sprite.texture = PIXI.Assets.get("icon/map/thick_grass")!;
+        sprite.texture = Assets.get("icon/map/thick_grass")!;
         break;
       case MapTile.water: {
         sprite.destroy();
-        let oldTexture: PIXI.Texture = PIXI.Assets.get("icon/map/water1");
+        let oldTexture: Texture = Assets.get("icon/map/water1");
         sprite = new AnimatedSprite({
           frames: [
-            PIXI.Assets.get("icon/map/water1")!,
-            PIXI.Assets.get("icon/map/water2")!,
+            Assets.get("icon/map/water1")!,
+            Assets.get("icon/map/water2")!,
           ],
           frameDuration: 1000,
           loop: true,
@@ -519,7 +525,7 @@ export class MapScreen extends GameScreen {
         break;
       }
       default:
-        sprite.texture = PIXI.Texture.WHITE;
+        sprite.texture = Texture.WHITE;
     }
     return sprite;
   }
@@ -728,7 +734,7 @@ export class MapScreen extends GameScreen {
     newTile: MapTile,
     currentTile: MapTile,
   ): boolean {
-    const chunkData = PIXI.Assets.get<MapSpecialData>("map/special/default");
+    const chunkData = Assets.get<MapSpecialData>("map/special/default");
     return this.handleSpecialTriggers(
       worldX,
       worldY,
@@ -745,7 +751,7 @@ export class MapScreen extends GameScreen {
     newTile: MapTile,
     currentTile: MapTile,
   ): boolean {
-    const chunkData = PIXI.Assets.get<MapSpecialData | null>(
+    const chunkData = Assets.get<MapSpecialData | null>(
       `map/special/${testChunkNumber}`,
     );
     return this.handleSpecialTriggers(

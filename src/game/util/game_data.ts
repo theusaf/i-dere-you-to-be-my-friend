@@ -19,6 +19,7 @@ export interface GameDataContent {
   mainNPC: Character;
   saveId?: string;
   gold?: number;
+  cutscenes?: Set<string>;
 }
 
 export interface RawGameDataContent {
@@ -29,6 +30,7 @@ export interface RawGameDataContent {
   mainNPC: CharacterInfo;
   saveId?: string;
   gold?: number;
+  cutscenes?: string[];
 }
 
 const maxFriends = 8;
@@ -39,12 +41,13 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
   you: Character;
   mainNPC: Character;
   gold: number;
+  cutscenes: Set<string>;
 
   get activeFriends(): Character[] {
     return this.friends.filter((friend) => friend.isActive);
   }
 
-  battle?: Battle;
+  battle: Battle | null = null;
   saveId: string;
 
   constructor({
@@ -54,6 +57,7 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
     mainNPC,
     saveId,
     gold,
+    cutscenes,
   }: Partial<GameDataContent> = {}) {
     this.saveId = saveId ?? chance.guid();
     this.worldMapData = worldMapData ?? {
@@ -64,6 +68,7 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
     this.you = you ?? new Character();
     this.mainNPC = mainNPC ?? new Character();
     this.gold = gold ?? 0;
+    this.cutscenes = cutscenes ?? new Set();
   }
 
   toMap(): RawGameDataContent {
@@ -75,6 +80,7 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
       version,
       saveId: this.saveId,
       gold: this.gold,
+      cutscenes: Array.from(this.cutscenes),
     };
   }
 
@@ -112,6 +118,7 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
       mainNPC: new Character(map.mainNPC),
       saveId: map.saveId,
       gold: map.gold,
+      cutscenes: new Set(map.cutscenes),
     });
   }
 }
