@@ -134,64 +134,14 @@ function UserView({
   onLogsRendered,
   callbackRegister,
 }: UserViewProps): JSX.Element {
-  return (
-    <div
-      className="row-start-4 row-span-2 border-t-4 border-neutral-400 bg-slate-600 bg-opacity-80 p-2 transition-transform duration-300"
-      style={{
-        transform: show ? "translateX(0)" : "translateY(100%)",
-      }}
-    >
-      <div className="flex w-full h-full">
-        <UserStatsView
-          activeCharacter={gameManager.gameData.battle!.activePlayer}
-          battle={gameManager.gameData.battle!}
-        />
-        <UserViewButtonController
-          key={logIndex}
-          gameManager={gameManager}
-          show={show}
-          logIndex={logIndex}
-          onLogsRendered={onLogsRendered}
-          callbackRegister={callbackRegister}
-        />
-      </div>
-    </div>
-  );
-}
-
-enum UserViewControllerState {
-  index,
-  fight,
-  friends,
-  actions,
-  run,
-  logs,
-  wait,
-  rizz,
-  contract,
-}
-
-function UserViewButtonController({
-  gameManager,
-  show,
-  logIndex,
-  onLogsRendered,
-  callbackRegister,
-}: UserViewProps): JSX.Element {
-  const [localLogIndex, setLocalLogIndex] = useState(logIndex);
-  const [state, setState] = useState(UserViewControllerState.index);
-  const className =
-    "align-middle flex flex-col place-content-center cursor-pointer";
+  const [displayContract, setDisplayContract] = useState(false);
   const battle = gameManager.gameData.battle!;
-  const logs = battle.logs;
-  useEffect(() => {
-    if (logs.length > localLogIndex) {
-      setState(UserViewControllerState.logs);
-    }
-  }, [logs.length, localLogIndex]);
-  const checkForBattleEnd = () => {
-    const currentOpponent = battle.activeOpponent!;
-    const currentPlayer = battle.activePlayer!;
+  const checkForBattleEnd = (
+    currentOpponent: Character,
+    currentPlayer: Character,
+  ) => {
+    currentOpponent ??= battle.activeOpponent!;
+    currentPlayer ??= battle.activePlayer!;
     let isEndOfBattle = false;
     // end of turn, check for ko/win/loss
     if (!battle.activeOpponent) {
@@ -243,10 +193,105 @@ function UserViewButtonController({
     }
     battle.triggerChange();
   };
+  return (
+    <>
+      <div
+        className="row-start-4 row-span-2 border-t-4 border-neutral-400 bg-slate-600 bg-opacity-80 p-2 transition-transform duration-300"
+        style={{
+          transform: show ? "translateX(0)" : "translateY(100%)",
+        }}
+      >
+        <div className="flex w-full h-full">
+          <UserStatsView
+            activeCharacter={gameManager.gameData.battle!.activePlayer}
+            battle={gameManager.gameData.battle!}
+          />
+          <UserViewButtonController
+            key={logIndex}
+            gameManager={gameManager}
+            show={show}
+            logIndex={logIndex}
+            onLogsRendered={onLogsRendered}
+            callbackRegister={callbackRegister}
+            displayContract={() => setDisplayContract(true)}
+            checkForBattleEnd={checkForBattleEnd}
+          />
+        </div>
+      </div>
+      {displayContract && (
+        <FriendContract
+          initialName={battle.activeOpponent!.name}
+          contractee={gameManager.gameData.you.name}
+          onContractSigned={(name) => {
+            const opponent = battle.activeOpponent!;
+            const newFriend = opponent.clone();
+            newFriend.name = name;
+            battle.addLog(`${newFriend.name} has become your friend!`);
+            battle.activeOpponent = null;
+            battle.opponentTeam.splice(
+              battle.opponentTeam.indexOf(opponent),
+              1,
+            );
+            const isActive = gameManager.gameData.addCharacter(newFriend);
+            if (isActive) {
+              battle.playerTeam.push(newFriend);
+            }
+            callbackRegister(() => {
+              checkForBattleEnd(opponent, gameManager.gameData.you);
+            });
+            setDisplayContract(false);
+            battle.triggerChange();
+          }}
+        />
+      )}
+    </>
+  );
+}
+
+enum UserViewControllerState {
+  index,
+  fight,
+  friends,
+  actions,
+  run,
+  logs,
+  wait,
+  rizz,
+}
+
+function UserViewButtonController({
+  gameManager,
+  show,
+  logIndex,
+  onLogsRendered,
+  callbackRegister,
+  displayContract,
+  checkForBattleEnd,
+}: UserViewProps & {
+  displayContract: () => void;
+  checkForBattleEnd: (
+    currentOpponent: Character,
+    currentPlayer: Character,
+  ) => void;
+}): JSX.Element {
+  const [localLogIndex, setLocalLogIndex] = useState(logIndex);
+  const [state, setState] = useState(UserViewControllerState.index);
+  const className =
+    "align-middle flex flex-col place-content-center cursor-pointer";
+  const battle = gameManager.gameData.battle!;
+  const logs = battle.logs;
+  useEffect(() => {
+    if (logs.length > localLogIndex) {
+      setState(UserViewControllerState.logs);
+    }
+  }, [logs.length, localLogIndex]);
   const onMoveSelected = (move: MoveData) => {
     const playback = battle.simulateTurn(move);
     let playbackIndex = 0;
     const callback = () => {
+      const currentOpponent = battle.activeOpponent!;
+      const currentPlayer = battle.activePlayer!;
+      console.log(currentOpponent, currentPlayer);
       if (playbackIndex < playback.length) {
         const [log, applyAction] = playback[playbackIndex];
         applyAction();
@@ -257,7 +302,7 @@ function UserViewButtonController({
         playbackIndex++;
         callbackRegister(callback);
       } else {
-        checkForBattleEnd();
+        checkForBattleEnd(currentOpponent, currentPlayer);
         battle.triggerChange();
       }
     };
@@ -361,7 +406,7 @@ function UserViewButtonController({
             if (diceRoll === 20 || diceRoll > baseDifficulty) {
               battle.addLog("Okay.");
               callbackRegister(() => {
-                setState(UserViewControllerState.contract);
+                setTimeout(() => displayContract());
               });
             } else {
               battle.addLog("No thank you.");
@@ -369,28 +414,6 @@ function UserViewButtonController({
                 onMoveSelected(getMovesets()["_pass"]);
               });
             }
-            battle.triggerChange();
-          }}
-        />
-      );
-      break;
-    case UserViewControllerState.contract:
-      message = "";
-      buttons = (
-        <FriendContract
-          initialName={battle.activeOpponent!.name}
-          contractee={gameManager.gameData.you.name}
-          onContractSigned={(name) => {
-            const opponent = battle.activeOpponent!;
-            const newFriend = opponent.clone();
-            newFriend.name = name;
-            battle.addLog(`${newFriend.name} has become your friend!`);
-            battle.activeOpponent = null;
-            battle.opponentTeam.splice(
-              battle.opponentTeam.indexOf(opponent),
-              1,
-            );
-            callbackRegister(() => checkForBattleEnd());
             battle.triggerChange();
           }}
         />

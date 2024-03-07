@@ -94,11 +94,14 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
     return this.activeFriends.some((friend) => !friend.isDead);
   }
 
-  addCharacter(character: Character): void {
+  addCharacter(character: Character): boolean {
+    let addedToActive = false;
     if (this.activeFriends.length < maxFriends) {
-      this.activeFriends.push(character);
+      character.isActive = true;
+      addedToActive = true;
     }
     this.friends.push(character);
+    return addedToActive;
   }
 
   static fromMap(map: RawGameDataContent): GameData {
