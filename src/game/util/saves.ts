@@ -1,4 +1,6 @@
 import { parse } from "yaml";
+import semver from "semver";
+import packageJson from "../../../package.json";
 
 export interface Saveable<T> {
   toYAML(): string;
@@ -52,4 +54,8 @@ export async function getSaveList(): Promise<string[]> {
       .filter((key) => key.startsWith("save/"))
       .map((key) => key.slice(5));
   }
+}
+
+export function isSaveCompatible(version: string): boolean {
+  return semver.satisfies(version, packageJson.compatibleWith);
 }

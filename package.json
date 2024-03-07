@@ -2,6 +2,7 @@
   "name": "i-dere-you-to-be-my-friend",
   "private": true,
   "version": "0.2.0",
+  "compatibleWith": ">=0.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,7 +12,8 @@
     "start": "node backend/index.js",
     "build-vite": "tsc && vite build",
     "build-server": "node esbuild.js",
-    "build-exe": "./build.sh -z"
+    "build-exe": "./build.sh -z",
+    "build-web": "mkdir -p build && zip -r build/i-dere-you-to-be-my-friend-web.zip dist"
   },
   "dependencies": {
     "@gluon-framework/gluon": "^0.14.0",
@@ -26,6 +28,7 @@
     "@types/express": "^4.17.21",
     "@types/react": "^18.2.62",
     "@types/react-dom": "^18.2.19",
+    "@types/semver": "^7.5.8",
     "@typescript-eslint/eslint-plugin": "^7.1.1",
     "@typescript-eslint/parser": "^7.1.1",
     "@vitejs/plugin-react": "^4.2.1",
@@ -40,6 +43,7 @@
     "prettier": "^3.2.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "semver": "^7.6.0",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.3.3",
     "uuid": "^9.0.1",

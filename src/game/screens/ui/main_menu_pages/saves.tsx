@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getSaveList, load } from "../../../util/saves";
+import { getSaveList, isSaveCompatible, load } from "../../../util/saves";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
 import { RawGameDataContent } from "../../../util/game_data";
@@ -22,7 +22,11 @@ export function SavesPage({
       );
     });
     saveList.then((saves) => {
-      setSaves(saves);
+      setSaves(
+        saves.filter((save) => {
+          return isSaveCompatible(save.version ?? "0.0.1");
+        }),
+      );
     });
   }, []);
   return (
