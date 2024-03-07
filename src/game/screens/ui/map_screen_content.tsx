@@ -11,6 +11,7 @@ import {
 } from "./map_screen_pages/settings";
 import { Battle } from "../../util/battle";
 import { chance } from "../../util/chance";
+import { AnimatedTextController } from "../../../engine/components/animated_text_container";
 
 interface MapScreenContentProps {
   state: MapScreen;
@@ -67,9 +68,23 @@ export function MapScreenContent({
     <>
       <div
         className={`absolute h-full w-full top-0 left-0 bg-black transition-opacity z-50 duration-700 ${
-          blankScreen ? "opacity-100 pointer-events-auto" : "pointer-events-none opacity-0"
+          blankScreen
+            ? "opacity-100 pointer-events-auto"
+            : "pointer-events-none opacity-0"
         }`}
       ></div>
+      {dialog && (
+        <div className="absolute h-full w-full top-0 left-0 z-60 pointer-events-none flex flex-col">
+          <div className="text-white text-2xl flex-1 px-20 py-10 flex flex-row content-center items-center">
+            <AnimatedTextController
+              key={dialog}
+              className="text-center flex-1 grid content-center"
+            >
+              {dialog}
+            </AnimatedTextController>
+          </div>
+        </div>
+      )}
       <div
         className={`grid grid-rows-8 relative h-full ${phoneVisible ? "pointer-events-auto" : ""}`}
         onClick={phoneVisible ? () => setPhoneVisible(false) : undefined}
