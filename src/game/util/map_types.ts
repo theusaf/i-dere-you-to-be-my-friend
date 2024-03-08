@@ -1,4 +1,6 @@
+import { CharacterStats, Gender } from "./character";
 import { mapTileStrings } from "./map";
+import { DereType } from "./types";
 
 export interface MapSpecialBoxBase {
   from: [number, number] | null;
@@ -86,10 +88,8 @@ type AnimateCutsceneAction = [
   CutsceneActionType.animate,
   {
     id: string;
-    start_x: number;
-    start_y: number;
-    end_x: number;
-    end_y: number;
+    start: [number, number];
+    end: [number, number];
     time: number;
   },
 ];
@@ -104,6 +104,27 @@ export type CutsceneAction =
   | BattleCutsceneAction
   | ContractCutsceneAction;
 
+export interface NPCData {
+  position: [number, number];
+  love: number | number[];
+  hp?: number | number[];
+  types?: DereType[];
+  gender?: Gender;
+  knownMoves?: string[];
+  stats?: Partial<CharacterStats>;
+  colors?: {
+    head: number;
+    body: number;
+    legs: number;
+    skin: number;
+  };
+  styles?: {
+    head: number;
+    body: number;
+    legs: number;
+  };
+}
+
 export interface Cutscene {
   actions: CutsceneAction[];
   conditions: [];
@@ -111,6 +132,6 @@ export interface Cutscene {
 
 export interface MapSpecialData {
   boxes?: (MapSpecialActionBox | MapSpecialBuildingBox)[];
-  npcs?: []; // TODO: not implemented yet
+  npcs?: Record<string, NPCData>;
   cutscenes?: Record<string, Cutscene>;
 }

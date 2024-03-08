@@ -1,6 +1,7 @@
 cutscenes:
   main:
     actions:
+      # TODO: Make slightly less cringy
       - [blank_screen, true]
       # - [music TODO]
       - - text
@@ -34,10 +35,8 @@ cutscenes:
         - <A person, seemingly desperate, quickly approaches you.>
       - - animate
         - id: intro
-          start_x: 74
-          start_y: 43
-          end_x: 74
-          end_y: 63
+          start: [74, 43]
+          end: [74, 63]
           time: 5000
       - - text
         - Hey, you! Can I be your friend?
@@ -73,6 +72,5 @@ cutscenes:
 
 npcs:
   intro:
-    type: random
     love: 1
     hp: 40

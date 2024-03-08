@@ -80,6 +80,7 @@ export function getGenderedString({
 }
 
 export interface CharacterInfo {
+  position: [number, number];
   id?: string;
   hp: number;
   name: string;
@@ -107,6 +108,7 @@ export interface CharacterInfo {
 }
 
 export class Character implements CharacterInfo, Saveable<CharacterInfo> {
+  position: [number, number];
   id?: string;
   hp: number;
   name: string;
@@ -146,7 +148,9 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
     isActive,
     colors,
     styles,
+    position,
   }: Partial<CharacterInfo> = {}) {
+    this.position = position ?? [0, 0];
     this.id = id;
     this.isActive = false;
     this.hp = hp ?? 1;
@@ -226,6 +230,7 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
       isActive: this.isActive,
       colors: this.colors,
       styles: this.styles,
+      position: this.position,
     };
   }
 

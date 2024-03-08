@@ -21,6 +21,7 @@ import {
   CharacterSprite,
   CharacterSpriteAnimation,
 } from "../../engine/character_sprite";
+import { Character } from "../util/character";
 
 export enum MapScreenEvents {
   /**
@@ -314,7 +315,7 @@ export class MapScreen extends GameScreen {
     );
     if (!chunkData) return;
 
-    const { boxes, cutscenes } = chunkData;
+    const { boxes, cutscenes, npcs } = chunkData;
     for (const box of boxes ?? []) {
       const { from, to, type } = box;
       if (from === null || to === null) continue;
@@ -364,6 +365,50 @@ export class MapScreen extends GameScreen {
       const cutscene = cutscenes![cutsceneId];
       this.gameManager.applyCutsceneData(cutscene.actions, cutsceneId);
       break;
+    }
+    for (const npcId in npcs ?? {}) {
+      if (this.gameManager.gameData.isNPCinFriendGroup(npcId)) continue;
+      let npc: Character;
+      let position: [number, number];
+      if (this.gameManager.gameData.specialNPCs[npcId]) {
+        npc = this.gameManager.gameData.specialNPCs[npcId];
+        position = npc.position;
+      } else {
+        let { love, hp, types, gender, knownMoves, stats, colors, styles } =
+          npcs![npcId];
+        position = npcs![npcId].position;
+        love = Array.isArray(love)
+          ? chance.integer({ min: love[0], max: love[1] })
+          : love;
+        hp = Array.isArray(hp)
+          ? chance.integer({ min: hp[0], max: hp[1] })
+          : hp;
+        npc = Character.createRandomCharacter(love);
+
+        npc.hp = hp ?? npc.hp;
+        npc.types = types ?? npc.types;
+        npc.gender = gender ?? npc.gender;
+        npc.knownMoves = knownMoves ?? npc.knownMoves;
+        Object.assign(npc.stats, stats ?? {});
+        npc.colors = colors ?? npc.colors;
+        npc.styles = styles ?? npc.styles;
+      }
+
+      const npcSprite = new CharacterSprite({
+        skinColor: npc.colors.skin,
+        headColor: npc.colors.head,
+        bodyColor: npc.colors.body,
+        legColor: npc.colors.legs,
+        headId: `${npc.styles.head}`,
+        bodyId: `${npc.styles.body}`,
+        legId: `${npc.styles.legs}`,
+      });
+      npcSprite.x = position[0];
+      npcSprite.y = position[1];
+      npcSprite.initSprite().then(() => {
+        npcSprite.setWidth(0.75);
+      });
+      this.mapSpecialContainer.addChild(npcSprite.getView());
     }
   }
 

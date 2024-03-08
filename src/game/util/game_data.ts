@@ -73,7 +73,10 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
     this.mainNPC = mainNPC ?? new Character();
     this.gold = gold ?? 0;
     this.cutscenes = cutscenes ?? new Set();
-    this.specialNPCs = specialNPCs ?? {};
+    this.specialNPCs = {};
+    for (const [id, npc] of Object.entries(specialNPCs ?? {})) {
+      this.specialNPCs[id] = new Character(npc);
+    }
   }
 
   toMap(): RawGameDataContent {
