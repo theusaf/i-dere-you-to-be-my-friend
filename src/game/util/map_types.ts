@@ -84,14 +84,15 @@ export enum CutsceneActionType {
 }
 
 type BlankScreenCutsceneAction = [CutsceneActionType.blankScreen, boolean];
+export interface CutsceneActionAnimate {
+  id: string;
+  start: [number, number];
+  end: [number, number];
+  time: number;
+}
 type AnimateCutsceneAction = [
   CutsceneActionType.animate,
-  {
-    id: string;
-    start: [number, number];
-    end: [number, number];
-    time: number;
-  },
+  CutsceneActionAnimate,
 ];
 type DialogCutsceneAction = [CutsceneActionType.dialog, string];
 type BattleCutsceneAction = [CutsceneActionType.battle, MapSpecialActionBattle];
@@ -106,6 +107,7 @@ export type CutsceneAction =
 
 export interface NPCData {
   position: [number, number];
+  type: "random" | "special";
   love: number | number[];
   hp?: number | number[];
   types?: DereType[];

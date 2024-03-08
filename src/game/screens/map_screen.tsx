@@ -13,7 +13,11 @@ import { MapScreenContent } from "./ui/map_screen_content";
 import RenderLayer from "../../engine/render_layer";
 import { MAP_SIZE, MapData, MapTile, mapTileStrings } from "../util/map";
 import { Direction } from "../util/direction";
-import { MapSpecialActionBattle, MapSpecialData } from "../util/map_types";
+import {
+  MapSpecialActionBattle,
+  MapSpecialData,
+  NPCData,
+} from "../util/map_types";
 import { AnimatedSprite } from "../../engine/animated_sprite";
 import { lerp } from "../util/animation";
 import { chance } from "../util/chance";
@@ -47,6 +51,14 @@ export class MapScreen extends GameScreen {
   mapSpecialContainer!: Container<DisplayObject>;
   mapContainer!: Container<DisplayObject>;
   paused: boolean = false;
+  mapNPCContainer!: Container<DisplayObject>;
+  mapNPCS: Record<
+    string,
+    {
+      character: Character;
+      sprite: CharacterSprite;
+    }
+  > = {};
   get currentChunk(): MapData | null {
     return this.chunks[`${this.chunkX},${this.chunkY}`];
   }
@@ -122,6 +134,7 @@ export class MapScreen extends GameScreen {
     this.mapContainer = new Container();
     this.mapBgContainer = new Container();
     this.mapSpecialContainer = new Container();
+    this.mapNPCContainer = new Container();
     this.mapSpecialContainer.sortableChildren = true;
     this.mapContainer.sortableChildren = true;
 
@@ -142,6 +155,7 @@ export class MapScreen extends GameScreen {
 
     this.mapContainer.addChild(this.mapBgContainer);
     this.mapContainer.addChild(this.mapSpecialContainer);
+    this.mapContainer.addChild(this.mapNPCContainer);
     this.container.addChild(this.mapContainer);
     this.mapContainer.addChild(this.characterSprite.getView());
     this.characterSprite.initSprite().then(() => {
@@ -149,7 +163,8 @@ export class MapScreen extends GameScreen {
     });
 
     this.mapSpecialContainer.zIndex = 25;
-    this.characterSprite.getView().zIndex = 30;
+    this.characterSprite.getView().zIndex = 40;
+    this.mapNPCContainer.zIndex = 30;
     this.mapContainer.zIndex = 20;
 
     this.container.sortChildren();
@@ -367,49 +382,61 @@ export class MapScreen extends GameScreen {
       break;
     }
     for (const npcId in npcs ?? {}) {
-      if (this.gameManager.gameData.isNPCinFriendGroup(npcId)) continue;
-      let npc: Character;
-      let position: [number, number];
-      if (this.gameManager.gameData.specialNPCs[npcId]) {
-        npc = this.gameManager.gameData.specialNPCs[npcId];
-        position = npc.position;
-      } else {
-        let { love, hp, types, gender, knownMoves, stats, colors, styles } =
-          npcs![npcId];
-        position = npcs![npcId].position;
-        love = Array.isArray(love)
-          ? chance.integer({ min: love[0], max: love[1] })
-          : love;
-        hp = Array.isArray(hp)
-          ? chance.integer({ min: hp[0], max: hp[1] })
-          : hp;
-        npc = Character.createRandomCharacter(love);
-
-        npc.hp = hp ?? npc.hp;
-        npc.types = types ?? npc.types;
-        npc.gender = gender ?? npc.gender;
-        npc.knownMoves = knownMoves ?? npc.knownMoves;
-        Object.assign(npc.stats, stats ?? {});
-        npc.colors = colors ?? npc.colors;
-        npc.styles = styles ?? npc.styles;
-      }
-
-      const npcSprite = new CharacterSprite({
-        skinColor: npc.colors.skin,
-        headColor: npc.colors.head,
-        bodyColor: npc.colors.body,
-        legColor: npc.colors.legs,
-        headId: `${npc.styles.head}`,
-        bodyId: `${npc.styles.body}`,
-        legId: `${npc.styles.legs}`,
-      });
-      npcSprite.x = position[0];
-      npcSprite.y = position[1];
-      npcSprite.initSprite().then(() => {
-        npcSprite.setWidth(0.75);
-      });
-      this.mapSpecialContainer.addChild(npcSprite.getView());
+      this.addNPC(npcId, npcs![npcId]);
     }
+  }
+
+  addNPC(npcId: string, npcData: NPCData): void {
+    if (this.gameManager.gameData.isNPCinFriendGroup(npcId)) return;
+    if (this.mapNPCS[npcId]) return;
+    let npc: Character;
+    let position: [number, number];
+    if (this.gameManager.gameData.specialNPCs[npcId]) {
+      npc = this.gameManager.gameData.specialNPCs[npcId];
+      position = npc.position;
+    } else {
+      let { love, hp, types, gender, knownMoves, stats, colors, styles, type } =
+        npcData;
+      position = npcData.position;
+      love = Array.isArray(love)
+        ? chance.integer({ min: love[0], max: love[1] })
+        : love;
+      hp = Array.isArray(hp) ? chance.integer({ min: hp[0], max: hp[1] }) : hp;
+      npc = Character.createRandomCharacter(love);
+
+      npc.hp = hp ?? npc.hp;
+      npc.types = types ?? npc.types;
+      npc.gender = gender ?? npc.gender;
+      npc.knownMoves = knownMoves ?? npc.knownMoves;
+      Object.assign(npc.stats, stats ?? {});
+      npc.colors = colors ?? npc.colors;
+      npc.styles = styles ?? npc.styles;
+
+      if (type === "special") {
+        this.gameManager.gameData.specialNPCs[npcId] = npc;
+      }
+    }
+
+    const npcSprite = new CharacterSprite({
+      skinColor: npc.colors.skin,
+      headColor: npc.colors.head,
+      bodyColor: npc.colors.body,
+      legColor: npc.colors.legs,
+      headId: `${npc.styles.head}`,
+      bodyId: `${npc.styles.body}`,
+      legId: `${npc.styles.legs}`,
+    });
+    npcSprite.x = position[0];
+    npcSprite.y = position[1];
+    npcSprite.initSprite().then(() => {
+      npcSprite.setWidth(0.75);
+    });
+    this.mapNPCS[npcId] = {
+      character: npc,
+      sprite: npcSprite,
+    };
+    this.mapNPCContainer.addChild(npcSprite.getView());
+    console.log("added npc", npcId);
   }
 
   addSpriteParticle(sprite: Sprite) {
@@ -636,7 +663,17 @@ export class MapScreen extends GameScreen {
 
     // TODO: make buildings opaque when near player
 
+    this.animateNPCs(delta);
     this.movePlayer(delta);
+  }
+
+  animateNPCs(delta: number): void {
+    for (const id in this.mapNPCS) {
+      const { sprite, character } = this.mapNPCS[id];
+      sprite.x = character.position[0];
+      sprite.y = character.position[1];
+      sprite.update(delta);
+    }
   }
 
   animatePlayer(delta: number): void {

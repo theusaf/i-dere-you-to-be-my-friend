@@ -2,7 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { PixelImage } from "../../../engine/components/pixel_image";
 import { Unselectable } from "../../../engine/components/unselectable";
 import { MapScreen, MapScreenEvents } from "../map_screen";
-import { MapSpecialActionBattle } from "../../util/map_types";
+import {
+  CutsceneActionAnimate,
+  MapSpecialActionBattle,
+} from "../../util/map_types";
 import { BattleScreen } from "../battle_screen";
 import { GameAnimation, easeMethod } from "../../util/animation";
 import {
@@ -54,6 +57,37 @@ export function MapScreenContent({
         gameManager.cutsceneIndex++;
       };
     }) as EventListener;
+    const animateListener = ((event: CustomEvent<CutsceneActionAnimate>) => {
+      const animateData = event.detail;
+      const npc = gameManager.gameData.specialNPCs[animateData.id];
+      const animation = new GameAnimation(
+        {
+          x: animateData.start[0],
+          y: animateData.start[1],
+        },
+        {
+          x: animateData.end[0],
+          y: animateData.end[1],
+        },
+        animateData.time,
+      );
+      console.log("animate event", event, npc, animation);
+      let lastTime = performance.now();
+      const animateLoop = (time: number) => {
+        console.log("animate loop", time);
+        if (animation.isDone) {
+          console.log("animate done");
+          gameManager.cutsceneIndex++;
+          return;
+        }
+        const progress = animation.update(time - lastTime);
+        npc.position[0] = progress.x;
+        npc.position[1] = progress.y;
+        lastTime = time;
+        requestAnimationFrame(animateLoop);
+      };
+      requestAnimationFrame(animateLoop);
+    }) as EventListener;
     const blankScreenListener = ((event: CustomEvent<boolean>) => {
       setBlankScreen((event as CustomEvent<boolean>).detail);
       setTimeout(() => {
@@ -72,6 +106,10 @@ export function MapScreenContent({
       MapScreenEvents.dialog,
       dialogListener,
     );
+    state.eventNotifier.addEventListener(
+      MapScreenEvents.animate,
+      animateListener,
+    );
     return () => {
       state.eventNotifier.removeEventListener(
         MapScreenEvents.battleStart,
@@ -84,6 +122,10 @@ export function MapScreenContent({
       state.eventNotifier.removeEventListener(
         MapScreenEvents.dialog,
         dialogListener,
+      );
+      state.eventNotifier.removeEventListener(
+        MapScreenEvents.animate,
+        animateListener,
       );
     };
   }, [state.eventNotifier]);
