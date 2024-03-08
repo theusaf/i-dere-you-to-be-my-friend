@@ -1,11 +1,5 @@
 import * as PIXI from "pixi.js";
-import {
-  useRef,
-  useEffect,
-  useState,
-  forwardRef,
-  useReducer,
-} from "react";
+import { useRef, useEffect, useState, forwardRef, useReducer } from "react";
 import Game from "./Game";
 import { GameManager } from "./engine/game_manager";
 import { main } from "./game/main";

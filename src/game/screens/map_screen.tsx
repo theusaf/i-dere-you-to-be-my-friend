@@ -399,8 +399,9 @@ export class MapScreen extends GameScreen {
       npc = this.gameManager.gameData.specialNPCs[npcId];
       position = npc.position;
     } else {
-      let { love, hp, types, gender, knownMoves, stats, colors, styles, type } =
+      const { types, gender, knownMoves, stats, colors, styles, type } =
         npcData;
+      let { love, hp } = npcData;
       position = npcData.position;
       love = Array.isArray(love)
         ? chance.integer({ min: love[0], max: love[1] })

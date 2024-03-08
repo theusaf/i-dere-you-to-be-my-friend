@@ -16,6 +16,8 @@ import { Battle } from "../../util/battle";
 import { chance } from "../../util/chance";
 import { AnimatedTextController } from "../../../engine/components/animated_text_container";
 import { FriendContract } from "../../../engine/components/contract";
+import { CharacterSpriteAnimation } from "../../../engine/character_sprite";
+import { Direction } from "../../util/direction";
 
 interface MapScreenContentProps {
   state: MapScreen;
@@ -76,8 +78,12 @@ export function MapScreenContent({
         animateData.time,
       );
       let lastTime = performance.now();
+      const sprite = state.mapNPCS[animateData.id].sprite;
+      sprite.setAnimation(CharacterSpriteAnimation.running);
+      sprite.animationContext.direction = Direction.down;
       const animateLoop = (time: number) => {
         if (animation.isDone) {
+          sprite.setAnimation(CharacterSpriteAnimation.idle);
           gameManager.cutsceneIndex++;
           return;
         }
@@ -149,7 +155,12 @@ export function MapScreenContent({
         contractListener,
       );
     };
-  }, [state.eventNotifier]);
+  }, [
+    state.eventNotifier,
+    gameManager.cutsceneIndex,
+    gameManager.gameData,
+    state.mapNPCS,
+  ]);
 
   return (
     <>

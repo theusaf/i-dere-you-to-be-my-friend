@@ -32,6 +32,15 @@ export function BattleScreenContent({
   const registerAfterLogRenderCallback = (cb: () => void) => {
     afterLogRenderCallbacks.current.add(cb);
   };
+  const onBattleEnd = () => {
+    gameManager.changeScreen(new MapScreen());
+    gameManager.gameData.battle = null;
+    if (gameManager.cutsceneData.length) {
+      setTimeout(() => {
+        gameManager.cutsceneIndex++;
+      }, 250);
+    }
+  };
 
   // handle other updates dependent on log timing
   if (logIndex >= battle.logs.length) {
@@ -76,6 +85,7 @@ export function BattleScreenContent({
           setLogIndex(battle.logs.length);
         }}
         callbackRegister={registerAfterLogRenderCallback}
+        onBattleEnd={onBattleEnd}
       />
     </div>
   );
@@ -125,6 +135,7 @@ interface UserViewProps extends ToggleableUIProps {
   logIndex: number;
   onLogsRendered: () => void;
   callbackRegister: (cb: () => void) => void;
+  onBattleEnd: () => void;
 }
 
 function UserView({
@@ -133,6 +144,7 @@ function UserView({
   logIndex,
   onLogsRendered,
   callbackRegister,
+  onBattleEnd,
 }: UserViewProps): JSX.Element {
   const [displayContract, setDisplayContract] = useState(false);
   const battle = gameManager.gameData.battle!;
@@ -186,10 +198,7 @@ function UserView({
     }
     if (isEndOfBattle) {
       callbackRegister(() => {
-        gameManager.gameData.save().finally(() => {
-          gameManager.changeScreen(new MapScreen());
-          gameManager.gameData.battle = null;
-        });
+        gameManager.gameData.save().finally(onBattleEnd);
       });
     }
     battle.triggerChange();
@@ -216,6 +225,7 @@ function UserView({
             callbackRegister={callbackRegister}
             displayContract={() => setDisplayContract(true)}
             checkForBattleEnd={checkForBattleEnd}
+            onBattleEnd={onBattleEnd}
           />
         </div>
       </div>
@@ -268,6 +278,7 @@ function UserViewButtonController({
   callbackRegister,
   displayContract,
   checkForBattleEnd,
+  onBattleEnd,
 }: UserViewProps & {
   displayContract: () => void;
   checkForBattleEnd: (
@@ -357,9 +368,7 @@ function UserViewButtonController({
           key="run"
           className="w-full"
           onCompleteAction={() => {
-            gameManager.gameData.save().finally(() => {
-              gameManager.changeScreen(new MapScreen());
-            });
+            gameManager.gameData.save().finally(onBattleEnd);
           }}
         >
           Your power of friendship is too weak for this! You run away.

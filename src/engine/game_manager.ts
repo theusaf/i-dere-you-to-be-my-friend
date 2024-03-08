@@ -37,18 +37,26 @@ export class GameManager {
     let cleanup: (() => void) | null = null; // run at the start of the next action
     for (const action of cutsceneData) {
       // data changed, stop this loop
-      if (this.cutsceneData !== cutsceneData) return;
+      if (this.cutsceneData !== cutsceneData) {
+        console.log("Cutscene data changed, stopping loop");
+        return;
+      }
+
+      console.log("Waiting for cutscene index", index + 1);
+
       while (
         this.cutsceneIndex === index ||
         !(this.currentScreen instanceof MapScreen)
       ) {
+        console.log("Waiting for cutscene index", index, this.cutsceneIndex);
         await sleep(500);
         continue;
       }
       if (cleanup) {
-        cleanup();
         cleanup = null;
       }
+
+      console.log("Executing cutscene action", action);
 
       this.currentScreen.paused = true;
       index = this.cutsceneIndex;
@@ -67,22 +75,19 @@ export class GameManager {
           break;
         }
         case CutsceneActionType.battle: {
-          cleanup = () => {
-            (this.currentScreen as MapScreen).paused = true;
-          };
           this.currentScreen.notify(MapScreenEvents.battleStart, data);
           break;
         }
         case CutsceneActionType.contract: {
           this.currentScreen.notify(MapScreenEvents.contract, data);
-          cleanup = () => {
-            (this.currentScreen as MapScreen).paused = false;
-          };
           break;
         }
       }
     }
-    if (cleanup) cleanup();
+    if (this.currentScreen instanceof MapScreen) {
+      this.currentScreen.paused = false;
+    }
+    this.cutsceneData = [];
   }
 
   executeGameLoop(delta: number): void {
