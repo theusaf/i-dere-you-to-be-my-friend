@@ -100,6 +100,7 @@ export const assetList: AssetsManifest = {
         },
         { src: "./assets/maps/special/-1,0.yaml", alias: "map/special/-1,0" },
         { src: "./assets/maps/special/0,-1.yaml", alias: "map/special/0,-1" },
+        { src: "./assets/maps/special/0,0.yaml", alias: "map/special/0,0" },
       ],
     },
     {

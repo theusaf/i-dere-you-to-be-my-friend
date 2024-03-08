@@ -31,6 +31,8 @@ export enum MapScreenEvents {
   battleStart = "battleStart",
   blankScreen = "blankScreen",
   dialog = "dialog",
+  contract = "contract",
+  animate = "animate",
 }
 
 export class MapScreen extends GameScreen {
@@ -360,7 +362,7 @@ export class MapScreen extends GameScreen {
     for (const cutsceneId in cutscenes ?? {}) {
       if (this.gameManager.gameData.cutscenes.has(cutsceneId)) continue;
       const cutscene = cutscenes![cutsceneId];
-      this.gameManager.applyCutsceneData(cutscene, cutsceneId);
+      this.gameManager.applyCutsceneData(cutscene.actions, cutsceneId);
       break;
     }
   }
@@ -782,7 +784,7 @@ export class MapScreen extends GameScreen {
     const { x: chunkX, y: chunkY } = this.getLocalChunkPosition(worldX, worldY);
     if (chunkData) {
       const { boxes } = chunkData;
-      for (const box of boxes!) {
+      for (const box of boxes ?? []) {
         const { type } = box;
         let { from, to } = box;
         if (from === null || to === null) {

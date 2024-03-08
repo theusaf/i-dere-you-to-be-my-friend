@@ -73,7 +73,7 @@ export interface MapSpecialActionBattle extends MapSpecialActionBase {
   popup?: string;
 }
 
-export enum CutsceneAction {
+export enum CutsceneActionType {
   blankScreen = "blank_screen",
   animate = "animate",
   dialog = "text",
@@ -81,9 +81,9 @@ export enum CutsceneAction {
   contract = "contract",
 }
 
-type BlankScreenCutsceneAction = [CutsceneAction, boolean];
+type BlankScreenCutsceneAction = [CutsceneActionType.blankScreen, boolean];
 type AnimateCutsceneAction = [
-  CutsceneAction.animate,
+  CutsceneActionType.animate,
   {
     id: string;
     start_x: number;
@@ -93,17 +93,24 @@ type AnimateCutsceneAction = [
     time: number;
   },
 ];
-type DialogCutsceneAction = [CutsceneAction.dialog, string];
-type BattleCutsceneAction = [CutsceneAction.battle, MapSpecialActionBattle];
+type DialogCutsceneAction = [CutsceneActionType.dialog, string];
+type BattleCutsceneAction = [CutsceneActionType.battle, MapSpecialActionBattle];
+type ContractCutsceneAction = [CutsceneActionType.contract, string];
 
-export type Cutscene =
+export type CutsceneAction =
   | BlankScreenCutsceneAction
   | AnimateCutsceneAction
   | DialogCutsceneAction
-  | BattleCutsceneAction;
+  | BattleCutsceneAction
+  | ContractCutsceneAction;
+
+export interface Cutscene {
+  actions: CutsceneAction[];
+  conditions: [];
+}
 
 export interface MapSpecialData {
   boxes?: (MapSpecialActionBox | MapSpecialBuildingBox)[];
   npcs?: []; // TODO: not implemented yet
-  cutscenes?: Record<string, Cutscene[]>;
+  cutscenes?: Record<string, Cutscene>;
 }

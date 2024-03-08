@@ -32,9 +32,12 @@ export function MapScreenContent({
   const [battleStartState, setBattleStartState] = useState(
     EnterBattleAnimationState.none,
   );
+  const dialogCallback = useRef<() => void>(() => {});
   const [battleData, setBattleData] = useState<MapSpecialActionBattle | null>(
     null,
   );
+  const { gameManager } = state;
+
   useEffect(() => {
     const battleStartListener = ((
       data: CustomEvent<MapSpecialActionBattle>,
@@ -43,23 +46,44 @@ export function MapScreenContent({
       setBattleData(data.detail);
       setBattleStartState(EnterBattleAnimationState.running);
     }) as EventListener;
+    const dialogListener = ((event: CustomEvent<string>) => {
+      console.log("dialog event", event);
+      setDialog((event as CustomEvent<string>).detail);
+      dialogCallback.current = () => {
+        setDialog("");
+        gameManager.cutsceneIndex++;
+      };
+    }) as EventListener;
+    const blankScreenListener = ((event: CustomEvent<boolean>) => {
+      setBlankScreen((event as CustomEvent<boolean>).detail);
+      setTimeout(() => {
+        gameManager.cutsceneIndex++;
+      }, 1000);
+    }) as EventListener;
     state.eventNotifier.addEventListener(
       MapScreenEvents.battleStart,
       battleStartListener,
     );
     state.eventNotifier.addEventListener(
       MapScreenEvents.blankScreen,
-      (event) => {
-        setBlankScreen((event as CustomEvent<boolean>).detail);
-      },
+      blankScreenListener,
     );
-    state.eventNotifier.addEventListener(MapScreenEvents.dialog, (data) =>
-      setDialog((data as CustomEvent<string>).detail),
+    state.eventNotifier.addEventListener(
+      MapScreenEvents.dialog,
+      dialogListener,
     );
     return () => {
       state.eventNotifier.removeEventListener(
         MapScreenEvents.battleStart,
         battleStartListener,
+      );
+      state.eventNotifier.removeEventListener(
+        MapScreenEvents.blankScreen,
+        blankScreenListener,
+      );
+      state.eventNotifier.removeEventListener(
+        MapScreenEvents.dialog,
+        dialogListener,
       );
     };
   }, [state.eventNotifier]);
@@ -67,18 +91,19 @@ export function MapScreenContent({
   return (
     <>
       <div
-        className={`absolute h-full w-full top-0 left-0 bg-black transition-opacity z-50 duration-700 ${
+        className={`absolute h-full w-full top-0 left-0 bg-black transition-opacity z-40 duration-700 ${
           blankScreen
             ? "opacity-100 pointer-events-auto"
             : "pointer-events-none opacity-0"
         }`}
       ></div>
       {dialog && (
-        <div className="absolute h-full w-full top-0 left-0 z-60 pointer-events-none flex flex-col">
+        <div className="absolute h-full w-full top-0 left-0 z-50 pointer-events-auto flex flex-col">
           <div className="text-white text-2xl flex-1 px-20 py-10 flex flex-row content-center items-center">
             <AnimatedTextController
               key={dialog}
               className="text-center flex-1 grid content-center"
+              onCompleteAction={dialogCallback.current}
             >
               {dialog}
             </AnimatedTextController>

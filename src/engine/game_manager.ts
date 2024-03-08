@@ -1,9 +1,9 @@
 import { Application, DisplayObject } from "pixi.js";
 import { GameScreen } from "./screen";
 import { GameData } from "../game/util/game_data";
-import { Cutscene, CutsceneAction } from "../game/util/map_types";
+import { CutsceneAction, CutsceneActionType } from "../game/util/map_types";
 import { sleep } from "../game/util/sleep";
-import { MapScreen } from "../game/screens/map_screen";
+import { MapScreen, MapScreenEvents } from "../game/screens/map_screen";
 
 /**
  * Manages game screens.
@@ -13,7 +13,7 @@ export class GameManager {
   app: Application;
   onScreenChange: () => void;
   gameData: GameData;
-  cutsceneData: Cutscene[];
+  cutsceneData: CutsceneAction[];
   cutsceneIndex: number = 0;
 
   constructor(app: Application, onScreenChange: () => void) {
@@ -24,7 +24,7 @@ export class GameManager {
     app.ticker.add(this.executeGameLoop.bind(this));
   }
 
-  applyCutsceneData(cutsceneData: Cutscene[], id: string): void {
+  applyCutsceneData(cutsceneData: CutsceneAction[], id: string): void {
     this.gameData.cutscenes.add(id);
     this.cutsceneData = cutsceneData;
     this.cutsceneIndex = 0;
@@ -33,18 +33,15 @@ export class GameManager {
 
   async executeCutsceneLoop(): Promise<void> {
     const cutsceneData = this.cutsceneData;
-    let index = this.cutsceneIndex;
-    let cleanup: (() => void) | null = null;
+    let index = this.cutsceneIndex - 1;
+    let cleanup: (() => void) | null = null; // run at the start of the next action
     for (const action of cutsceneData) {
       // data changed, stop this loop
       if (this.cutsceneData !== cutsceneData) return;
-      // waiting for cutscene actions to finish
-      if (index === this.cutsceneIndex) {
-        // TODO: check for changes
-        await sleep(250);
-        continue;
-      }
-      if (!(this.currentScreen instanceof MapScreen)) {
+      while (
+        this.cutsceneIndex === index ||
+        !(this.currentScreen instanceof MapScreen)
+      ) {
         await sleep(500);
         continue;
       }
@@ -52,27 +49,34 @@ export class GameManager {
         cleanup();
         cleanup = null;
       }
+
       index = this.cutsceneIndex;
       const [type, data] = action;
       switch (type) {
-        case CutsceneAction.blankScreen: {
-          cleanup = () => {}
+        case CutsceneActionType.blankScreen: {
+          this.currentScreen.notify(MapScreenEvents.blankScreen, data);
           break;
         }
-        case CutsceneAction.animate: {
+        case CutsceneActionType.animate: {
+          this.currentScreen.notify(MapScreenEvents.animate, data);
           break;
         }
-        case CutsceneAction.dialog: {
+        case CutsceneActionType.dialog: {
+          this.currentScreen.notify(MapScreenEvents.dialog, data);
           break;
         }
-        case CutsceneAction.battle: {
+        case CutsceneActionType.battle: {
+          cleanup = () => {};
+          this.currentScreen.notify(MapScreenEvents.battleStart, data);
           break;
         }
-        case CutsceneAction.contract: {
+        case CutsceneActionType.contract: {
+          this.currentScreen.notify(MapScreenEvents.contract, data);
           break;
         }
       }
     }
+    if (cleanup) cleanup();
   }
 
   executeGameLoop(delta: number): void {
