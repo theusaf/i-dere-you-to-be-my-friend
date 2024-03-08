@@ -442,7 +442,6 @@ export class MapScreen extends GameScreen {
       sprite: npcSprite,
     };
     this.mapNPCContainer.addChild(npcSprite.getView());
-    console.log("added npc", npcId);
   }
 
   addSpriteParticle(sprite: Sprite) {

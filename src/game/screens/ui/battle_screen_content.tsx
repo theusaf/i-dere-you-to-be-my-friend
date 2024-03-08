@@ -303,7 +303,6 @@ function UserViewButtonController({
     const currentPlayer = battle.activePlayer!;
     let playbackIndex = 0;
     const callback = () => {
-      console.log(currentOpponent, currentPlayer);
       if (playbackIndex < playback.length) {
         const [log, applyAction] = playback[playbackIndex];
         applyAction();

@@ -13,6 +13,8 @@ export interface MapSpecialBuildingBox extends MapSpecialBoxBase {
   type: "building";
   image: string;
   background_tile?: keyof typeof mapTileStrings;
+  entry?: [number, number, number, number];
+  building_id?: string;
 }
 
 export interface MapSpecialActionBox extends MapSpecialBoxBase {

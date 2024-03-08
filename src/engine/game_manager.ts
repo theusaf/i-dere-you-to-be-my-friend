@@ -38,25 +38,19 @@ export class GameManager {
     for (const action of cutsceneData) {
       // data changed, stop this loop
       if (this.cutsceneData !== cutsceneData) {
-        console.log("Cutscene data changed, stopping loop");
         return;
       }
-
-      console.log("Waiting for cutscene index", index + 1);
 
       while (
         this.cutsceneIndex === index ||
         !(this.currentScreen instanceof MapScreen)
       ) {
-        console.log("Waiting for cutscene index", index, this.cutsceneIndex);
         await sleep(500);
         continue;
       }
       if (cleanup) {
         cleanup = null;
       }
-
-      console.log("Executing cutscene action", action);
 
       this.currentScreen.paused = true;
       index = this.cutsceneIndex;
