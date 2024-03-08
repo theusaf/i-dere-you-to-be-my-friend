@@ -27,6 +27,7 @@ import {
   CharacterSpriteAnimation,
 } from "../../engine/character_sprite";
 import { Character } from "../util/character";
+import { constrain } from "../util/math";
 
 export enum MapScreenEvents {
   /**
@@ -60,8 +61,8 @@ export class MapScreen extends GameScreen {
       sprite: CharacterSprite;
     }
   > = {};
-  baseScale!: ObservablePoint;
-  currentScale!: ObservablePoint;
+  baseSize!: number;
+  currentSize!: number;
 
   get currentChunk(): MapData | null {
     return this.chunks[`${this.chunkX},${this.chunkY}`];
@@ -135,8 +136,8 @@ export class MapScreen extends GameScreen {
     // intialize world size in terms of "blocks" (about 0.5 meters)
     super.initialize(app, gameManager, new RenderLayer(app, 30));
 
-    this.baseScale = this.container.scale;
-    this.currentScale = this.baseScale;
+    this.baseSize = this.container.worldWidth;
+    this.currentSize = this.baseSize;
 
     this.mapContainer = new Container();
     this.mapBgContainer = new Container();
@@ -674,10 +675,35 @@ export class MapScreen extends GameScreen {
     this.characterSprite.y = this.characterWorldY;
     this.characterSprite.update(delta);
 
-    // TODO: make buildings opaque when near player
-
+    this.animateBuildings(delta);
     this.animateNPCs(delta);
     this.movePlayer(delta);
+  }
+
+  animateBuildings(delta: number) {
+    const chunkData = Assets.get<MapSpecialData>(
+      `map/special/${this.chunkX},${this.chunkY}`,
+    );
+    let resultSize = this.baseSize;
+    for (const box of chunkData.boxes ?? []) {
+      if (box.type !== "building") continue;
+      const { entry } = box;
+      if (!entry) continue;
+      const center = [(entry[0] + entry[2]) / 2, (entry[1] + entry[3]) / 2];
+      const distance = Math.sqrt(
+        (center[0] - this.characterChunkX) ** 2 +
+          (center[1] - this.characterChunkY) ** 2,
+      );
+      if (distance > 10) continue;
+      const size = constrain(
+        this.baseSize / (Math.max(10 - distance, 1) / 4),
+        this.baseSize / 2,
+        this.baseSize,
+      );
+      resultSize = Math.min(resultSize, size);
+    }
+    this.currentSize = lerp(this.currentSize, resultSize, 0.1);
+    this.container.setWorldSize(this.currentSize);
   }
 
   animateNPCs(delta: number): void {

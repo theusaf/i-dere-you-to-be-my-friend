@@ -4,6 +4,8 @@ boxes:
     type: building
     image: hospital
     background_tile: null
+    entry: [26, 27, 28, 29]
+    building_id: hospital
 
   - from: [3, 47]
     to: [31, 73]
