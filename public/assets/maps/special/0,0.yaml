@@ -54,7 +54,7 @@ cutscenes:
       - - text
         - There! Now we're friends!
       - - text
-        - <Two people appear out of nowhere.>
+        - <A group of people appear out of nowhere.>
       - - text
         - >-
           How could you run off like that? Don't tell me... No...
@@ -67,6 +67,10 @@ cutscenes:
           level: 1
           reward_table: default
           popup: tutorial
+      - - text
+        - Thanks! I hope you will treat me well as your friend!
+      - - text
+        - ... I really hope I made the right choice...
 
     conditions: []
 

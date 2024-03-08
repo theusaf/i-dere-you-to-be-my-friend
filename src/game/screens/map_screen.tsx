@@ -388,6 +388,10 @@ export class MapScreen extends GameScreen {
 
   addNPC(npcId: string, npcData: NPCData): void {
     if (this.gameManager.gameData.isNPCinFriendGroup(npcId)) return;
+    if (this.gameManager.gameData.specialNPCs[npcId]) {
+      const npc = this.gameManager.gameData.specialNPCs[npcId];
+      if (npc.isDead || npc.hp <= 0) return;
+    }
     if (this.mapNPCS[npcId]) return;
     let npc: Character;
     let position: [number, number];
@@ -413,6 +417,7 @@ export class MapScreen extends GameScreen {
       npc.styles = styles ?? npc.styles;
 
       if (type === "special") {
+        npc.id = npcId;
         this.gameManager.gameData.specialNPCs[npcId] = npc;
       }
     }

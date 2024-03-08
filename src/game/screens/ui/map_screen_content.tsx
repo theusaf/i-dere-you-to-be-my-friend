@@ -15,6 +15,7 @@ import {
 import { Battle } from "../../util/battle";
 import { chance } from "../../util/chance";
 import { AnimatedTextController } from "../../../engine/components/animated_text_container";
+import { FriendContract } from "../../../engine/components/contract";
 
 interface MapScreenContentProps {
   state: MapScreen;
@@ -31,10 +32,13 @@ export function MapScreenContent({
 }: MapScreenContentProps): JSX.Element {
   const [phoneVisible, setPhoneVisible] = useState(false);
   const [blankScreen, setBlankScreen] = useState(false);
+  const [contractVisible, setContractVisible] = useState(false);
+  const [contractName, setContractName] = useState("");
   const [dialog, setDialog] = useState("");
   const [battleStartState, setBattleStartState] = useState(
     EnterBattleAnimationState.none,
   );
+  const contractCallback = useRef<() => void>(() => {});
   const dialogCallback = useRef<() => void>(() => {});
   const [battleData, setBattleData] = useState<MapSpecialActionBattle | null>(
     null,
@@ -50,10 +54,10 @@ export function MapScreenContent({
       setBattleStartState(EnterBattleAnimationState.running);
     }) as EventListener;
     const dialogListener = ((event: CustomEvent<string>) => {
-      console.log("dialog event", event);
       setDialog((event as CustomEvent<string>).detail);
       dialogCallback.current = () => {
         setDialog("");
+        dialogCallback.current = () => {};
         gameManager.cutsceneIndex++;
       };
     }) as EventListener;
@@ -71,12 +75,9 @@ export function MapScreenContent({
         },
         animateData.time,
       );
-      console.log("animate event", event, npc, animation);
       let lastTime = performance.now();
       const animateLoop = (time: number) => {
-        console.log("animate loop", time);
         if (animation.isDone) {
-          console.log("animate done");
           gameManager.cutsceneIndex++;
           return;
         }
@@ -94,6 +95,18 @@ export function MapScreenContent({
         gameManager.cutsceneIndex++;
       }, 1000);
     }) as EventListener;
+    const contractListener = ((event: CustomEvent<string>) => {
+      const npcId = event.detail;
+      const npc = gameManager.gameData.specialNPCs[npcId];
+      setContractName(npc.name);
+      setContractVisible(true);
+      contractCallback.current = () => {
+        gameManager.gameData.addCharacter(npc);
+        setContractVisible(false);
+        contractCallback.current = () => {};
+        gameManager.cutsceneIndex++;
+      };
+    }) as EventListener;
     state.eventNotifier.addEventListener(
       MapScreenEvents.battleStart,
       battleStartListener,
@@ -109,6 +122,10 @@ export function MapScreenContent({
     state.eventNotifier.addEventListener(
       MapScreenEvents.animate,
       animateListener,
+    );
+    state.eventNotifier.addEventListener(
+      MapScreenEvents.contract,
+      contractListener,
     );
     return () => {
       state.eventNotifier.removeEventListener(
@@ -126,6 +143,10 @@ export function MapScreenContent({
       state.eventNotifier.removeEventListener(
         MapScreenEvents.animate,
         animateListener,
+      );
+      state.eventNotifier.removeEventListener(
+        MapScreenEvents.contract,
+        contractListener,
       );
     };
   }, [state.eventNotifier]);
@@ -151,6 +172,13 @@ export function MapScreenContent({
             </AnimatedTextController>
           </div>
         </div>
+      )}
+      {contractVisible && (
+        <FriendContract
+          initialName={contractName}
+          contractee={gameManager.gameData.you.name}
+          onContractSigned={contractCallback.current}
+        />
       )}
       <div
         className={`grid grid-rows-8 relative h-full ${phoneVisible ? "pointer-events-auto" : ""}`}
