@@ -3,6 +3,7 @@ import {
   Assets,
   Container,
   DisplayObject,
+  ObservablePoint,
   ParticleContainer,
   Sprite,
   Texture,
@@ -59,6 +60,9 @@ export class MapScreen extends GameScreen {
       sprite: CharacterSprite;
     }
   > = {};
+  baseScale!: ObservablePoint;
+  currentScale!: ObservablePoint;
+
   get currentChunk(): MapData | null {
     return this.chunks[`${this.chunkX},${this.chunkY}`];
   }
@@ -130,6 +134,9 @@ export class MapScreen extends GameScreen {
   initialize(app: Application, gameManager: GameManager): void {
     // intialize world size in terms of "blocks" (about 0.5 meters)
     super.initialize(app, gameManager, new RenderLayer(app, 30));
+
+    this.baseScale = this.container.scale;
+    this.currentScale = this.baseScale;
 
     this.mapContainer = new Container();
     this.mapBgContainer = new Container();
@@ -377,6 +384,7 @@ export class MapScreen extends GameScreen {
     }
     for (const cutsceneId in cutscenes ?? {}) {
       if (this.gameManager.gameData.cutscenes.has(cutsceneId)) continue;
+      if (this.chunkX !== chunkX || this.chunkY !== chunkY) continue;
       const cutscene = cutscenes![cutsceneId];
       this.gameManager.applyCutsceneData(cutscene.actions, cutsceneId);
       break;
