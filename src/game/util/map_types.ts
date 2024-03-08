@@ -14,6 +14,7 @@ export interface MapSpecialBuildingBox extends MapSpecialBoxBase {
   image: string;
   background_tile?: keyof typeof mapTileStrings;
   entry?: [number, number, number, number];
+  inside?: [number, number, number, number];
   building_id?: string;
 }
 
@@ -138,4 +139,9 @@ export interface MapSpecialData {
   boxes?: (MapSpecialActionBox | MapSpecialBuildingBox)[];
   npcs?: Record<string, NPCData>;
   cutscenes?: Record<string, Cutscene>;
+}
+
+export interface BuildingSpecialData extends MapSpecialData {
+  entry: [number, number, number, number];
+  inside: [number, number, number, number];
 }

@@ -41,6 +41,12 @@ export enum MapScreenEvents {
   animate = "animate",
 }
 
+export enum MapBuildingPosition {
+  outside,
+  entering,
+  inside,
+}
+
 export class MapScreen extends GameScreen {
   mapBgContainer!: Container;
   chunks: Record<`${number},${number}`, MapData | null> = {};
@@ -51,8 +57,9 @@ export class MapScreen extends GameScreen {
   lerpWorldX: number = 0;
   mapSpecialContainer!: Container<DisplayObject>;
   mapContainer!: Container<DisplayObject>;
-  paused: boolean = false;
+  mapBuildingContainer!: Container<DisplayObject>;
   mapNPCContainer!: Container<DisplayObject>;
+  paused: boolean = false;
   mapNPCS: Record<
     string,
     {
@@ -62,6 +69,8 @@ export class MapScreen extends GameScreen {
   > = {};
   baseSize!: number;
   currentSize!: number;
+  inBuilding!: MapBuildingPosition;
+  ignoreCollisionBox: [number, number, number, number] | null = null;
 
   get currentChunk(): MapData | null {
     return this.chunks[`${this.chunkX},${this.chunkY}`];
@@ -142,6 +151,7 @@ export class MapScreen extends GameScreen {
     this.mapBgContainer = new Container();
     this.mapSpecialContainer = new Container();
     this.mapNPCContainer = new Container();
+    this.mapBuildingContainer = new Container();
     this.mapSpecialContainer.sortableChildren = true;
     this.mapContainer.sortableChildren = true;
 
@@ -163,6 +173,7 @@ export class MapScreen extends GameScreen {
     this.mapContainer.addChild(this.mapBgContainer);
     this.mapContainer.addChild(this.mapSpecialContainer);
     this.mapContainer.addChild(this.mapNPCContainer);
+    this.mapContainer.addChild(this.mapBuildingContainer);
     this.container.addChild(this.mapContainer);
     this.mapContainer.addChild(this.characterSprite.getView());
     this.characterSprite.initSprite().then(() => {
@@ -172,11 +183,13 @@ export class MapScreen extends GameScreen {
     this.mapSpecialContainer.zIndex = 25;
     this.characterSprite.getView().zIndex = 40;
     this.mapNPCContainer.zIndex = 30;
-    this.mapContainer.zIndex = 20;
+    this.mapBuildingContainer.zIndex = 20;
+    this.mapContainer.zIndex = 15;
 
     this.container.sortChildren();
     this.updateChunks();
 
+    this.inBuilding = MapBuildingPosition.outside;
     window.addEventListener("keydown", (e) => this.onKeyDown(e.code));
     window.addEventListener("keyup", (e) => this.onKeyUp(e.code));
   }
@@ -629,6 +642,9 @@ export class MapScreen extends GameScreen {
       case MapTile.stonebrick:
         sprite.texture = Assets.get("icon/map/stonebrick")!;
         break;
+      case MapTile.building:
+        sprite.texture = Texture.EMPTY;
+        break;
       default:
         sprite.texture = Texture.WHITE;
     }
@@ -692,10 +708,12 @@ export class MapScreen extends GameScreen {
     const chunkData = Assets.get<MapSpecialData>(
       `map/special/${this.chunkX},${this.chunkY}`,
     );
+    let resultDistance = Infinity;
     let resultSize = this.baseSize;
     for (const box of chunkData.boxes ?? []) {
       if (box.type !== "building") continue;
-      const { entry } = box;
+      const entry = box.entry;
+      const inside = box.inside!;
       if (!entry) continue;
       const center = [(entry[0] + entry[2]) / 2, (entry[1] + entry[3]) / 2];
       const distance = Math.sqrt(
@@ -703,14 +721,34 @@ export class MapScreen extends GameScreen {
           (center[1] - this.characterChunkY) ** 2,
       );
       if (distance > 10) continue;
-      const size = constrain(
-        this.baseSize / (Math.max(10 - distance, 1) / 4),
-        this.baseSize / 2,
-        this.baseSize,
-      );
-      resultSize = Math.min(resultSize, size);
+      if (distance < resultDistance) {
+        resultDistance = distance;
+        resultSize = this.baseSize / (Math.max(10 - resultDistance, 1) / 4);
+        if (
+          this.characterChunkX >= inside[0] &&
+          this.characterChunkX <= inside[2] &&
+          this.characterChunkY >= inside[1] &&
+          this.characterChunkY <= inside[3]
+        ) {
+          this.inBuilding = MapBuildingPosition.inside;
+        } else if (
+          this.characterChunkX >= entry[0] &&
+          this.characterChunkX <= entry[2] &&
+          this.characterChunkY >= entry[1] &&
+          this.characterChunkY <= entry[3]
+        ) {
+          this.inBuilding = MapBuildingPosition.entering;
+          this.ignoreCollisionBox = inside;
+        } else {
+          this.inBuilding = MapBuildingPosition.outside;
+        }
+      }
     }
-    this.currentSize = lerp(this.currentSize, resultSize, 0.1);
+    this.currentSize = lerp(
+      this.currentSize,
+      constrain(resultSize, this.baseSize / 2, this.baseSize),
+      0.1,
+    );
     this.container.setWorldSize(this.currentSize);
   }
 
@@ -836,6 +874,13 @@ export class MapScreen extends GameScreen {
       this.characterChunkX,
       this.characterChunkY,
     );
+    // check for ignore
+    if (this.ignoreCollisionBox) {
+      const [x1, y1, x2, y2] = this.ignoreCollisionBox;
+      if (localX >= x1 && localX <= x2 && localY >= y1 && localY <= y2) {
+        return false;
+      }
+    }
     if (this.handleBasicCollisions(newTile, currentTile)) return true;
 
     // special checks

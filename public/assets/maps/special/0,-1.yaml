@@ -5,6 +5,7 @@ boxes:
     image: hospital
     background_tile: null
     entry: [26, 27, 28, 29]
+    inside: [25, 27, 26, 29]
     building_id: hospital
 
   - from: [3, 47]
