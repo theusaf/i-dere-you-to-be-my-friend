@@ -50,6 +50,18 @@ export const assetList: AssetsManifest = {
           src: "./assets/images/map_icons/water2.png",
           alias: "icon/map/water2",
         },
+        {
+          src: "./assets/images/map_icons/glass.png",
+          alias: "icon/map/glass",
+        },
+        {
+          src: "./assets/images/map_icons/tile.png",
+          alias: "icon/map/tile",
+        },
+        {
+          src: "./assets/images/map_icons/stonebrick.png",
+          alias: "icon/map/stonebrick",
+        },
       ],
     },
     {
@@ -89,6 +101,15 @@ export const assetList: AssetsManifest = {
         { src: "./assets/maps/0,-1.map", alias: "map/0,-1" },
         { src: "./assets/maps/-1,0.map", alias: "map/-1,0" },
         { src: "./assets/maps/1,0.map", alias: "map/1,0" },
+      ],
+    },
+    {
+      name: "data-map-building",
+      assets: [
+        {
+          src: "./assets/maps/buildings/hospital.map",
+          alias: "map/building/hospital",
+        },
       ],
     },
     {

@@ -3,7 +3,6 @@ import {
   Assets,
   Container,
   DisplayObject,
-  ObservablePoint,
   ParticleContainer,
   Sprite,
   Texture,
@@ -621,6 +620,15 @@ export class MapScreen extends GameScreen {
         });
         break;
       }
+      case MapTile.glass:
+        sprite.texture = Assets.get("icon/map/glass")!;
+        break;
+      case MapTile.tile:
+        sprite.texture = Assets.get("icon/map/tile")!;
+        break;
+      case MapTile.stonebrick:
+        sprite.texture = Assets.get("icon/map/stonebrick")!;
+        break;
       default:
         sprite.texture = Texture.WHITE;
     }
@@ -680,7 +688,7 @@ export class MapScreen extends GameScreen {
     this.movePlayer(delta);
   }
 
-  animateBuildings(delta: number) {
+  animateBuildings(_: number) {
     const chunkData = Assets.get<MapSpecialData>(
       `map/special/${this.chunkX},${this.chunkY}`,
     );

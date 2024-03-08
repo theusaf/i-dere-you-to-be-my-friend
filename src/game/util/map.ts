@@ -20,6 +20,9 @@ export enum MapTile {
   bridge = "bridge",
   sand = "sand",
   building = "building",
+  glass = "glass",
+  tile = "tile",
+  stonebrick = "stonebrick",
 }
 
 export const mapTileStrings = {
