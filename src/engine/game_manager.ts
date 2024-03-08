@@ -50,6 +50,7 @@ export class GameManager {
         cleanup = null;
       }
 
+      this.currentScreen.paused = true;
       index = this.cutsceneIndex;
       const [type, data] = action;
       switch (type) {
@@ -66,12 +67,17 @@ export class GameManager {
           break;
         }
         case CutsceneActionType.battle: {
-          cleanup = () => {};
+          cleanup = () => {
+            (this.currentScreen as MapScreen).paused = true;
+          };
           this.currentScreen.notify(MapScreenEvents.battleStart, data);
           break;
         }
         case CutsceneActionType.contract: {
           this.currentScreen.notify(MapScreenEvents.contract, data);
+          cleanup = () => {
+            (this.currentScreen as MapScreen).paused = false;
+          };
           break;
         }
       }

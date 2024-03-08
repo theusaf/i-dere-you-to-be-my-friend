@@ -20,6 +20,7 @@ export interface GameDataContent {
   saveId?: string;
   gold?: number;
   cutscenes?: Set<string>;
+  specialNPCs?: Record<string, Character>;
 }
 
 export interface RawGameDataContent {
@@ -31,6 +32,7 @@ export interface RawGameDataContent {
   saveId?: string;
   gold?: number;
   cutscenes?: string[];
+  specialNPCs?: Record<string, CharacterInfo>;
 }
 
 const maxFriends = 8;
@@ -42,6 +44,7 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
   mainNPC: Character;
   gold: number;
   cutscenes: Set<string>;
+  specialNPCs: Record<string, Character> = {};
 
   get activeFriends(): Character[] {
     return this.friends.filter((friend) => friend.isActive);
@@ -58,6 +61,7 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
     saveId,
     gold,
     cutscenes,
+    specialNPCs,
   }: Partial<GameDataContent> = {}) {
     this.saveId = saveId ?? chance.guid();
     this.worldMapData = worldMapData ?? {
@@ -69,9 +73,14 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
     this.mainNPC = mainNPC ?? new Character();
     this.gold = gold ?? 0;
     this.cutscenes = cutscenes ?? new Set();
+    this.specialNPCs = specialNPCs ?? {};
   }
 
   toMap(): RawGameDataContent {
+    const specialNPCs: Record<string, CharacterInfo> = {};
+    for (const [id, npc] of Object.entries(this.specialNPCs)) {
+      specialNPCs[id] = npc.toMap();
+    }
     return {
       worldMapData: this.worldMapData,
       friends: this.friends.map((friend) => friend.toMap()),
@@ -81,6 +90,7 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
       saveId: this.saveId,
       gold: this.gold,
       cutscenes: Array.from(this.cutscenes),
+      specialNPCs: specialNPCs,
     };
   }
 
@@ -111,6 +121,10 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
   }
 
   static fromMap(map: RawGameDataContent): GameData {
+    const specialNPCs: Record<string, Character> = {};
+    for (const [id, npc] of Object.entries(map.specialNPCs ?? {})) {
+      specialNPCs[id] = new Character(npc);
+    }
     return new GameData({
       worldMapData: map.worldMapData,
       friends: map.friends.map((friend) => new Character(friend)),
@@ -119,6 +133,7 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
       saveId: map.saveId,
       gold: map.gold,
       cutscenes: new Set(map.cutscenes),
+      specialNPCs,
     });
   }
 }
