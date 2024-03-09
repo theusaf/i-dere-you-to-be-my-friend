@@ -173,7 +173,6 @@ function UserView({
         battle.updateNextPlayer();
       } else {
         isEndOfBattle = true;
-        // TODO: move player to hospital
         const hasLivingFriends =
           gameManager.gameData.hasAnyLivingActiveFriends();
         if (currentPlayer.isDead && !hasLivingFriends) {

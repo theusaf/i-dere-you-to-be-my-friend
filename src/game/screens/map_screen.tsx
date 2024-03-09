@@ -14,7 +14,9 @@ import RenderLayer from "../../engine/render_layer";
 import { MAP_SIZE, MapData, MapTile, mapTileStrings } from "../util/map";
 import { Direction } from "../util/direction";
 import {
+  BuildingSpecialData,
   MapSpecialActionBattle,
+  MapSpecialBuildingBox,
   MapSpecialData,
   NPCData,
 } from "../util/map_types";
@@ -315,6 +317,10 @@ export class MapScreen extends GameScreen {
           const tileIndex = offsetY * MAP_SIZE + offsetX,
             tile = chunk.tiles[tileIndex];
           const sprite = this.getSpriteFromTile(tile);
+          if (sprite.texture === Texture.EMPTY) {
+            sprite.destroy();
+            continue;
+          }
           sprite.x = globalX;
           sprite.y = globalY;
           sprite.width = 1;
@@ -624,10 +630,13 @@ export class MapScreen extends GameScreen {
           onTextureChange: (texture) => {
             if (oldTexture !== texture) {
               oldTexture = texture;
-              this.textureParticleContainerMap
-                .get(texture)
-                ?.removeChild(sprite);
-              this.addSpriteParticle(sprite);
+              const container = sprite.parent;
+              if (container instanceof ParticleContainer) {
+                this.textureParticleContainerMap
+                  .get(texture)
+                  ?.removeChild(sprite);
+                this.addSpriteParticle(sprite);
+              }
             }
           },
         });
@@ -643,10 +652,10 @@ export class MapScreen extends GameScreen {
         sprite.texture = Assets.get("icon/map/stonebrick")!;
         break;
       case MapTile.building:
-        sprite.texture = Texture.EMPTY;
+        sprite.texture = Texture.WHITE;
         break;
       default:
-        sprite.texture = Texture.WHITE;
+        sprite.texture = Texture.EMPTY;
     }
     return sprite;
   }
@@ -699,17 +708,18 @@ export class MapScreen extends GameScreen {
     this.characterSprite.y = this.characterWorldY;
     this.characterSprite.update(delta);
 
-    this.animateBuildings(delta);
+    this.updateBuildings(delta);
     this.animateNPCs(delta);
     this.movePlayer(delta);
   }
 
-  animateBuildings(_: number) {
+  updateBuildings(_: number) {
     const chunkData = Assets.get<MapSpecialData>(
       `map/special/${this.chunkX},${this.chunkY}`,
     );
     let resultDistance = Infinity;
     let resultSize = this.baseSize;
+    let resultBox: MapSpecialBuildingBox | null = null;
     for (const box of chunkData.boxes ?? []) {
       if (box.type !== "building") continue;
       const entry = box.entry;
@@ -720,10 +730,17 @@ export class MapScreen extends GameScreen {
         (center[0] - this.characterChunkX) ** 2 +
           (center[1] - this.characterChunkY) ** 2,
       );
-      if (distance > 10) continue;
+      if (distance > 10) {
+        if (this.mapBuildingContainer.children.length) {
+          const removed = this.mapBuildingContainer.removeChildren();
+          for (const sprite of removed) sprite.destroy({ children: true });
+        }
+        continue;
+      }
       if (distance < resultDistance) {
         resultDistance = distance;
         resultSize = this.baseSize / (Math.max(10 - resultDistance, 1) / 4);
+        resultBox = box;
         if (
           this.characterChunkX >= inside[0] &&
           this.characterChunkX <= inside[2] &&
@@ -744,12 +761,60 @@ export class MapScreen extends GameScreen {
         }
       }
     }
-    this.currentSize = lerp(
-      this.currentSize,
-      constrain(resultSize, this.baseSize / 2, this.baseSize),
-      0.1,
+    if (resultBox) {
+      this.currentSize = lerp(
+        this.currentSize,
+        constrain(resultSize, this.baseSize / 2, this.baseSize),
+        0.1,
+      );
+      this.container.setWorldSize(this.currentSize);
+      if (!this.mapBuildingContainer.children.length) {
+        this.loadBuilding(resultBox);
+      }
+    }
+  }
+
+  loadBuilding(resultBox: MapSpecialBuildingBox) {
+    const buildingId = resultBox.building_id!;
+    console.log(buildingId);
+    const buildingData = Assets.get<BuildingSpecialData>(
+      `building/special/${buildingId}`,
     );
-    this.container.setWorldSize(this.currentSize);
+    const { width, height, tiles } = Assets.get<MapData>(
+      `building/${buildingId}`,
+    );
+    const tileContainer = new Container();
+    const chunkEntryPos = resultBox.entry!;
+    const buildingEntryPos = buildingData.entry;
+    // calculate offset between local building and chunk position
+    let offsetX = chunkEntryPos[0] - buildingEntryPos[0];
+    let offsetY = chunkEntryPos[1] - buildingEntryPos[1];
+    // calculate offset between entry and width/height
+    const { x, y } = this.getChunkGlobalPosition(
+      this.chunkX,
+      this.chunkY,
+      offsetX,
+      offsetY,
+    );
+    tileContainer.x = x;
+    tileContainer.y = y;
+    this.mapBuildingContainer.addChild(tileContainer);
+    // add tiles
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const tile = tiles[y * width + x];
+        const sprite = this.getSpriteFromTile(tile);
+        if (sprite.texture === Texture.EMPTY) {
+          sprite.destroy();
+          continue;
+        }
+        sprite.x = x;
+        sprite.y = y;
+        sprite.width = 1;
+        sprite.height = 1;
+        tileContainer.addChild(sprite);
+      }
+    }
   }
 
   animateNPCs(delta: number): void {

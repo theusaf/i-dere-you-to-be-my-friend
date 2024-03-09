@@ -46,6 +46,9 @@ export const mapTiles = {
   0xf2b141: MapTile.bridge,
   0xe1d334: MapTile.sand,
   0x838383: MapTile.building,
+  0x45dcde: MapTile.glass,
+  0xe7e7e7: MapTile.tile,
+  0xa0a0a0: MapTile.stonebrick,
 };
 
 // Hardcoded. Represents the width and height of the map.

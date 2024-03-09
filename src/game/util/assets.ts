@@ -108,7 +108,16 @@ export const assetList: AssetsManifest = {
       assets: [
         {
           src: "./assets/maps/buildings/hospital.map",
-          alias: "map/building/hospital",
+          alias: "building/hospital",
+        },
+      ],
+    },
+    {
+      name: "data-building-special",
+      assets: [
+        {
+          src: "./assets/maps/buildings/hospital.yaml",
+          alias: "building/special/hospital",
         },
       ],
     },
