@@ -202,7 +202,14 @@ export function MapScreenContent({
       )}
       <div
         className={`grid grid-rows-8 relative h-full ${phoneVisible ? "pointer-events-auto" : ""}`}
-        onClick={phoneVisible ? () => setPhoneVisible(false) : undefined}
+        onClick={
+          phoneVisible
+            ? () => {
+                setPhoneVisible(false);
+                (gameManager.currentScreen as MapScreen).paused = false;
+              }
+            : undefined
+        }
       >
         {phoneVisible && <PhoneLargeDisplay gameManager={state.gameManager} />}
         {battleStartState === EnterBattleAnimationState.running && (
@@ -227,7 +234,12 @@ export function MapScreenContent({
           <div className="col-span-2 px-4 relative h-full">
             {!phoneVisible &&
               battleStartState === EnterBattleAnimationState.none && (
-                <PhoneWidget onClick={() => setPhoneVisible(true)} />
+                <PhoneWidget
+                  onClick={() => {
+                    setPhoneVisible(true);
+                    (gameManager.currentScreen as MapScreen).paused = true;
+                  }}
+                />
               )}
           </div>
         </div>
