@@ -27,6 +27,7 @@ export function BattleScreenContent({
 }: BattleScreenContentProps): JSX.Element {
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
   const [logIndex, setLogIndex] = useState(0);
+  const [popup, setPopup] = useState(state.gameManager.gameData.battle?.popup);
   const { gameManager } = state;
   const battle = gameManager.gameData.battle!;
   const afterLogRenderCallbacks = useRef<Set<() => void>>(new Set());
@@ -76,18 +77,77 @@ export function BattleScreenContent({
   const showUI = state.state === BattleScreenState.battle;
 
   return (
-    <div className="grid grid-rows-5 h-full text-white">
-      <EnemyView show={showUI} activeEnemy={battle.activeOpponent} />
-      <UserView
-        gameManager={gameManager}
-        show={showUI}
-        logIndex={logIndex}
-        onLogsRendered={() => {
-          setLogIndex(battle.logs.length);
-        }}
-        callbackRegister={registerAfterLogRenderCallback}
-        onBattleEnd={onBattleEnd}
-      />
+    <>
+      {showUI && popup && <Popup popup={popup} onDone={() => setPopup("")} />}
+      <div className="grid grid-rows-5 h-full text-white">
+        <EnemyView show={showUI} activeEnemy={battle.activeOpponent} />
+        <UserView
+          gameManager={gameManager}
+          show={showUI}
+          logIndex={logIndex}
+          onLogsRendered={() => {
+            setLogIndex(battle.logs.length);
+          }}
+          callbackRegister={registerAfterLogRenderCallback}
+          onBattleEnd={onBattleEnd}
+        />
+      </div>
+    </>
+  );
+}
+
+function Popup({ onDone }: { popup: string; onDone: () => void }): JSX.Element {
+  // TODO: Currently hardcoded to tutorial content. If more popups are added, this should be changed
+  return (
+    <div className="fixed top-0 left-0 w-full h-full z-30 bg-black bg-opacity-60">
+      <div className="max-w-5xl fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-600 p-4 rounded text-white max-h-full overflow-y-auto pointer-events-auto">
+        <h2 className="text-2xl">Tutorial</h2>
+        <p>
+          Hi! Welcome to I Dere You to be My Friend! This tutorial will go over
+          some of the sections on this screen and about this game.
+        </p>
+        <h3 className="text-xl mt-2">Fight</h3>
+        <p>
+          In the fight section, you will see various moves that your friend can
+          carry out. These have limited use until you refresh them or lose, so
+          be careful!
+        </p>
+        <p>
+          Each character and move has various personality traits, which affect
+          how much damage is dealt by moves. The weaknesses and resistances are
+          a bit convoluted, and even I don't memorize them. Just choose what you
+          think works best!
+        </p>
+        <h3 className="text-xl mt-2">Friends</h3>
+        <p>
+          This section lists all of your current <strong>active</strong>{" "}
+          friends. You can have up to 8 at a time. To change out your active
+          friends, use the party application on your phone in the map.
+        </p>
+        <p>
+          You can use this section to switch out your current friend with
+          another one. However, this will give the opponent an opportunity to
+          attack!
+        </p>
+        <h3 className="text-xl mt-2">Actions & Items</h3>
+        <p>This section lists two actions and items (when implemented).</p>
+        <p>
+          The <strong>rizz</strong> action is the main way you gain new friends.
+          During combat, you instead daringly ask the opponent to be your
+          friend. Generally, the higher the level and the higher the health, the
+          lower the chance of success. Some battles may not allow you to rizz.
+        </p>
+        <h3 className="text-xl mt-2">Conclusion</h3>
+        <p>
+          That's about it for the basics! There are some other secrets that you
+          may encounter, but otherwise, have fun!
+        </p>
+        <div className="flex flex-col items-center text-center">
+          <TextActionButton className="w-36" onClick={onDone}>
+            Got it!
+          </TextActionButton>
+        </div>
+      </div>
     </div>
   );
 }

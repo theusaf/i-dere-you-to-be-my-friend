@@ -19,6 +19,7 @@ interface BattleData {
   playerTeam: Character[];
   rewardTableId?: string | null;
   gameData: GameData;
+  popup?: string | null;
 }
 
 export enum BattleEvents {
@@ -51,6 +52,7 @@ export class Battle extends EventTarget implements BattleData {
   playerTeam: Character[];
   rewardTable: RewardTable | null = null;
   gameData: GameData;
+  popup: string | null = null;
 
   activeOpponent: Character | null = null;
   activePlayer: Character | null = null;
@@ -62,12 +64,14 @@ export class Battle extends EventTarget implements BattleData {
     playerTeam,
     rewardTableId = null,
     gameData,
+    popup,
   }: BattleData) {
     super();
     this.opponentLeader = opponentLeader;
     this.opponentTeam = opponentTeam ?? [opponentLeader];
     this.playerTeam = playerTeam;
     this.gameData = gameData;
+    this.popup = popup ?? null;
 
     const rewardTables =
       Assets.get<Record<string, RewardTable>>("game/rewards");
@@ -946,6 +950,7 @@ export class Battle extends EventTarget implements BattleData {
       opponentTeam: enemyTeam,
       rewardTableId: rewardTable,
       gameData: gameManager.gameData,
+      popup: data.popup,
     });
   }
 }
