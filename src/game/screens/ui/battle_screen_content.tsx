@@ -188,7 +188,7 @@ function UserView({
           if (friend.isDead) continue;
           friend.hp = friend.stats.maxHealth;
           for (const key in friend.moveUses) {
-            friend.moveUses[key] = movesets[key].max_uses;
+            friend.moveUses[key] = movesets[key]?.max_uses ?? 1;
           }
         }
         gameManager.gameData.worldMapData.playerX = 26.5;
