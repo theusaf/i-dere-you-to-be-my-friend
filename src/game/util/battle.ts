@@ -100,6 +100,48 @@ export class Battle extends EventTarget implements BattleData {
       this.addLog("The opponent disappeared, leaving nothing behind.");
       return;
     } else {
+      let { gold, xp } = this.rewardTable;
+      if (Array.isArray(gold.amount)) {
+        gold.amount = chance.integer({
+          min: gold.amount[0],
+          max: gold.amount[1],
+        });
+      }
+      if (Array.isArray(xp.amount)) {
+        xp.amount = chance.integer({ min: xp.amount[0], max: xp.amount[1] });
+      }
+      const enemyLove = this.opponentLeader.love;
+      gold.amount = gold.amount * enemyLove * gold.love_multiplier;
+      let addAmount = xp.amount;
+      let totalAmount = addAmount;
+      for (let i = 0; i < enemyLove; i++) {
+        addAmount *= xp.love_multiplier;
+        totalAmount += addAmount;
+      }
+      xp.amount = totalAmount;
+      this.addLog(`You gained ${Math.floor(gold.amount)} gold!`);
+      this.addLog(`Your friend group gained ${Math.ceil(xp.amount)} xp each!`);
+      this.gameData.gold += Math.floor(gold.amount);
+      const yourInitialLove = this.gameData.you.love;
+      this.gameData.you.addXP(Math.ceil(xp.amount));
+      const yourAfterLove = this.gameData.you.love;
+      if (yourInitialLove !== yourAfterLove) {
+        this.addLog(
+          `${this.gameData.you.name}'s love grew by a factor of ${yourAfterLove - yourInitialLove}!`,
+        );
+      }
+
+      for (const friend of this.playerTeam) {
+        if (friend.isDead) continue;
+        const initialLove = friend.love;
+        friend.addXP(Math.ceil(xp.amount));
+        const afterLove = friend.love;
+        if (initialLove !== afterLove) {
+          this.addLog(
+            `${friend.name}'s love grew by a factor of ${afterLove - initialLove}!`,
+          );
+        }
+      }
     }
   }
 

@@ -176,7 +176,7 @@ function EnemyView({ show, activeEnemy }: EnemyViewProps) {
             </span>
             <div className="grid grid-cols-5">
               <HealthBar
-                className="col-span-4 m-auto"
+                className="col-span-4 m-auto !list-disc"
                 percentage={activeEnemy.hp / activeEnemy.stats.maxHealth}
               />
               <p className="text-center">
@@ -569,6 +569,7 @@ function UserStatsView({
       {activeCharacter && (
         <HealthBar
           percentage={activeCharacter.hp / activeCharacter.stats.maxHealth}
+          className="list-item !list-disc"
         />
       )}
       {activeCharacter && (
