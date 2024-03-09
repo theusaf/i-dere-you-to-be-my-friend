@@ -170,6 +170,21 @@ export function MapScreenContent({
     gameManager.gameData,
     state.mapNPCS,
   ]);
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.code === "Escape") {
+        if (phoneVisible) {
+          setPhoneVisible(false);
+          (gameManager.currentScreen as MapScreen).paused = false;
+        } else {
+          setPhoneVisible(true);
+          (gameManager.currentScreen as MapScreen).paused = true;
+        }
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [phoneVisible]);
 
   return (
     <>
