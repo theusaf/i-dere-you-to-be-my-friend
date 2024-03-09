@@ -122,23 +122,25 @@ export class BattleScreen extends GameScreen {
         }
       }
       if (battle.activePlayer) {
-        const character = new CharacterSprite({
-          skinColor: battle.activePlayer.colors.skin,
-          headColor: battle.activePlayer.colors.head,
-          bodyColor: battle.activePlayer.colors.body,
-          legColor: battle.activePlayer.colors.legs,
-          headId: `${battle.activePlayer.styles.head}`,
-          bodyId: `${battle.activePlayer.styles.body}`,
-          legId: `${battle.activePlayer.styles.legs}`,
-        });
-        this.battleCharacterSprite = character;
-        await character.initSprite();
-        character.facingForward = false;
-        character.updateSkinColor(character.skinColor);
-        this.container.addChild(character.getView());
-        character.setHeight(10);
-        character.x = 12;
-        character.y = 17;
+        if (!this.battleCharacterSprite) {
+          const character = new CharacterSprite({
+            skinColor: battle.activePlayer.colors.skin,
+            headColor: battle.activePlayer.colors.head,
+            bodyColor: battle.activePlayer.colors.body,
+            legColor: battle.activePlayer.colors.legs,
+            headId: `${battle.activePlayer.styles.head}`,
+            bodyId: `${battle.activePlayer.styles.body}`,
+            legId: `${battle.activePlayer.styles.legs}`,
+          });
+          this.battleCharacterSprite = character;
+          await character.initSprite();
+          character.facingForward = false;
+          character.updateSkinColor(character.skinColor);
+          this.container.addChild(character.getView());
+          character.setHeight(10);
+          character.x = 12;
+          character.y = 17;
+        }
       } else {
         if (this.battleCharacterSprite) {
           this.container.removeChild(this.battleCharacterSprite.getView()!);
