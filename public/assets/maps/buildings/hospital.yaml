@@ -1,2 +1,23 @@
 entry: [21, 14, 23, 16]
 inside: [20, 14, 21, 16]
+
+npcs:
+  doctor:
+    id: doctor
+    type: special
+    name: Dr. Kobi Alice Yoro
+    position: [15, 1]
+    gender: she
+    love: 6
+    stats:
+      constitution: 8
+      maxHealth: 40
+    styles:
+      head: 2
+      body: 1
+      legs: 3
+    colors:
+      skin: 16628340
+      head: 14362487
+      body: 16777215
+      legs: 3752

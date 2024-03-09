@@ -49,4 +49,4 @@ boxes:
     image: store_stall_2
     background_tile: grass
 
-npcs: []
+npcs: {}
