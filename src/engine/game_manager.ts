@@ -101,6 +101,10 @@ export class GameManager {
   }
 
   convertSpriteToImage(sprite: DisplayObject): Promise<Blob> {
-    return this.app.renderer.extract.canvas(sprite).convertToBlob!();
+    return new Promise((resolve) => {
+      this.app.renderer.extract.canvas(sprite).toBlob!((blob) => {
+        resolve(blob!);
+      });
+    });
   }
 }

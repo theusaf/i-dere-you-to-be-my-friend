@@ -23,6 +23,7 @@ import { MePagePhone } from "./map_screen_pages/me";
 import { GameManager } from "../../../engine/game_manager";
 import { ContactPageLarge, ContactPagePhone } from "./map_screen_pages/friends";
 import { Character } from "../../util/character";
+import { PartyPageLarge, PartyPagePhone } from "./map_screen_pages/party";
 
 interface MapScreenContentProps {
   state: MapScreen;
@@ -431,11 +432,18 @@ function PhoneLargeDisplay({ gameManager }: { gameManager: GameManager }) {
         onSelect={setPageData}
       />
     ),
+    party: <PartyPagePhone />,
   };
   const pageContents: Record<string, JSX.Element | JSX.Element[]> = {
     settings: <SettingsPageLarge />,
     credits: <CreditsPageLarge />,
     contacts: <ContactPageLarge friend={pageData as Character} />,
+    party: (
+      <PartyPageLarge
+        gameData={gameManager.gameData}
+        gameManager={gameManager}
+      />
+    ),
   };
   return (
     <div className="row-span-8 row-start-1 col-start-1 flex items-start flex-row p-4 z-10">
