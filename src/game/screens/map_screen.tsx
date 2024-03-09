@@ -708,6 +708,28 @@ export class MapScreen extends GameScreen {
     this.characterSprite.y = this.characterWorldY;
     this.characterSprite.update(delta);
 
+    const specialAlphaTarget =
+      this.inBuilding === MapBuildingPosition.inside ? 0 : 1;
+    const bgAlphaTarget =
+      this.inBuilding === MapBuildingPosition.inside ? 0.25 : 1;
+    const buildingAlphaTarget =
+      this.inBuilding === MapBuildingPosition.inside ? 1 : 0;
+    this.mapSpecialContainer.alpha = lerp(
+      this.mapSpecialContainer.alpha,
+      specialAlphaTarget,
+      0.1,
+    );
+    this.mapBgContainer.alpha = lerp(
+      this.mapBgContainer.alpha,
+      bgAlphaTarget,
+      0.1,
+    );
+    this.mapBuildingContainer.alpha = lerp(
+      this.mapBuildingContainer.alpha,
+      buildingAlphaTarget,
+      0.1,
+    );
+
     this.updateBuildings(delta);
     this.animateNPCs(delta);
     this.movePlayer(delta);
@@ -757,7 +779,9 @@ export class MapScreen extends GameScreen {
           this.inBuilding = MapBuildingPosition.entering;
           this.ignoreCollisionBox = inside;
         } else {
-          this.inBuilding = MapBuildingPosition.outside;
+          if (this.inBuilding === MapBuildingPosition.entering) {
+            this.inBuilding = MapBuildingPosition.outside;
+          }
         }
       }
     }
