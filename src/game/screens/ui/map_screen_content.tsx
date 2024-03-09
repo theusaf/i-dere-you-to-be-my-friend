@@ -18,6 +18,7 @@ import { AnimatedTextController } from "../../../engine/components/animated_text
 import { FriendContract } from "../../../engine/components/contract";
 import { CharacterSpriteAnimation } from "../../../engine/character_sprite";
 import { Direction } from "../../util/direction";
+import { CreditsPageLarge, CreditsPagePhone } from "./map_screen_pages/credits";
 
 interface MapScreenContentProps {
   state: MapScreen;
@@ -390,9 +391,11 @@ function PhoneLargeDisplay() {
   const pages: Record<string, JSX.Element | JSX.Element[]> = {
     index: appIndex,
     settings: <SettingsPagePhone />,
+    credits: <CreditsPagePhone />,
   };
   const pageContents: Record<string, JSX.Element | JSX.Element[]> = {
     settings: <SettingsPageLarge />,
+    credits: <CreditsPageLarge />,
   };
   return (
     <div className="row-span-8 row-start-1 col-start-1 flex items-start flex-row p-4 z-10">
