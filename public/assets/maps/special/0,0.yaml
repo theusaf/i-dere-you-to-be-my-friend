@@ -19,7 +19,7 @@ cutscenes:
       - - text
         - §player.name§?
       - - text
-        - Wait, is that $friend.name§? Someone actually knows me?
+        - Wait, is that §friend.name§? Someone actually knows me?
       - - text
         - Oh no, I'm so close to getting a friend, but I'm dying...
       - - text

@@ -56,7 +56,11 @@ export function MapScreenContent({
       setBattleStartState(EnterBattleAnimationState.running);
     }) as EventListener;
     const dialogListener = ((event: CustomEvent<string>) => {
-      setDialog((event as CustomEvent<string>).detail);
+      setDialog(
+        (event as CustomEvent<string>).detail
+          .replace(/§player.name§/g, gameManager.gameData.you.name)
+          .replace(/§friend.name§/g, gameManager.gameData.mainNPC.name),
+      );
       dialogCallback.current = () => {
         setDialog("");
         dialogCallback.current = () => {};
