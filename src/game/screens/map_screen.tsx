@@ -1064,7 +1064,11 @@ export class MapScreen extends GameScreen {
     if (newTile === MapTile.water) {
       return currentTile !== MapTile.water;
     }
-    if (newTile === MapTile.building) return true;
+    if (newTile === MapTile.building) {
+      // to prevent players from being stuck if they save the game while in a building
+      // TODO: make sure players either load back into the building, or are booted outside
+      return currentTile !== MapTile.building;
+    }
     if (newTile === MapTile.glass) return true;
     if (newTile === MapTile.stonebrick) return true;
     return false;
