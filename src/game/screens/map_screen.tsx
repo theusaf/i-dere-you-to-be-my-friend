@@ -766,12 +766,12 @@ export class MapScreen extends GameScreen {
       0.1,
     );
 
-    this.updateBuildings(delta);
+    this.updateBuildings();
     this.animateNPCs(delta);
     this.movePlayer(delta);
   }
 
-  updateBuildings(_: number) {
+  updateBuildings() {
     const chunkData = Assets.get<MapSpecialData>(
       `map/special/${this.chunkX},${this.chunkY}`,
     );
@@ -837,7 +837,6 @@ export class MapScreen extends GameScreen {
 
   loadBuilding(resultBox: MapSpecialBuildingBox) {
     const buildingId = resultBox.building_id!;
-    console.log(buildingId);
     const buildingData = Assets.get<BuildingSpecialData>(
       `building/special/${buildingId}`,
     );
@@ -847,8 +846,8 @@ export class MapScreen extends GameScreen {
     const chunkEntryPos = resultBox.entry!;
     const buildingEntryPos = buildingData.entry;
     // calculate offset between local building and chunk position
-    let offsetX = chunkEntryPos[0] - buildingEntryPos[0];
-    let offsetY = chunkEntryPos[1] - buildingEntryPos[1];
+    const offsetX = chunkEntryPos[0] - buildingEntryPos[0];
+    const offsetY = chunkEntryPos[1] - buildingEntryPos[1];
     // calculate offset between entry and width/height
     const { x, y } = this.getChunkGlobalPosition(
       this.chunkX,
