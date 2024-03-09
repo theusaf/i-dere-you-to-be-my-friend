@@ -341,7 +341,25 @@ function UserViewButtonController({
       message = "Fight";
       break;
     case UserViewControllerState.friends:
-      buttons = <FriendsButtons />;
+      buttons = (
+        <FriendsButtons
+          onFriendSelected={(friend) => {
+            battle.addLog(`${battle.activePlayer!.name}, come back!`);
+            battle.activePlayer = null;
+            callbackRegister(() => {
+              battle.activePlayer = friend;
+              battle.triggerChange();
+              battle.addLog(`${friend.name}, you're up!`);
+              callbackRegister(() => {
+                onMoveSelected(getMovesets()["_pass"]);
+              });
+            });
+            battle.triggerChange();
+          }}
+          friends={gameManager.gameData.activeFriends}
+          activeFriend={battle.activePlayer}
+        />
+      );
       message = "Friends";
       break;
     case UserViewControllerState.actions:
@@ -589,21 +607,42 @@ function IndexButtons({ className, setState }: UserViewButtonProps) {
   );
 }
 
-function FriendsButtons() {
+function FriendsButtons({
+  onFriendSelected,
+  friends,
+  activeFriend,
+}: {
+  onFriendSelected: (friend: Character) => void;
+  friends: Character[];
+  activeFriend: Character | null;
+}) {
   const className = "w-32";
   return (
     <div className="h-full overflow-x-auto grid grid-cols-1">
-      <div className="gap-2 text-center h-full grid grid-flow-col grid-rows-1">
-        <TextActionButton className={className}>
-          Selected Friend
-        </TextActionButton>
-        <TextActionButton className={className}>Friend 2</TextActionButton>
-        <TextActionButton className={className}>Friend 3</TextActionButton>
-        <TextActionButton className={className}>Friend 4</TextActionButton>
-        <TextActionButton className={className}>Friend 5</TextActionButton>
-        <TextActionButton className={className}>Friend 6</TextActionButton>
-        <TextActionButton className={className}>Friend 7</TextActionButton>
-        <TextActionButton className={className}>Friend 8</TextActionButton>
+      <div className="gap-2 text-center h-full flex">
+        {friends.map((friend, i) => {
+          return (
+            <TextActionButton
+              disabled={friend.hp <= 0 || friend === activeFriend}
+              key={i}
+              className={`break-all ${
+                friend.hp <= 0
+                  ? "cursor-not-allowed opacity-75"
+                  : friend === activeFriend
+                    ? "cursor-not-allowed"
+                    : "cursor-pointer"
+              } ${className ?? ""} ${friend === activeFriend ? "bg-slate-700 outline-green-700" : ""}`}
+              onClick={() => onFriendSelected(friend)}
+            >
+              <div>{friend.name}</div>
+              <div>
+                <NumberSpan>
+                  {friend.hp}/{friend.stats.maxHealth}
+                </NumberSpan>
+              </div>
+            </TextActionButton>
+          );
+        })}
       </div>
     </div>
   );
