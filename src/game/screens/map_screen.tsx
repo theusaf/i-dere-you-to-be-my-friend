@@ -1,6 +1,7 @@
 import {
   Application,
   Assets,
+  BaseTexture,
   Container,
   DisplayObject,
   ParticleContainer,
@@ -686,6 +687,9 @@ export class MapScreen extends GameScreen {
         break;
       case MapTile.stonebrick:
         sprite.texture = Assets.get("icon/map/stonebrick")!;
+        break;
+      case MapTile.interactable:
+        sprite.texture = Texture.WHITE;
         break;
       case MapTile.building:
         sprite.texture = Texture.WHITE;
