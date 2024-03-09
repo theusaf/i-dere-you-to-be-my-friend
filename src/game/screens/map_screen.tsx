@@ -159,6 +159,7 @@ export class MapScreen extends GameScreen {
     this.mapSpecialContainer = new Container();
     this.mapNPCContainer = new Container();
     this.mapBuildingContainer = new Container();
+    this.mapBuildingContainer.sortableChildren = true;
     this.mapSpecialContainer.sortableChildren = true;
     this.mapContainer.sortableChildren = true;
 
@@ -445,11 +446,11 @@ export class MapScreen extends GameScreen {
       break;
     }
     for (const npcId in npcs ?? {}) {
-      this.addNPC(npcId, npcs![npcId]);
+      this.addNPC(npcId, npcs![npcId], this.mapNPCContainer);
     }
   }
 
-  addNPC(npcId: string, npcData: NPCData): void {
+  addNPC(npcId: string, npcData: NPCData, container: Container): void {
     if (this.gameManager.gameData.isNPCinFriendGroup(npcId)) return;
     if (this.gameManager.gameData.specialNPCs[npcId]) {
       const npc = this.gameManager.gameData.specialNPCs[npcId];
@@ -495,16 +496,15 @@ export class MapScreen extends GameScreen {
       bodyId: `${npc.styles.body}`,
       legId: `${npc.styles.legs}`,
     });
-    npcSprite.x = position[0];
-    npcSprite.y = position[1];
+    npc.position = position;
     npcSprite.initSprite().then(() => {
       npcSprite.setWidth(0.75);
+      container.addChild(npcSprite.getView());
     });
     this.mapNPCS[npcId] = {
       character: npc,
       sprite: npcSprite,
     };
-    this.mapNPCContainer.addChild(npcSprite.getView());
   }
 
   addSpriteParticle(sprite: Sprite) {
@@ -882,11 +882,20 @@ export class MapScreen extends GameScreen {
         tileContainer.addChild(sprite);
       }
     }
+
+    const npcs = buildingData.npcs;
+    for (const id in npcs) {
+      this.addNPC(id, npcs[id], tileContainer);
+    }
   }
 
   animateNPCs(delta: number): void {
     for (const id in this.mapNPCS) {
       const { sprite, character } = this.mapNPCS[id];
+      if (sprite.mainContainer.destroyed) {
+        delete this.mapNPCS[id];
+        continue;
+      }
       sprite.x = character.position[0];
       sprite.y = character.position[1];
       sprite.update(delta);

@@ -6,7 +6,7 @@ npcs:
     id: doctor
     type: special
     name: Dr. Kobi Alice Yoro
-    position: [15, 1]
+    position: [15.5, 1.5]
     gender: she
     love: 6
     stats:
