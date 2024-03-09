@@ -1,7 +1,6 @@
 import {
   Application,
   Assets,
-  BaseTexture,
   Container,
   DisplayObject,
   ParticleContainer,

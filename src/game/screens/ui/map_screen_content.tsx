@@ -21,6 +21,8 @@ import { Direction } from "../../util/direction";
 import { CreditsPageLarge, CreditsPagePhone } from "./map_screen_pages/credits";
 import { MePagePhone } from "./map_screen_pages/me";
 import { GameManager } from "../../../engine/game_manager";
+import { ContactPageLarge, ContactPagePhone } from "./map_screen_pages/friends";
+import { Character } from "../../util/character";
 
 interface MapScreenContentProps {
   state: MapScreen;
@@ -372,6 +374,7 @@ function PhoneWidget({ onClick }: PhoneWidgetProps) {
 
 function PhoneLargeDisplay({ gameManager }: { gameManager: GameManager }) {
   const [page, setPage] = useState("index");
+  const [pageData, setPageData] = useState<any>(null);
   const className = "h-full drop-shadow-md shadow-black";
   const apps = ["contacts", "party", "me", "bag", "settings", "credits"];
   const appIndex = apps.map((app) => (
@@ -395,10 +398,17 @@ function PhoneLargeDisplay({ gameManager }: { gameManager: GameManager }) {
     settings: <SettingsPagePhone />,
     credits: <CreditsPagePhone />,
     me: <MePagePhone me={gameManager.gameData.you} />,
+    contacts: (
+      <ContactPagePhone
+        friends={gameManager.gameData.friends}
+        onSelect={setPageData}
+      />
+    ),
   };
   const pageContents: Record<string, JSX.Element | JSX.Element[]> = {
     settings: <SettingsPageLarge />,
     credits: <CreditsPageLarge />,
+    contacts: <ContactPageLarge friend={pageData as Character} />,
   };
   return (
     <div className="row-span-8 row-start-1 col-start-1 flex items-start flex-row p-4 z-10">

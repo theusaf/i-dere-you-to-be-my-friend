@@ -16,6 +16,7 @@ import { TypeIcon } from "../../../engine/components/type_icon";
 import { NumberSpan } from "../../../engine/components/numer_span";
 import { chance } from "../../util/chance";
 import { FriendContract } from "../../../engine/components/contract";
+import { MoveButton } from "../../../engine/components/move_button";
 
 export interface BattleScreenContentProps {
   state: BattleScreen;
@@ -716,26 +717,16 @@ function FightButtons({
       {moves.map((move, i) => {
         const moveData = movesets[move];
         return (
-          <TextActionButton
+          <MoveButton
             key={i}
-            className={className}
             onMouseOver={() => onHover(moveData)}
             onMouseOut={onUnhover}
             onClick={() => onMoveSelected(moveData)}
-            disabled={character.moveUses[move] <= 0}
-          >
-            <div className="flex flex-col align-middle h-full">
-              <div>{moveData.name}</div>
-              <div className="text-sm">
-                <TypeIcon type={moveData.type} />
-              </div>
-              <div>
-                <NumberSpan>
-                  {character.moveUses[move]}/{moveData.max_uses}
-                </NumberSpan>
-              </div>
-            </div>
-          </TextActionButton>
+            moveData={moveData}
+            className={className}
+            move={move}
+            user={character}
+          />
         );
       })}
     </div>
