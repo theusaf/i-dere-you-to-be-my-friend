@@ -243,7 +243,7 @@ export class MapScreen extends GameScreen {
   /**
    * Loads map data and adds relevant sprites to the renderer.
    */
-  updateChunks(): void {
+  async updateChunks(): Promise<void> {
     const { worldWidth, worldHeight } = this.container!;
     const totalVisibleSprites = Math.ceil(worldWidth * worldHeight);
     const remainingAvailableSprites =
@@ -296,43 +296,74 @@ export class MapScreen extends GameScreen {
         this.characterChunkY + additionalLoadAllDirections + worldHeight / 2,
       );
 
-    for (const [, container] of this.textureParticleContainerMap) {
-      const removedSprites = container.removeChildren();
-      for (const sprite of removedSprites) {
+    const { x: globalStartX, y: globalStartY } = this.getChunkGlobalPosition(
+        this.chunkX,
+        this.chunkY,
+        relativeStartX,
+        relativeStartY,
+      ),
+      { x: globalEndX, y: globalEndY } = this.getChunkGlobalPosition(
+        this.chunkX,
+        this.chunkY,
+        relativeEndX,
+        relativeEndY,
+      );
+    const exists = new Set<string>();
+    const deleteExcessSprites = (container: Container, i: number) => {
+      const sprite = container.children[i];
+      if (
+        sprite.x < globalStartX ||
+        sprite.x > globalEndX ||
+        sprite.y < globalStartY ||
+        sprite.y > globalEndY
+      ) {
+        container.removeChildAt(i);
         sprite.destroy();
+      } else {
+        exists.add(`${sprite.x},${sprite.y}`);
+      }
+    };
+    for (const [, container] of this.textureParticleContainerMap) {
+      for (let i = container.children.length - 1; i >= 0; i--) {
+        deleteExcessSprites(container, i);
       }
     }
     for (let y = relativeStartY; y < relativeEndY; y++) {
       for (let x = relativeStartX; x < relativeEndX; x++) {
-        const chunk = this.getChunkRelative(x, y);
-        if (chunk) {
-          const [chunkX, chunkY] = this.getChunkNumberRelative(x, y)
-            .split(",")
-            .map(Number);
-          const { x: newChunkBaseGlobalX, y: newChunkBaseGlobalY } =
-            this.getChunkGlobalPosition(chunkX, chunkY);
-          const { x: globalX, y: globalY } = this.getChunkGlobalPosition(
-            this.chunkX,
-            this.chunkY,
-            x,
-            y,
-          );
-          const offsetX = globalX - newChunkBaseGlobalX,
-            offsetY = globalY - newChunkBaseGlobalY;
-          const tileIndex = offsetY * MAP_SIZE + offsetX,
-            tile = chunk.tiles[tileIndex];
-          const sprite = this.getSpriteFromTile(tile);
-          if (sprite.texture === Texture.EMPTY) {
-            sprite.destroy();
-            continue;
-          }
-          sprite.x = globalX;
-          sprite.y = globalY;
-          sprite.width = 1;
-          sprite.height = 1;
-          this.addSpriteParticle(sprite);
-        }
+        this.createTileSprite(x, y, exists);
       }
+    }
+  }
+
+  createTileSprite(x: number, y: number, exists: Set<string>) {
+    const chunk = this.getChunkRelative(x, y);
+    if (chunk) {
+      const [chunkX, chunkY] = this.getChunkNumberRelative(x, y)
+        .split(",")
+        .map(Number);
+      const { x: newChunkBaseGlobalX, y: newChunkBaseGlobalY } =
+        this.getChunkGlobalPosition(chunkX, chunkY);
+      const { x: globalX, y: globalY } = this.getChunkGlobalPosition(
+        this.chunkX,
+        this.chunkY,
+        x,
+        y,
+      );
+      if (exists.has(`${globalX},${globalY}`)) return;
+      const offsetX = globalX - newChunkBaseGlobalX,
+        offsetY = globalY - newChunkBaseGlobalY;
+      const tileIndex = offsetY * MAP_SIZE + offsetX,
+        tile = chunk.tiles[tileIndex];
+      const sprite = this.getSpriteFromTile(tile);
+      if (sprite.texture === Texture.EMPTY) {
+        sprite.destroy();
+        return;
+      }
+      sprite.x = globalX;
+      sprite.y = globalY;
+      sprite.width = 1;
+      sprite.height = 1;
+      this.addSpriteParticle(sprite);
     }
   }
 
@@ -744,6 +775,7 @@ export class MapScreen extends GameScreen {
     const chunkData = Assets.get<MapSpecialData>(
       `map/special/${this.chunkX},${this.chunkY}`,
     );
+    if (!chunkData) return;
     let resultDistance = Infinity;
     let resultSize = this.baseSize;
     let resultBox: MapSpecialBuildingBox | null = null;

@@ -58,7 +58,13 @@ export class BattleScreen extends GameScreen {
       .endFill();
     this.transitionAnimation.reset();
 
+    const background = new PIXI.Graphics()
+      .beginFill(ColorScheme.light)
+      .drawRect(0, 0, this.container.worldWidth, this.container.worldHeight)
+      .endFill();
+
     // add all graphics to screen
+    this.container.addChild(background);
     this.container.addChild(this.transitionGraphicsTop);
     this.container.addChild(this.transitionGraphicsBottom);
   }
