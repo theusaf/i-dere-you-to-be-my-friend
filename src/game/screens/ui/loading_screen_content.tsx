@@ -21,7 +21,7 @@ export function LoadingScreenContent({
 
   return (
     <div
-      className="pointer-events-auto h-full flex flex-col items-center"
+      className="pointer-events-auto h-full flex flex-col items-center relative"
       onClick={() => {
         if (data.progress >= 1) {
           data.gameManager.changeScreen(new MainMenuScreen());
@@ -40,6 +40,10 @@ export function LoadingScreenContent({
         >
           <span>Click to Start...</span>
         </Unselectable>
+      </div>
+      <div className="absolute bottom-0 left-0 p-2 text-white">
+        Copyright 2024 <a href="https://theusaf.org">theusaf</a>,
+        <a href="https://好きな.みんな">好きな.みんな Games</a>
       </div>
     </div>
   );
