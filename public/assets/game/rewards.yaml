@@ -3,7 +3,7 @@ default:
   friends_capturable: true
   gold:
     amount: [5, 40]
-    love_multiplier: 1.15
+    love_multiplier: 0.25
   xp:
     amount: [15, 60]
     love_multiplier: 0.5

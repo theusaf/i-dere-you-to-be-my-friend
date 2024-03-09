@@ -111,7 +111,10 @@ export class Battle extends EventTarget implements BattleData {
         xp.amount = chance.integer({ min: xp.amount[0], max: xp.amount[1] });
       }
       const enemyLove = this.opponentLeader.love;
-      gold.amount = gold.amount * enemyLove * gold.love_multiplier;
+      gold.amount = Math.max(
+        gold.amount * enemyLove * gold.love_multiplier,
+        gold.amount,
+      );
       let addAmount = xp.amount;
       let totalAmount = addAmount;
       for (let i = 0; i < enemyLove; i++) {
