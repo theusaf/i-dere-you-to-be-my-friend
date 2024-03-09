@@ -163,6 +163,7 @@ function UserView({
         battle.updateNextOpponent();
       } else {
         // TODO: if rewards apply, allow player to potentially capture opponent leader
+        // Note: currently decided against this
         battle.getRewards();
         isEndOfBattle = true;
       }

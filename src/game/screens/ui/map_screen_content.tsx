@@ -19,6 +19,8 @@ import { FriendContract } from "../../../engine/components/contract";
 import { CharacterSpriteAnimation } from "../../../engine/character_sprite";
 import { Direction } from "../../util/direction";
 import { CreditsPageLarge, CreditsPagePhone } from "./map_screen_pages/credits";
+import { MePagePhone } from "./map_screen_pages/me";
+import { GameManager } from "../../../engine/game_manager";
 
 interface MapScreenContentProps {
   state: MapScreen;
@@ -200,7 +202,7 @@ export function MapScreenContent({
         className={`grid grid-rows-8 relative h-full ${phoneVisible ? "pointer-events-auto" : ""}`}
         onClick={phoneVisible ? () => setPhoneVisible(false) : undefined}
       >
-        {phoneVisible && <PhoneLargeDisplay />}
+        {phoneVisible && <PhoneLargeDisplay gameManager={state.gameManager} />}
         {battleStartState === EnterBattleAnimationState.running && (
           <BattleAnimationDisplay
             key={chance.guid()}
@@ -368,7 +370,7 @@ function PhoneWidget({ onClick }: PhoneWidgetProps) {
   );
 }
 
-function PhoneLargeDisplay() {
+function PhoneLargeDisplay({ gameManager }: { gameManager: GameManager }) {
   const [page, setPage] = useState("index");
   const className = "h-full drop-shadow-md shadow-black";
   const apps = ["contacts", "party", "me", "bag", "settings", "credits"];
@@ -392,6 +394,7 @@ function PhoneLargeDisplay() {
     index: appIndex,
     settings: <SettingsPagePhone />,
     credits: <CreditsPagePhone />,
+    me: <MePagePhone me={gameManager.gameData.you} />,
   };
   const pageContents: Record<string, JSX.Element | JSX.Element[]> = {
     settings: <SettingsPageLarge />,
