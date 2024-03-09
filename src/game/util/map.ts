@@ -23,6 +23,7 @@ export enum MapTile {
   glass = "glass",
   tile = "tile",
   stonebrick = "stonebrick",
+  interactable = "interactable",
 }
 
 export const mapTileStrings = {
@@ -35,6 +36,10 @@ export const mapTileStrings = {
   bridge: MapTile.bridge,
   sand: MapTile.sand,
   building: MapTile.building,
+  glass: MapTile.glass,
+  tile: MapTile.tile,
+  stonebrick: MapTile.stonebrick,
+  interactable: MapTile.interactable,
 };
 
 export const mapTiles = {
@@ -49,6 +54,7 @@ export const mapTiles = {
   0x45dcde: MapTile.glass,
   0xe7e7e7: MapTile.tile,
   0xa0a0a0: MapTile.stonebrick,
+  0x000000: MapTile.interactable,
 };
 
 // Hardcoded. Represents the width and height of the map.
@@ -95,13 +101,17 @@ export function registerMapParsingExtension(): void {
             image.height,
           );
           for (let i = 0; i < imageData.data.length; i += 4) {
-            const r = imageData.data[i];
-            const g = imageData.data[i + 1];
-            const b = imageData.data[i + 2];
-            const color = (r << 16) + (g << 8) + b;
-            mapData.tiles.push(
-              mapTiles[color as keyof typeof mapTiles] ?? MapTile.unknown,
-            );
+            if (imageData.data[i + 3] === 0) {
+              mapData.tiles.push(MapTile.unknown);
+            } else {
+              const r = imageData.data[i];
+              const g = imageData.data[i + 1];
+              const b = imageData.data[i + 2];
+              const color = (r << 16) + (g << 8) + b;
+              mapData.tiles.push(
+                mapTiles[color as keyof typeof mapTiles] ?? MapTile.unknown,
+              );
+            }
           }
           return resolve(mapData as T);
         });

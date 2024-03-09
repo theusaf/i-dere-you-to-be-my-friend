@@ -73,6 +73,11 @@ export class MapScreen extends GameScreen {
   currentSize!: number;
   inBuilding!: MapBuildingPosition;
   ignoreCollisionBox: [number, number, number, number] | null = null;
+  mapBuildingData: {
+    offsetX: number;
+    offsetY: number;
+    data: MapData;
+  } | null = null;
 
   get currentChunk(): MapData | null {
     return this.chunks[`${this.chunkX},${this.chunkY}`];
@@ -752,7 +757,7 @@ export class MapScreen extends GameScreen {
         (center[0] - this.characterChunkX) ** 2 +
           (center[1] - this.characterChunkY) ** 2,
       );
-      if (distance > 10) {
+      if (distance > 10 && this.inBuilding !== MapBuildingPosition.inside) {
         if (this.mapBuildingContainer.children.length) {
           const removed = this.mapBuildingContainer.removeChildren();
           for (const sprite of removed) sprite.destroy({ children: true });
@@ -804,9 +809,8 @@ export class MapScreen extends GameScreen {
     const buildingData = Assets.get<BuildingSpecialData>(
       `building/special/${buildingId}`,
     );
-    const { width, height, tiles } = Assets.get<MapData>(
-      `building/${buildingId}`,
-    );
+    const mapBuildingData = Assets.get<MapData>(`building/${buildingId}`);
+    const { width, height, tiles } = mapBuildingData;
     const tileContainer = new Container();
     const chunkEntryPos = resultBox.entry!;
     const buildingEntryPos = buildingData.entry;
@@ -823,6 +827,11 @@ export class MapScreen extends GameScreen {
     tileContainer.x = x;
     tileContainer.y = y;
     this.mapBuildingContainer.addChild(tileContainer);
+    this.mapBuildingData = {
+      offsetX,
+      offsetY,
+      data: mapBuildingData,
+    };
     // add tiles
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
@@ -934,7 +943,7 @@ export class MapScreen extends GameScreen {
   moveCharacterTo(x: number, y: number): void {
     // check for collisions/bounds
     const testChunkNumber = this.getGlobalChunkNumber(x, y);
-    if (!this.chunks[testChunkNumber]) return;
+    if (!this.chunks[testChunkNumber]) return; // chunk doesn't exist (out of bounds)
     if (this.handleCollisions(x, y)) return;
 
     // checks pass, move character
@@ -953,22 +962,46 @@ export class MapScreen extends GameScreen {
     const testChunkNumber = this.getGlobalChunkNumber(x, y),
       [testChunkX, testChunkY] = testChunkNumber.split(",").map(Number);
     const { x: localX, y: localY } = this.getLocalChunkPosition(x, y);
-    const newTile = this.getLocalChunkTile(
-      localX,
-      localY,
-      testChunkX,
-      testChunkY,
-    );
-    const currentTile = this.getLocalChunkTile(
-      this.characterChunkX,
-      this.characterChunkY,
-    );
-    // check for ignore
-    if (this.ignoreCollisionBox) {
-      const [x1, y1, x2, y2] = this.ignoreCollisionBox;
-      if (localX >= x1 && localX <= x2 && localY >= y1 && localY <= y2) {
-        return false;
+    let newTile: MapTile;
+    let currentTile: MapTile;
+    if (this.inBuilding !== MapBuildingPosition.inside) {
+      newTile = this.getLocalChunkTile(localX, localY, testChunkX, testChunkY);
+      currentTile = this.getLocalChunkTile(
+        this.characterChunkX,
+        this.characterChunkY,
+      );
+      // check for ignore
+      if (this.ignoreCollisionBox) {
+        const [x1, y1, x2, y2] = this.ignoreCollisionBox;
+        if (localX >= x1 && localX <= x2 && localY >= y1 && localY <= y2) {
+          return false;
+        }
       }
+    } else {
+      const { offsetX, offsetY, data } = this.mapBuildingData!;
+      // check for building bounds
+      if (
+        localX - offsetX < 0 ||
+        localX - offsetX >= data.width ||
+        localY - offsetY < 0 ||
+        localY - offsetY >= data.height
+      ) {
+        return true;
+      }
+
+      // get tile
+      newTile =
+        data.tiles[
+          (Math.floor(localY) - offsetY) * data.width +
+            (Math.floor(localX) - offsetX)
+        ];
+      currentTile =
+        data.tiles[
+          Math.floor(
+            (Math.floor(this.characterChunkY) - offsetY) * data.width +
+              (Math.floor(this.characterChunkX) - offsetX),
+          )
+        ];
     }
     if (this.handleBasicCollisions(newTile, currentTile)) return true;
 
@@ -995,10 +1028,14 @@ export class MapScreen extends GameScreen {
   }
 
   handleBasicCollisions(newTile: MapTile, currentTile: MapTile): boolean {
+    if (!newTile) return true;
+    if (newTile === MapTile.unknown) return true;
     if (newTile === MapTile.water) {
       return currentTile !== MapTile.water;
     }
     if (newTile === MapTile.building) return true;
+    if (newTile === MapTile.glass) return true;
+    if (newTile === MapTile.stonebrick) return true;
     return false;
   }
 

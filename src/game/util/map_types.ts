@@ -142,6 +142,14 @@ export interface MapSpecialData {
 }
 
 export interface BuildingSpecialData extends MapSpecialData {
+  /**
+   * The entry coordinates for the building,
+   * located using local coordinates to the building's origin.
+   */
   entry: [number, number, number, number];
+  /**
+   * The coordinates for the inside entry of the building,
+   * located using local coordinates to the building's origin.
+   */
   inside: [number, number, number, number];
 }

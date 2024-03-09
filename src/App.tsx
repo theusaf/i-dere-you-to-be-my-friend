@@ -6,7 +6,7 @@ import { main } from "./game/main";
 import { GameManagerContext } from "./game/util/game_manager_context";
 
 const PixiRenderer = forwardRef<HTMLCanvasElement>((props, ref) => {
-  return <canvas ref={ref} {...props} className="bg-white" />;
+  return <canvas ref={ref} {...props} className="bg-black" />;
 });
 
 function App() {
