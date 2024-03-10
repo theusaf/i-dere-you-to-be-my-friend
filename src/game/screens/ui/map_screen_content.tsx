@@ -27,6 +27,7 @@ import { PartyPageLarge, PartyPagePhone } from "./map_screen_pages/party";
 import { DoctorDialog } from "./map_screen_pages/npcs/doctor";
 import { BagPagePhone } from "./map_screen_pages/bag";
 import { DoctorPagePhone } from "./map_screen_pages/doctor";
+import { SavePagePhone } from "./map_screen_pages/save";
 
 interface MapScreenContentProps {
   state: MapScreen;
@@ -437,7 +438,15 @@ function PhoneLargeDisplay({ gameManager }: { gameManager: GameManager }) {
   const [page, setPage] = useState("index");
   const [pageData, setPageData] = useState<any>(null);
   const className = "h-full drop-shadow-md shadow-black";
-  const apps = ["contacts", "party", "me", "bag", "settings", "credits"];
+  const apps = [
+    "contacts",
+    "party",
+    "me",
+    "bag",
+    "settings",
+    "credits",
+    "save",
+  ];
 
   // special apps
   if (gameManager.gameData.isNPCinFriendGroup("doctor")) {
@@ -474,6 +483,7 @@ function PhoneLargeDisplay({ gameManager }: { gameManager: GameManager }) {
     party: <PartyPagePhone />,
     bag: <BagPagePhone gold={gameManager.gameData.gold} />,
     doctor: <DoctorPagePhone gameData={gameManager.gameData} />,
+    save: <SavePagePhone gameManager={gameManager} />,
   };
   const pageContents: Record<string, JSX.Element | JSX.Element[]> = {
     settings: <SettingsPageLarge />,

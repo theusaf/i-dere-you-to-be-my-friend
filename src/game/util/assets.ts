@@ -29,6 +29,10 @@ export const assetList: AssetsManifest = {
           src: "./assets/images/ui/apps/settings.png",
           alias: "ui/apps/settings",
         },
+        {
+          src: "./assets/images/ui/apps/save.png",
+          alias: "ui/apps/save",
+        },
       ],
     },
     {
