@@ -17,7 +17,6 @@ export interface GameDataContent {
   friends: Character[];
   you: Character;
   worldMapData: WorldMapData;
-  mainNPC: Character;
   saveId?: string;
   gold?: number;
   cutscenes?: Set<string>;
@@ -29,7 +28,6 @@ export interface RawGameDataContent {
   you: CharacterInfo;
   worldMapData: WorldMapData;
   version?: string;
-  mainNPC: CharacterInfo;
   saveId?: string;
   gold?: number;
   cutscenes?: string[];
@@ -42,7 +40,6 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
   worldMapData: WorldMapData;
   friends: Character[];
   you: Character;
-  mainNPC: Character;
   gold: number;
   cutscenes: Set<string>;
   specialNPCs: Record<string, Character> = {};
@@ -58,7 +55,6 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
     worldMapData,
     friends,
     you,
-    mainNPC,
     saveId,
     gold,
     cutscenes,
@@ -71,7 +67,6 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
     };
     this.friends = friends ?? [];
     this.you = you ?? new Character();
-    this.mainNPC = mainNPC ?? new Character();
     this.gold = gold ?? 0;
     this.cutscenes = cutscenes ?? new Set();
     this.specialNPCs = {};
@@ -89,7 +84,6 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
       worldMapData: this.worldMapData,
       friends: this.friends.map((friend) => friend.toMap()),
       you: this.you,
-      mainNPC: this.mainNPC,
       version,
       saveId: this.saveId,
       gold: this.gold,
@@ -164,7 +158,6 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
       worldMapData: map.worldMapData,
       friends: map.friends.map((friend) => new Character(friend)),
       you: new Character(map.you),
-      mainNPC: new Character(map.mainNPC),
       saveId: map.saveId,
       gold: map.gold,
       cutscenes: new Set(map.cutscenes),

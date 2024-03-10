@@ -118,7 +118,12 @@ export function CreateSavePage({
       legs: legsId.current,
     };
     if (creationState) {
-      myFriend.current.id = "ura_bosu";
+      const myFriendFinal = Character.createRandomCharacter(20);
+      myFriendFinal.id = "ura_bosu";
+      myFriendFinal.styles = myFriend.current.styles;
+      myFriendFinal.colors = myFriend.current.colors;
+      myFriendFinal.name = myFriend.current.name;
+      myFriendFinal.gender = myFriend.current.gender;
       const gameData: RawGameDataContent = {
         friends: [],
         you: myCharacter.current,
@@ -126,7 +131,9 @@ export function CreateSavePage({
           playerX: 72,
           playerY: 64,
         },
-        mainNPC: myFriend.current,
+        specialNPCs: {
+          ura_bosu: myFriendFinal.toMap(),
+        },
       };
       onSaveCreated(gameData);
     } else {
