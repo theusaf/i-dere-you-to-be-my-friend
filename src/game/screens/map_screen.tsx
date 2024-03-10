@@ -69,6 +69,8 @@ export class MapScreen extends GameScreen {
       character: Character;
       sprite: CharacterSprite;
       building: boolean;
+      chunkX?: number;
+      chunkY?: number;
     }
   > = {};
   baseSize!: number;
@@ -515,18 +517,7 @@ export class MapScreen extends GameScreen {
       bodyId: `${npc.styles.body}`,
       legId: `${npc.styles.legs}`,
     });
-    if (building) {
-      npc.position = position;
-    } else {
-      // convert to global position
-      const { x, y } = this.getChunkGlobalPosition(
-        chunkX!,
-        chunkY!,
-        position[0],
-        position[1],
-      );
-      npc.position = [x, y];
-    }
+    npc.position = position;
     npcSprite.initSprite().then(() => {
       npcSprite.setWidth(0.75);
       container.addChild(npcSprite.getView());
@@ -535,6 +526,8 @@ export class MapScreen extends GameScreen {
       character: npc,
       sprite: npcSprite,
       building,
+      chunkX: chunkX,
+      chunkY: chunkY,
     };
   }
 
@@ -984,13 +977,25 @@ export class MapScreen extends GameScreen {
 
   animateNPCs(delta: number): void {
     for (const id in this.mapNPCS) {
-      const { sprite, character } = this.mapNPCS[id];
+      const { sprite, character, building, chunkX, chunkY } = this.mapNPCS[id];
       if (sprite.mainContainer.destroyed) {
         delete this.mapNPCS[id];
         continue;
       }
-      sprite.x = character.position[0];
-      sprite.y = character.position[1];
+      if (building) {
+        sprite.x = character.position[0];
+        sprite.y = character.position[1];
+      } else {
+        const { x, y } = this.getChunkGlobalPosition(
+          chunkX!,
+          chunkY!,
+          character.position[0],
+          character.position[1],
+        );
+        sprite.x = x;
+        sprite.y = y;
+      }
+
       sprite.update(delta);
     }
   }
