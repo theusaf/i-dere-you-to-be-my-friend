@@ -5,7 +5,7 @@ import { TextActionButton } from "../../../../engine/components/action_button";
 export function DoctorPagePhone({ gameData }: { gameData: GameData }) {
   const [message, setMessage] = useState("");
   const { activeFriends } = gameData;
-  let doctor = activeFriends.find((friend) => friend.id === "doctor");
+  const doctor = activeFriends.find((friend) => friend.id === "doctor");
   if (!doctor) {
     return (
       <div className="flex items-center flex-col h-full">

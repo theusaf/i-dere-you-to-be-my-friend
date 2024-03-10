@@ -30,12 +30,11 @@ export function DoctorDialog({
   const { gameData } = gameManager;
   console.log(dialog, state);
   useEffect(() => {
-    if (dialog.length) {
-    } else if (onDialogFinishCallback) {
+    if (!dialog.length && onDialogFinishCallback) {
       onDialogFinishCallback.current?.();
       onDialogFinishCallback.current = null;
     }
-  }, [dialog.length, onDialogFinishCallback.current]);
+  }, [dialog.length]);
   const className = "grid items-center text-2xl";
   return (
     <div className="absolute top-0 left-0 h-full w-full">
