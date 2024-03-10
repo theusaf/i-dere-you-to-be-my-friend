@@ -70,7 +70,10 @@ export function MapScreenContent({
       setDialog(
         (event as CustomEvent<string>).detail
           .replace(/§player.name§/g, gameManager.gameData.you.name)
-          .replace(/§friend.name§/g, gameManager.gameData.mainNPC.name),
+          .replace(
+            /§friend.name§/g,
+            gameManager.gameData.specialNPCs.ura_boss.name,
+          ),
       );
       dialogCallback.current = () => {
         setDialog("");

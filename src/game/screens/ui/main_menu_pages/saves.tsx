@@ -57,7 +57,7 @@ export function SavesPage({
               >
                 <h3 className="text-xl">{save.you.name}</h3>
                 <p className="text-center">&amp;</p>
-                <h3 className="text-xl">{save.mainNPC.name}</h3>
+                <h3 className="text-xl">{save.specialNPCs!.ura_boss.name}</h3>
                 <hr />
                 <p>Lov. {save.you.love}</p>
                 <p>Friends: {save.friends.length}</p>

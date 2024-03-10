@@ -20,7 +20,7 @@ export interface GameDataContent {
   saveId?: string;
   gold?: number;
   cutscenes?: Set<string>;
-  specialNPCs?: Record<string, Character>;
+  specialNPCs: Record<string, Character>;
 }
 
 export interface RawGameDataContent {
