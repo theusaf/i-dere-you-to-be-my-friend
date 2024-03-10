@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TextActionButton } from "../../../../../engine/components/action_button";
 import { Character } from "../../../../util/character";
 import { MapScreen, MapScreenEvents } from "../../../map_screen";
@@ -9,10 +9,10 @@ import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { MapSpecialActionBattle } from "../../../../util/map_types";
 
 enum DoctorDialogState {
-  index,
-  talk,
-  rizz,
-  heal,
+  index = "index",
+  talk = "talk",
+  rizz = "rizz",
+  heal = "heal",
 }
 
 export function DoctorDialog({
@@ -24,16 +24,18 @@ export function DoctorDialog({
 }): JSX.Element {
   const [state, setState] = useState(DoctorDialogState.index);
   const [dialog, setDialog] = useState<string[]>([]);
-  const [onDialogFinishCallback, setOnDialogFinishCallback] = useState<
-    (() => void) | null
-  >(null);
+  const onDialogFinishCallback = useRef<(() => void) | null>(null);
   const { gameManager } = screen;
   const { gameData } = gameManager;
-  if (dialog.length) {
-  } else if (onDialogFinishCallback) {
-    onDialogFinishCallback?.();
-    setOnDialogFinishCallback(null);
-  }
+  console.log(dialog, state);
+  useEffect(() => {
+    if (dialog.length) {
+    } else if (onDialogFinishCallback) {
+      onDialogFinishCallback.current?.();
+      onDialogFinishCallback.current = null;
+    }
+  }, [dialog.length, onDialogFinishCallback.current]);
+
   if (state === DoctorDialogState.heal) {
     // TODO: calculate costs
   }
@@ -110,9 +112,10 @@ export function DoctorDialog({
               className={className}
               onClick={() => {
                 setDialog(["Hello! How may I help you?"]);
-                setOnDialogFinishCallback(() => {
+                setState(DoctorDialogState.index);
+                onDialogFinishCallback.current = () => {
                   setState(DoctorDialogState.talk);
-                });
+                };
               }}
             >
               Talk
@@ -134,7 +137,7 @@ export function DoctorDialog({
               onClick={() => {
                 setDialog(["Huh? What's this?", "...", "SECURITY!"]);
                 setState(DoctorDialogState.index);
-                setOnDialogFinishCallback(() => {
+                onDialogFinishCallback.current = () => {
                   const data: MapSpecialActionBattle = {
                     against: "doctor",
                     level: [8, 12],
@@ -147,7 +150,7 @@ export function DoctorDialog({
                       detail: data,
                     }),
                   );
-                });
+                };
               }}
             >
               Fight
