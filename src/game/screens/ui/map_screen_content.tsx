@@ -25,6 +25,7 @@ import { ContactPageLarge, ContactPagePhone } from "./map_screen_pages/friends";
 import { Character } from "../../util/character";
 import { PartyPageLarge, PartyPagePhone } from "./map_screen_pages/party";
 import { DoctorDialog } from "./map_screen_pages/npcs/doctor";
+import { BagPagePhone } from "./map_screen_pages/bag";
 
 interface MapScreenContentProps {
   state: MapScreen;
@@ -464,6 +465,7 @@ function PhoneLargeDisplay({ gameManager }: { gameManager: GameManager }) {
       />
     ),
     party: <PartyPagePhone />,
+    bag: <BagPagePhone gold={gameManager.gameData.gold} />,
   };
   const pageContents: Record<string, JSX.Element | JSX.Element[]> = {
     settings: <SettingsPageLarge />,
