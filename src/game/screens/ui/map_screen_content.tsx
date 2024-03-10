@@ -288,7 +288,6 @@ function NPCDialog({
   screen: MapScreen;
   setNpcDialog: (npc: Character | null) => void;
 }): JSX.Element {
-  console.log(npc);
   if (!npc) return <></>;
   if (npc.id === "doctor") {
     return <DoctorDialog screen={screen} setNpcDialog={setNpcDialog} />;
