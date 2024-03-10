@@ -239,6 +239,7 @@ export class Character implements CharacterInfo, Saveable<CharacterInfo> {
     while (true) {
       if (this.xPower < 0) {
         this.loveDown();
+        this.xPower += this.getRequiredXP() * 0.75;
       } else {
         break;
       }
