@@ -298,7 +298,7 @@ function UserView({
           <div
             className="absolute top-0 left-0 p-2 bg-slate-900"
             style={{
-              transform: "translateY(-100%)",
+              transform: "translate(0.25rem, calc(-100% - 0.5rem))",
             }}
           >
             <FontAwesomeIcon icon={faUser} className="mr-2" />
@@ -458,7 +458,7 @@ function UserViewButtonController({
             });
             battle.triggerChange();
           }}
-          friends={gameManager.gameData.activeFriends}
+          friends={battle.playerTeam}
           activeFriend={battle.activePlayer}
         />
       );
