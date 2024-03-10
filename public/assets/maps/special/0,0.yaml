@@ -77,6 +77,6 @@ cutscenes:
 npcs:
   intro:
     type: special
-    position: [74, 63]
+    position: [74, 43]
     love: 1
     hp: 40
