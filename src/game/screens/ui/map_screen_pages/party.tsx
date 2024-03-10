@@ -44,7 +44,7 @@ export function PartyPageLarge({
     forceUpdate();
   };
   const onSelect = (friend: Character) => {
-    if (activeFriends.length >= 6) return;
+    if (activeFriends.length >= 8) return;
     if (friend.isDead) return;
     friend.isActive = true;
     forceUpdate();

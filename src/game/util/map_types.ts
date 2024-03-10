@@ -113,6 +113,7 @@ export interface NPCData {
   type: "random" | "special";
   love: number | number[];
   hp?: number | number[];
+  name?: string;
   types?: DereType[];
   gender?: Gender;
   knownMoves?: string[];

@@ -13,6 +13,7 @@ export const assetList: AssetsManifest = {
       assets: [
         { src: "./assets/images/ui/phone.png", alias: "ui/phone" },
         { src: "./assets/images/ui/scroll.png", alias: "ui/scroll" },
+        { src: "./assets/images/ui/dialog.png", alias: "ui/dialog" },
         { src: "./assets/images/ui/apps/bag.png", alias: "ui/apps/bag" },
         {
           src: "./assets/images/ui/apps/contacts.png",

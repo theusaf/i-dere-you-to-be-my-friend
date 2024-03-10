@@ -24,6 +24,7 @@ import { GameManager } from "../../../engine/game_manager";
 import { ContactPageLarge, ContactPagePhone } from "./map_screen_pages/friends";
 import { Character } from "../../util/character";
 import { PartyPageLarge, PartyPagePhone } from "./map_screen_pages/party";
+import { DoctorDialog } from "./map_screen_pages/npcs/doctor";
 
 interface MapScreenContentProps {
   state: MapScreen;
@@ -43,6 +44,7 @@ export function MapScreenContent({
   const [contractVisible, setContractVisible] = useState(false);
   const [contractName, setContractName] = useState("");
   const [dialog, setDialog] = useState("");
+  const [npcDialog, setNpcDialog] = useState<Character | null>(null);
   const [battleStartState, setBattleStartState] = useState(
     EnterBattleAnimationState.none,
   );
@@ -123,6 +125,10 @@ export function MapScreenContent({
         gameManager.cutsceneIndex++;
       };
     }) as EventListener;
+    const npcDialogListener = ((event: CustomEvent<Character>) => {
+      console.log("npcDialogListener", event.detail);
+      setNpcDialog(event.detail);
+    }) as EventListener;
     state.eventNotifier.addEventListener(
       MapScreenEvents.battleStart,
       battleStartListener,
@@ -142,6 +148,10 @@ export function MapScreenContent({
     state.eventNotifier.addEventListener(
       MapScreenEvents.contract,
       contractListener,
+    );
+    state.eventNotifier.addEventListener(
+      MapScreenEvents.npcDialogStart,
+      npcDialogListener,
     );
     return () => {
       state.eventNotifier.removeEventListener(
@@ -163,6 +173,10 @@ export function MapScreenContent({
       state.eventNotifier.removeEventListener(
         MapScreenEvents.contract,
         contractListener,
+      );
+      state.eventNotifier.removeEventListener(
+        MapScreenEvents.npcDialogStart,
+        npcDialogListener,
       );
     };
   }, [
@@ -260,8 +274,26 @@ export function MapScreenContent({
           </div>
         </div>
       </div>
+      <NPCDialog npc={npcDialog} screen={state} setNpcDialog={setNpcDialog} />
     </>
   );
+}
+
+function NPCDialog({
+  npc,
+  screen,
+  setNpcDialog,
+}: {
+  npc: Character | null;
+  screen: MapScreen;
+  setNpcDialog: (npc: Character | null) => void;
+}): JSX.Element {
+  console.log(npc);
+  if (!npc) return <></>;
+  if (npc.id === "doctor") {
+    return <DoctorDialog screen={screen} setNpcDialog={setNpcDialog} />;
+  }
+  return <></>;
 }
 
 interface BattleAnimationDisplayProps {

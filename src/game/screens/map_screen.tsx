@@ -41,6 +41,7 @@ export enum MapScreenEvents {
   dialog = "dialog",
   contract = "contract",
   animate = "animate",
+  npcDialogStart = "npcDialogStart",
 }
 
 export enum MapBuildingPosition {
@@ -67,6 +68,7 @@ export class MapScreen extends GameScreen {
     {
       character: Character;
       sprite: CharacterSprite;
+      building: boolean;
     }
   > = {};
   baseSize!: number;
@@ -78,6 +80,7 @@ export class MapScreen extends GameScreen {
     offsetY: number;
     data: MapData;
   } | null = null;
+  dialogSprite: Sprite | null = null;
 
   get currentChunk(): MapData | null {
     return this.chunks[`${this.chunkX},${this.chunkY}`];
@@ -446,11 +449,16 @@ export class MapScreen extends GameScreen {
       break;
     }
     for (const npcId in npcs ?? {}) {
-      this.addNPC(npcId, npcs![npcId], this.mapNPCContainer);
+      this.addNPC(npcId, npcs![npcId], this.mapNPCContainer, false);
     }
   }
 
-  addNPC(npcId: string, npcData: NPCData, container: Container): void {
+  addNPC(
+    npcId: string,
+    npcData: NPCData,
+    container: Container,
+    building: boolean,
+  ): void {
     if (this.gameManager.gameData.isNPCinFriendGroup(npcId)) return;
     if (this.gameManager.gameData.specialNPCs[npcId]) {
       const npc = this.gameManager.gameData.specialNPCs[npcId];
@@ -463,7 +471,7 @@ export class MapScreen extends GameScreen {
       npc = this.gameManager.gameData.specialNPCs[npcId];
       position = npc.position;
     } else {
-      const { types, gender, knownMoves, stats, colors, styles, type } =
+      const { types, gender, knownMoves, stats, colors, styles, type, name } =
         npcData;
       let { love, hp } = npcData;
       position = npcData.position;
@@ -474,6 +482,7 @@ export class MapScreen extends GameScreen {
       npc = Character.createRandomCharacter(love);
 
       npc.hp = hp ?? npc.hp;
+      npc.name = name ?? npc.name;
       npc.types = types ?? npc.types;
       npc.gender = gender ?? npc.gender;
       npc.knownMoves = knownMoves ?? npc.knownMoves;
@@ -504,6 +513,7 @@ export class MapScreen extends GameScreen {
     this.mapNPCS[npcId] = {
       character: npc,
       sprite: npcSprite,
+      building,
     };
   }
 
@@ -775,7 +785,66 @@ export class MapScreen extends GameScreen {
     this.movePlayer(delta);
   }
 
-  updateNPCs() {}
+  /**
+   * Detects if the player is close to an NPC and updates the UI accordingly.
+   */
+  updateNPCs() {
+    if (this.inBuilding === MapBuildingPosition.inside) {
+      for (const id in this.mapNPCS) {
+        const { sprite, building, character } = this.mapNPCS[id];
+        if (!building) continue;
+        if (sprite.mainContainer.destroyed) {
+          delete this.mapNPCS[id];
+          continue;
+        }
+        const characterLocalX =
+          character.position[0] + this.mapBuildingData!.offsetX;
+        const characterLocalY =
+          character.position[1] + this.mapBuildingData!.offsetY;
+        const { x, y } = this.getChunkGlobalPosition(
+          this.chunkX,
+          this.chunkY,
+          characterLocalX,
+          characterLocalY,
+        );
+        const distance = Math.sqrt(
+          (x - this.characterWorldX) ** 2 + (y - this.characterWorldY) ** 2,
+        );
+        if (distance <= 2) {
+          if (!this.dialogSprite) {
+            const dialogSprite = new Sprite(Assets.get("ui/dialog"));
+            dialogSprite.x = x;
+            dialogSprite.y = y - 1.5;
+            dialogSprite.anchor.set(0.5, 1);
+            dialogSprite.width = 1;
+            dialogSprite.height = 1;
+            dialogSprite.eventMode = "static";
+            dialogSprite.cursor = "pointer";
+            dialogSprite.onpointerdown = () => {
+              this.eventNotifier.dispatchEvent(
+                new CustomEvent(MapScreenEvents.npcDialogStart, {
+                  detail: character,
+                }),
+              );
+            };
+            this.dialogSprite = dialogSprite;
+            this.dialogSprite.zIndex = 60;
+            this.mapContainer.addChild(dialogSprite);
+          }
+        } else {
+          if (this.dialogSprite) {
+            this.dialogSprite.destroy();
+            this.dialogSprite = null;
+            this.eventNotifier.dispatchEvent(
+              new CustomEvent(MapScreenEvents.npcDialogStart, { detail: null }),
+            );
+          }
+        }
+      }
+    } else {
+      /* TODO */
+    }
+  }
 
   updateBuildings() {
     const chunkData = Assets.get<MapSpecialData>(
@@ -888,7 +957,7 @@ export class MapScreen extends GameScreen {
 
     const npcs = buildingData.npcs;
     for (const id in npcs) {
-      this.addNPC(id, npcs[id], tileContainer);
+      this.addNPC(id, npcs[id], tileContainer, true);
     }
   }
 
