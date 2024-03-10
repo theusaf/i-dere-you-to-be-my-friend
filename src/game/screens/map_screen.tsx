@@ -770,9 +770,12 @@ export class MapScreen extends GameScreen {
     );
 
     this.updateBuildings();
+    this.updateNPCs();
     this.animateNPCs(delta);
     this.movePlayer(delta);
   }
+
+  updateNPCs() {}
 
   updateBuildings() {
     const chunkData = Assets.get<MapSpecialData>(

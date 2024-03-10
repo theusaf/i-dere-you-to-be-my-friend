@@ -50,7 +50,7 @@ export function PartyPageLarge({
     forceUpdate();
   };
   const onLeft = (friend: Character) => {
-    let friendIndex = friends.indexOf(friend);
+    const friendIndex = friends.indexOf(friend);
     if (friendIndex === 0) return;
     let switchIndex;
     if (friend.isActive) {
@@ -71,7 +71,7 @@ export function PartyPageLarge({
     forceUpdate();
   };
   const onRight = (friend: Character) => {
-    let friendIndex = friends.indexOf(friend);
+    const friendIndex = friends.indexOf(friend);
     if (friendIndex === friends.length - 1) return;
     let switchIndex;
     if (friend.isActive) {

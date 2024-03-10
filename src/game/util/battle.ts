@@ -100,7 +100,7 @@ export class Battle extends EventTarget implements BattleData {
       this.addLog("The opponent disappeared, leaving nothing behind.");
       return;
     } else {
-      let { gold, xp } = this.rewardTable;
+      const { gold, xp } = this.rewardTable;
       if (Array.isArray(gold.amount)) {
         gold.amount = chance.integer({
           min: gold.amount[0],

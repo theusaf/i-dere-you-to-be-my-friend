@@ -185,7 +185,7 @@ export function MapScreenContent({
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [phoneVisible]);
+  }, [phoneVisible, gameManager.currentScreen]);
 
   return (
     <>
