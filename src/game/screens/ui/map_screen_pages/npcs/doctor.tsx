@@ -7,6 +7,7 @@ import { ConfirmationButton } from "../../../../../engine/components/confirmatio
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { MapSpecialActionBattle } from "../../../../util/map_types";
+import { NumberSpan } from "../../../../../engine/components/numer_span";
 
 enum DoctorDialogState {
   index = "index",
@@ -35,10 +36,6 @@ export function DoctorDialog({
       onDialogFinishCallback.current = null;
     }
   }, [dialog.length, onDialogFinishCallback.current]);
-
-  if (state === DoctorDialogState.heal) {
-    // TODO: calculate costs
-  }
   const className = "grid items-center text-2xl";
   return (
     <div className="absolute top-0 left-0 h-full w-full">
@@ -73,8 +70,19 @@ export function DoctorDialog({
             <TextActionButton
               className={className}
               onClick={() => {
-                setDialog(["Sure thing! One second..."]);
-                setState(DoctorDialogState.heal);
+                const costs = gameData.calculateMedicalCosts();
+                if (costs === 0) {
+                  setDialog([
+                    "Sure thing! One second...",
+                    "It looks like your friends are all healthy!",
+                  ]);
+                } else {
+                  setDialog([
+                    "Sure thing! One second...",
+                    `That's going to cost ${costs} gold. Is that alright?`,
+                  ]);
+                  setState(DoctorDialogState.heal);
+                }
               }}
             >
               Heal Active Friends
@@ -105,7 +113,33 @@ export function DoctorDialog({
             </TextActionButton>
           </div>
         ) : state === DoctorDialogState.heal ? (
-          <></>
+          <div className="grid grid-cols-3 gap-4 flex-1 text-center">
+            <div className="text-left">
+              <p>
+                Cost:{" "}
+                <NumberSpan>{gameData.calculateMedicalCosts()}</NumberSpan>
+              </p>
+              <p>
+                Balance: <NumberSpan>{gameData.gold}</NumberSpan>
+              </p>
+            </div>
+            <TextActionButton
+              className={className}
+              onClick={() => {
+                gameData.healActiveFriends();
+                setDialog([
+                  "Alright, I'll check on your friends.",
+                  "...",
+                  "All done!",
+                  "<Your friends health and energy have been restored!>",
+                ]);
+                setState(DoctorDialogState.index);
+              }}
+            >
+              Yes
+            </TextActionButton>
+            <TextActionButton className={className}>No</TextActionButton>
+          </div>
         ) : (
           <div className="grid grid-cols-3 gap-4 text-center flex-1">
             <TextActionButton

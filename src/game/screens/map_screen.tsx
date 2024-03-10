@@ -462,7 +462,7 @@ export class MapScreen extends GameScreen {
     if (this.gameManager.gameData.isNPCinFriendGroup(npcId)) return;
     if (this.gameManager.gameData.specialNPCs[npcId]) {
       const npc = this.gameManager.gameData.specialNPCs[npcId];
-      if (npc.isDead || npc.hp <= 0) return;
+      if (npc.isDead) return;
     }
     if (this.mapNPCS[npcId]) return;
     let npc: Character;

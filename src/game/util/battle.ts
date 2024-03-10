@@ -983,7 +983,8 @@ export class Battle extends EventTarget implements BattleData {
       }
     } else {
       const npc = gameManager.gameData.specialNPCs[against];
-      enemyLeader = npc.clone();
+      enemyLeader = npc;
+      npc.hp = npc.stats.maxHealth;
       enemyTeam.push(enemyLeader);
     }
     if (gameManager.gameData.friends.length === 0) {

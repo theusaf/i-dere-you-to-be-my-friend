@@ -244,15 +244,7 @@ function UserView({
           );
         }
         battle.addLog("You and your friends escape to the hospital...");
-        // TODO: heal all friends and subtract money properly
-        const movesets = getMovesets();
-        for (const friend of gameManager.gameData.activeFriends) {
-          if (friend.isDead) continue;
-          friend.hp = friend.stats.maxHealth;
-          for (const key in friend.moveUses) {
-            friend.moveUses[key] = movesets[key]?.max_uses ?? 1;
-          }
-        }
+        gameManager.gameData.healActiveFriends();
         gameManager.gameData.worldMapData.playerX = 26.5;
         gameManager.gameData.worldMapData.playerY = -99.5;
       }

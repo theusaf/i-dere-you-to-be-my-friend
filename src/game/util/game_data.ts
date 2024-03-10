@@ -4,6 +4,7 @@ import { Saveable, save } from "./saves";
 import { stringify } from "yaml";
 import data from "../../../package.json";
 import { chance } from "./chance";
+import { getMovesets } from "./moves";
 
 const version = data.version;
 
@@ -126,11 +127,32 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
   calculateMedicalCosts(): number {
     let amount = 0;
     const costPerHP = 5;
+    const costPerSkillRecovery = 2;
+    const movesets = getMovesets();
     for (const friend of this.activeFriends) {
       if (friend.isDead) continue;
       amount += (friend.stats.maxHealth - friend.hp) * costPerHP;
+      for (const key in friend.moveUses) {
+        if (movesets[key]) {
+          amount +=
+            (movesets[key].max_uses - friend.moveUses[key]) *
+            costPerSkillRecovery;
+        }
+      }
     }
     return amount;
+  }
+
+  healActiveFriends(free: boolean = false): void {
+    const movesets = getMovesets();
+    if (!free) this.gold -= this.calculateMedicalCosts();
+    for (const friend of this.activeFriends) {
+      if (friend.isDead) continue;
+      friend.hp = friend.stats.maxHealth;
+      for (const key in friend.moveUses) {
+        friend.moveUses[key] = movesets[key]?.max_uses ?? 1;
+      }
+    }
   }
 
   static fromMap(map: RawGameDataContent): GameData {
