@@ -106,6 +106,8 @@ export const assetList: AssetsManifest = {
         { src: "./assets/maps/0,-1.map", alias: "map/0,-1" },
         { src: "./assets/maps/-1,0.map", alias: "map/-1,0" },
         { src: "./assets/maps/1,0.map", alias: "map/1,0" },
+        { src: "./assets/maps/2,-1.map", alias: "map/2,-1" },
+        { src: "./assets/maps/1,-1.map", alias: "map/1,-1" },
       ],
     },
     {
