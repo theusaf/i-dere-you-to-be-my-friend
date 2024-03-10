@@ -123,6 +123,16 @@ export class GameData implements Saveable<RawGameDataContent>, GameDataContent {
     return addedToActive;
   }
 
+  calculateMedicalCosts(): number {
+    let amount = 0;
+    const costPerHP = 5;
+    for (const friend of this.activeFriends) {
+      if (friend.isDead) continue;
+      amount += (friend.stats.maxHealth - friend.hp) * costPerHP;
+    }
+    return amount;
+  }
+
   static fromMap(map: RawGameDataContent): GameData {
     const specialNPCs: Record<string, Character> = {};
     for (const [id, npc] of Object.entries(map.specialNPCs ?? {})) {
