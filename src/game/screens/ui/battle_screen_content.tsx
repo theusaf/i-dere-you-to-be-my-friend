@@ -772,6 +772,7 @@ function FightButtons({
         return (
           <MoveButton
             key={i}
+            disabled={character.moveUses[move] <= 0}
             onMouseOver={() => onHover(moveData)}
             onMouseOut={onUnhover}
             onClick={() => onMoveSelected(moveData)}
