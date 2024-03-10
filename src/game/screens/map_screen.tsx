@@ -931,6 +931,7 @@ export class MapScreen extends GameScreen {
       this.characterSprite.setAnimation(CharacterSpriteAnimation.running);
       this.characterSprite.animationContext.direction = this.direction;
       const distance = this.getSpeed() * delta;
+      const angleMult = 1 / Math.sqrt(2);
       switch (this.direction) {
         case Direction.up:
           this.moveCharacterY(-distance);
@@ -945,20 +946,20 @@ export class MapScreen extends GameScreen {
           this.moveCharacterX(distance);
           break;
         case Direction.upLeft:
-          this.moveCharacterX(-distance);
-          this.moveCharacterY(-distance);
+          this.moveCharacterX(-distance * angleMult);
+          this.moveCharacterY(-distance * angleMult);
           break;
         case Direction.upRight:
-          this.moveCharacterY(-distance);
-          this.moveCharacterX(distance);
+          this.moveCharacterY(-distance * angleMult);
+          this.moveCharacterX(distance * angleMult);
           break;
         case Direction.downLeft:
-          this.moveCharacterY(distance);
-          this.moveCharacterX(-distance);
+          this.moveCharacterY(distance * angleMult);
+          this.moveCharacterX(-distance * angleMult);
           break;
         case Direction.downRight:
-          this.moveCharacterY(distance);
-          this.moveCharacterX(distance);
+          this.moveCharacterY(distance * angleMult);
+          this.moveCharacterX(distance * angleMult);
           break;
       }
       this.updateChunks();
