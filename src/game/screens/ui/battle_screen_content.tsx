@@ -7,7 +7,7 @@ import {
   useState,
 } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft, faUser } from "@fortawesome/free-solid-svg-icons";
 import { BattleScreen, BattleScreenState } from "../battle_screen";
 import { HealthBar } from "../../../engine/components/health_bar";
 import { TextActionButton } from "../../../engine/components/action_button";
@@ -87,7 +87,11 @@ export function BattleScreenContent({
     <>
       {showUI && popup && <Popup popup={popup} onDone={() => setPopup("")} />}
       <div className="grid grid-rows-5 h-full text-white">
-        <EnemyView show={showUI} activeEnemy={battle.activeOpponent} />
+        <EnemyView
+          show={showUI}
+          activeEnemy={battle.activeOpponent}
+          battle={battle}
+        />
         <UserView
           gameManager={gameManager}
           show={showUI}
@@ -165,9 +169,10 @@ interface ToggleableUIProps {
 
 interface EnemyViewProps extends ToggleableUIProps {
   activeEnemy: Character | null;
+  battle: Battle;
 }
 
-function EnemyView({ show, activeEnemy }: EnemyViewProps) {
+function EnemyView({ show, activeEnemy, battle }: EnemyViewProps) {
   return (
     <div
       className="grid grid-cols-7 transition-transform duration-300"
@@ -175,6 +180,24 @@ function EnemyView({ show, activeEnemy }: EnemyViewProps) {
         transform: show && activeEnemy ? "translateX(0)" : "translateY(-100%)",
       }}
     >
+      {show && (
+        <div
+          className="absolute bottom-0 left-4 p-2 bg-slate-900"
+          style={{
+            transform: "translateY(100%)",
+          }}
+        >
+          <FontAwesomeIcon icon={faUser} className="mr-2" />
+          <NumberSpan>
+            {
+              battle.opponentTeam.filter((character) => {
+                return character.hp > 0;
+              }).length
+            }
+            /{battle.opponentTeam.length}
+          </NumberSpan>
+        </div>
+      )}
       <div className="col-span-3 m-4 bg-slate-500 outline outline-4 outline-neutral-400 overflow-y-auto p-2 pointer-events-auto">
         {activeEnemy && (
           <>
@@ -271,6 +294,24 @@ function UserView({
           transform: show ? "translateX(0)" : "translateY(100%)",
         }}
       >
+        {show && (
+          <div
+            className="absolute top-0 left-0 p-2 bg-slate-900"
+            style={{
+              transform: "translateY(-100%)",
+            }}
+          >
+            <FontAwesomeIcon icon={faUser} className="mr-2" />
+            <NumberSpan>
+              {
+                battle.playerTeam.filter((character) => {
+                  return character.hp > 0;
+                }).length
+              }
+              /{battle.playerTeam.length}
+            </NumberSpan>
+          </div>
+        )}
         <div className="flex w-full h-full">
           <UserStatsView
             activeCharacter={gameManager.gameData.battle!.activePlayer}
@@ -559,10 +600,7 @@ function UserStatsView({
   return (
     <div
       className="border-r-4 pr-2 flex flex-col transition-transform duration-300"
-      style={{
-        ...style,
-        flex: 2,
-      }}
+      style={{ ...style, flex: 2 }}
     >
       <h3 className="text-2xl pointer-events-auto mb-2">
         {activeCharacter?.name}
