@@ -1,7 +1,7 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { TextActionButton } from "../../../../../engine/components/action_button";
 import { Character } from "../../../../util/character";
-import { MapScreen } from "../../../map_screen";
+import { MapScreen, MapScreenEvents } from "../../../map_screen";
 import { AnimatedTextController } from "../../../../../engine/components/animated_text_container";
 import { ConfirmationButton } from "../../../../../engine/components/confirmation_button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -35,6 +35,7 @@ export function DoctorDialog({
     setOnDialogFinishCallback(null);
   }
   if (state === DoctorDialogState.heal) {
+    // TODO: calculate costs
   }
   const className = "grid items-center text-2xl";
   return (
@@ -136,7 +137,16 @@ export function DoctorDialog({
                 setOnDialogFinishCallback(() => {
                   const data: MapSpecialActionBattle = {
                     against: "doctor",
+                    level: [8, 12],
+                    reward_table: "default",
+                    size: 8,
+                    type: "enter_battle",
                   };
+                  screen.eventNotifier.dispatchEvent(
+                    new CustomEvent(MapScreenEvents.battleStart, {
+                      detail: data,
+                    }),
+                  );
                 });
               }}
             >

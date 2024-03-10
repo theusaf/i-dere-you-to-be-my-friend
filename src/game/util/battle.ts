@@ -965,24 +965,26 @@ export class Battle extends EventTarget implements BattleData {
     if (level === null) {
       level = [chance.bool() ? Math.max(playerLove - 4, 1) : 1, playerLove + 2];
     }
+    const enemySize = Array.isArray(size)
+      ? chance.integer({ min: size[0], max: size[1] })
+      : size;
+    for (let i = 0; i < enemySize; i++) {
+      love = Array.isArray(level)
+        ? chance.integer({ min: level[0], max: level[1] })
+        : level;
+      const enemy = Character.createRandomCharacter(love ?? 1);
+      enemyTeam.push(enemy);
+    }
     if (against === "random") {
-      const enemySize = Array.isArray(size)
-        ? chance.integer({ min: size[0], max: size[1] })
-        : size;
-      for (let i = 0; i < enemySize; i++) {
-        love = Array.isArray(level)
-          ? chance.integer({ min: level[0], max: level[1] })
-          : level;
-        const enemy = Character.createRandomCharacter(love ?? 1);
-        enemyTeam.push(enemy);
-      }
       if (enemyTeam.length === 1) {
         enemyLeader = enemyTeam[0];
       } else {
         enemyLeader = Character.createRandomCharacter(love ?? 1);
       }
     } else {
-      throw new Error("Not implemented");
+      const npc = gameManager.gameData.specialNPCs[against];
+      enemyLeader = npc.clone();
+      enemyTeam.push(enemyLeader);
     }
     if (gameManager.gameData.friends.length === 0) {
       const character = Character.createRandomCharacter(1);
