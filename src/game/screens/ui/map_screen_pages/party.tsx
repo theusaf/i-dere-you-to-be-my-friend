@@ -95,9 +95,9 @@ export function PartyPageLarge({
   return (
     <ClosableView>
       <div className="w-full h-full grid grid-rows-2 gap-2 text-white">
-        <div className="flex flex-col">
+        <div className="flex flex-col overflow-x-auto">
           <h3 className="text-xl">Active Friends</h3>
-          <div className="p-2 rounded gap-2 flex bg-orange-400 overflow-x-auto flex-1">
+          <div className="p-2 rounded gap-2 flex bg-orange-400 flex-1 overflow-x-auto">
             {activeFriends.map((friend, i) => {
               return (
                 <PartyMember
@@ -120,7 +120,7 @@ export function PartyPageLarge({
             })}
           </div>
         </div>
-        <div className="flex flex-col">
+        <div className="flex flex-col overflow-x-auto">
           <h3 className="text-xl">Inactive Friends</h3>
           <div className="p-2 rounded gap-2 flex overflow-x-auto flex-1 bg-orange-700">
             {friends
@@ -197,7 +197,7 @@ function PartyMember({
   }
   return (
     <div
-      className="p-2 rounded grid grid-rows-3 items-center text-center bg-slate-700 w-32 shadow-md shadow-slate-900"
+      className="p-2 rounded grid grid-rows-3 items-center text-center bg-slate-700 w-32 min-w-32 shadow-md shadow-slate-900"
       onClick={() => {
         forceUpdate();
       }}
