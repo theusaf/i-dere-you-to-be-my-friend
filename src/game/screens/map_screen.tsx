@@ -506,7 +506,6 @@ export class MapScreen extends GameScreen {
         this.gameManager.gameData.specialNPCs[npcId] = npc;
       }
     }
-    console.log(npc, npcData, this.gameManager.gameData.specialNPCs[npcId]);
 
     const npcSprite = new CharacterSprite({
       skinColor: npc.colors.skin,

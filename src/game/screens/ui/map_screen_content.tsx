@@ -132,7 +132,6 @@ export function MapScreenContent({
       };
     }) as EventListener;
     const npcDialogListener = ((event: CustomEvent<Character>) => {
-      console.log("npcDialogListener", event.detail);
       setNpcDialog(event.detail);
     }) as EventListener;
     state.eventNotifier.addEventListener(

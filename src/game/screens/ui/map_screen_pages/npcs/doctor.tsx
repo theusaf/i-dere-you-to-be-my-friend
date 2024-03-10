@@ -28,7 +28,6 @@ export function DoctorDialog({
   const onDialogFinishCallback = useRef<(() => void) | null>(null);
   const { gameManager } = screen;
   const { gameData } = gameManager;
-  console.log(dialog, state);
   useEffect(() => {
     if (!dialog.length && onDialogFinishCallback) {
       onDialogFinishCallback.current?.();
