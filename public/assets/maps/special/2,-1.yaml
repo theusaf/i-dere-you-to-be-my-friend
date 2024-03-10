@@ -1,0 +1,6 @@
+boxes:
+  - from: [91, 10]
+    to: [111, 18]
+    type: building
+    image: stage
+    background_tile: null
