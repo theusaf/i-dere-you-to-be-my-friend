@@ -4,3 +4,8 @@ boxes:
     type: building
     image: stage
     background_tile: null
+
+npcs:
+  ura_bosu:
+    type: special
+    position: [101, 15]

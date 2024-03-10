@@ -449,7 +449,14 @@ export class MapScreen extends GameScreen {
       break;
     }
     for (const npcId in npcs ?? {}) {
-      this.addNPC(npcId, npcs![npcId], this.mapNPCContainer, false);
+      this.addNPC(
+        npcId,
+        npcs![npcId],
+        this.mapNPCContainer,
+        false,
+        chunkX,
+        chunkY,
+      );
     }
   }
 
@@ -458,6 +465,8 @@ export class MapScreen extends GameScreen {
     npcData: NPCData,
     container: Container,
     building: boolean,
+    chunkX?: number,
+    chunkY?: number,
   ): void {
     if (this.gameManager.gameData.isNPCinFriendGroup(npcId)) return;
     if (this.gameManager.gameData.specialNPCs[npcId]) {
@@ -495,6 +504,7 @@ export class MapScreen extends GameScreen {
         this.gameManager.gameData.specialNPCs[npcId] = npc;
       }
     }
+    console.log(npc, npcData, this.gameManager.gameData.specialNPCs[npcId]);
 
     const npcSprite = new CharacterSprite({
       skinColor: npc.colors.skin,
@@ -505,7 +515,18 @@ export class MapScreen extends GameScreen {
       bodyId: `${npc.styles.body}`,
       legId: `${npc.styles.legs}`,
     });
-    npc.position = position;
+    if (building) {
+      npc.position = position;
+    } else {
+      // convert to global position
+      const { x, y } = this.getChunkGlobalPosition(
+        chunkX!,
+        chunkY!,
+        position[0],
+        position[1],
+      );
+      npc.position = [x, y];
+    }
     npcSprite.initSprite().then(() => {
       npcSprite.setWidth(0.75);
       container.addChild(npcSprite.getView());
