@@ -1,4 +1,11 @@
-import { useEffect, useReducer, useRef, useState } from "react";
+import {
+  ReactNode,
+  forwardRef,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { BattleScreen, BattleScreenState } from "../battle_screen";
@@ -542,6 +549,13 @@ function UserStatsView({
   activeCharacter: Character | null;
   battle: Battle;
 }): JSX.Element {
+  const logRenderer = useRef<HTMLDivElement>(null);
+  if (logRenderer.current) {
+    logRenderer.current.scrollTop = -logRenderer.current.scrollHeight;
+    setTimeout(() => {
+      logRenderer.current?.scrollBy(0, -200);
+    }, 50);
+  }
   return (
     <div
       className="border-r-4 pr-2 flex flex-col transition-transform duration-300"
@@ -576,7 +590,7 @@ function UserStatsView({
           <span>{/* effect icons here */}</span>
         </p>
       )}
-      <div className="overflow-y-auto pointer-events-auto w-full flex flex-col-reverse bg-slate-800 p-2 rounded mt-2">
+      <LogRenderer ref={logRenderer}>
         {battle.logs.map((log, i) => {
           return (
             <p key={i} className="text-sm">
@@ -584,10 +598,22 @@ function UserStatsView({
             </p>
           );
         })}
-      </div>
+      </LogRenderer>
     </div>
   );
 }
+
+const LogRenderer = forwardRef<HTMLDivElement, { children: ReactNode }>(
+  function (props, ref) {
+    return (
+      <div
+        ref={ref}
+        className="overflow-y-auto pointer-events-auto w-full flex flex-col-reverse bg-slate-800 p-2 rounded mt-2"
+        {...props}
+      />
+    );
+  },
+);
 
 interface UserViewButtonProps {
   className: string;
