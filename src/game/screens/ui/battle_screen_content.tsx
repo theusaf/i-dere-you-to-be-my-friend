@@ -614,7 +614,7 @@ function RizzButtons({
 }): JSX.Element {
   const messages = chance.pickset(rizzMessages, 4);
   return (
-    <div className="grid grid-cols-2 gap-2 w-full h-full">
+    <div className="grid grid-cols-2 gap-2 w-full h-full overflow-y-auto">
       {messages.map((message, i) => {
         return (
           <TextActionButton
