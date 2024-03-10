@@ -674,13 +674,13 @@ function FriendsButtons({
   const className = "w-32";
   return (
     <div className="h-full overflow-x-auto grid grid-cols-1">
-      <div className="gap-2 text-center h-full flex">
+      <div className="gap-2 text-center h-full flex overflow-x-auto">
         {friends.map((friend, i) => {
           return (
             <TextActionButton
               disabled={friend.hp <= 0 || friend === activeFriend}
               key={i}
-              className={`break-all ${
+              className={`break-all w-32 min-w-32 ${
                 friend.hp <= 0
                   ? "cursor-not-allowed opacity-75"
                   : friend === activeFriend
