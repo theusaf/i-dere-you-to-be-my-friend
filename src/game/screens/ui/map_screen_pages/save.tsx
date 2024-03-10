@@ -24,7 +24,7 @@ export function SavePagePhone({ gameManager }: { gameManager: GameManager }) {
           gameManager.changeScreen(new MainMenuScreen());
         }}
       >
-        Save and Returnt to Menu
+        Save and Return to Menu
       </TextActionButton>
       <div>{message}</div>
     </div>
