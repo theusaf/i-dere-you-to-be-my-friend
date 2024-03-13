@@ -80,6 +80,7 @@ export class GameManager {
         case CutsceneActionType.music: {
           SoundManager.stopAll();
           SoundManager.playSound(`music/${data}`, true);
+          this.cutsceneIndex++;
           break;
         }
       }

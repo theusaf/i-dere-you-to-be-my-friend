@@ -75,7 +75,7 @@ export function MapScreenContent({
           .replace(/§player.name§/g, gameManager.gameData.you.name)
           .replace(
             /§friend.name§/g,
-            gameManager.gameData.specialNPCs.ura_boss.name,
+            gameManager.gameData.specialNPCs.ura_bosu.name,
           ),
       );
       dialogCallback.current = () => {
