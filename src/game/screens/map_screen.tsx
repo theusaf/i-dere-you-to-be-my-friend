@@ -841,60 +841,57 @@ export class MapScreen extends GameScreen {
    * Detects if the player is close to an NPC and updates the UI accordingly.
    */
   updateNPCs() {
-    if (this.inBuilding === MapBuildingPosition.inside) {
-      for (const id in this.mapNPCS) {
-        const { sprite, building, character } = this.mapNPCS[id];
-        if (!building) continue;
-        if (sprite.mainContainer.destroyed) {
-          delete this.mapNPCS[id];
-          continue;
-        }
-        const characterLocalX =
-          character.position[0] + this.mapBuildingData!.offsetX;
-        const characterLocalY =
-          character.position[1] + this.mapBuildingData!.offsetY;
-        const { x, y } = this.getChunkGlobalPosition(
-          this.chunkX,
-          this.chunkY,
-          characterLocalX,
-          characterLocalY,
-        );
-        const distance = Math.sqrt(
-          (x - this.characterWorldX) ** 2 + (y - this.characterWorldY) ** 2,
-        );
-        if (distance <= 2) {
-          if (!this.dialogSprite) {
-            const dialogSprite = new Sprite(Assets.get("ui/dialog"));
-            dialogSprite.x = x;
-            dialogSprite.y = y - 1.5;
-            dialogSprite.anchor.set(0.5, 1);
-            dialogSprite.width = 1;
-            dialogSprite.height = 1;
-            dialogSprite.eventMode = "static";
-            dialogSprite.cursor = "pointer";
-            dialogSprite.onpointerdown = () => {
-              this.eventNotifier.dispatchEvent(
-                new CustomEvent(MapScreenEvents.npcDialogStart, {
-                  detail: character,
-                }),
-              );
-            };
-            this.dialogSprite = dialogSprite;
-            this.dialogSprite.zIndex = 60;
-            this.mapContainer.addChild(dialogSprite);
-          }
-        } else {
-          if (this.dialogSprite) {
-            this.dialogSprite.destroy();
-            this.dialogSprite = null;
+    for (const id in this.mapNPCS) {
+      const { sprite, building, character } = this.mapNPCS[id];
+      if (sprite.mainContainer.destroyed) {
+        delete this.mapNPCS[id];
+        continue;
+      }
+      let characterLocalX = character.position[0];
+      let characterLocalY = character.position[1];
+      if (building) {
+        characterLocalX += this.mapBuildingData!.offsetX;
+        characterLocalY += this.mapBuildingData!.offsetY;
+      }
+      const { x, y } = this.getChunkGlobalPosition(
+        this.chunkX,
+        this.chunkY,
+        characterLocalX,
+        characterLocalY,
+      );
+      const distance = Math.sqrt(
+        (x - this.characterWorldX) ** 2 + (y - this.characterWorldY) ** 2,
+      );
+      if (distance <= 2) {
+        if (!this.dialogSprite) {
+          const dialogSprite = new Sprite(Assets.get("ui/dialog"));
+          dialogSprite.x = x;
+          dialogSprite.y = y - 1.5;
+          dialogSprite.anchor.set(0.5, 1);
+          dialogSprite.width = 1;
+          dialogSprite.height = 1;
+          dialogSprite.eventMode = "static";
+          dialogSprite.cursor = "pointer";
+          dialogSprite.onpointerdown = () => {
             this.eventNotifier.dispatchEvent(
-              new CustomEvent(MapScreenEvents.npcDialogStart, { detail: null }),
+              new CustomEvent(MapScreenEvents.npcDialogStart, {
+                detail: character,
+              }),
             );
-          }
+          };
+          this.dialogSprite = dialogSprite;
+          this.dialogSprite.zIndex = 60;
+          this.mapContainer.addChild(dialogSprite);
+        }
+      } else {
+        if (this.dialogSprite) {
+          this.dialogSprite.destroy();
+          this.dialogSprite = null;
+          this.eventNotifier.dispatchEvent(
+            new CustomEvent(MapScreenEvents.npcDialogStart, { detail: null }),
+          );
         }
       }
-    } else {
-      /* TODO */
     }
   }
 
