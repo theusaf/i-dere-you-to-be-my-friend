@@ -124,6 +124,7 @@ export function CreateSavePage({
       myFriendFinal.colors = myFriend.current.colors;
       myFriendFinal.name = myFriend.current.name;
       myFriendFinal.gender = myFriend.current.gender;
+      myFriendFinal.position = [101, 15]; // see 2,-1.yaml. This is hardcoded here because its a special NPC created here
       const gameData: RawGameDataContent = {
         friends: [],
         you: myCharacter.current,

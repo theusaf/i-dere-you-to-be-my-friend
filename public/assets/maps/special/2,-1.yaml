@@ -8,7 +8,7 @@ boxes:
 npcs:
   ura_bosu:
     type: special
-    position: [101, 15]
+    position: [101, 15] # Currently doens't really do anything. See `game/screens/ui/main_meu_pages/create.tsx` for more info.
 
 cutscenes:
   friend_competition:
