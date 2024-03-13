@@ -3,6 +3,8 @@ import { getSaveList, isSaveCompatible, load } from "../../../util/saves";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
 import { RawGameDataContent } from "../../../util/game_data";
+import { TextActionButton } from "../../../../engine/components/action_button";
+import { ConfirmationButton } from "../../../../engine/components/confirmation_button";
 
 export function SavesPage({
   onSaveSelected,
@@ -51,6 +53,7 @@ export function SavesPage({
               }}
             >
               <div
+                className="overflow-y-auto"
                 style={{
                   wordBreak: "break-all",
                 }}
@@ -61,6 +64,17 @@ export function SavesPage({
                 <hr />
                 <p>Lov. {save.you.love}</p>
                 <p>Friends: {save.friends.length}</p>
+                <div className="flex w-full mt-2 mb-2">
+                  <ConfirmationButton
+                    className="m-auto"
+                    onClick={() => {
+                      localStorage.removeItem(`save/${save.saveId!}`);
+                      setSaves(saves.filter((s) => s.saveId !== save.saveId));
+                    }}
+                  >
+                    Delete
+                  </ConfirmationButton>
+                </div>
               </div>
             </div>
           );

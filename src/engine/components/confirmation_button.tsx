@@ -21,6 +21,7 @@ export function ConfirmationButton({
       onMouseOver={onMouseOver}
       className={className}
       onClick={(event) => {
+        event.stopPropagation();
         if (confirming) {
           onClick?.(event);
         } else {
