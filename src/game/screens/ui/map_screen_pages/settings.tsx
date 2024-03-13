@@ -21,12 +21,8 @@ export function SettingsPageLarge(): JSX.Element {
     setMusicVolume(musicVolume);
     setSfxVolume(sfxVolume);
   }, []);
-  useEffect(() => {
-    localStorage.setItem("musicVolume", musicVolume.toString());
-    localStorage.setItem("sfxVolume", sfxVolume.toString());
-    SoundManager.setMusicVolume(musicVolume);
-    SoundManager.setSfxVolume(sfxVolume);
-  }, [musicVolume, sfxVolume]);
+  SoundManager.setMusicVolume(musicVolume);
+  SoundManager.setSfxVolume(sfxVolume);
 
   return (
     <ClosableView>
@@ -42,6 +38,7 @@ export function SettingsPageLarge(): JSX.Element {
             value={musicVolume}
             onChange={(evt) => {
               setMusicVolume(parseInt(evt.target.value));
+              localStorage.setItem("musicVolume", musicVolume.toString());
             }}
           />
           <span className="ml-2">{musicVolume}%</span>
@@ -56,6 +53,7 @@ export function SettingsPageLarge(): JSX.Element {
             value={sfxVolume}
             onChange={(evt) => {
               setSfxVolume(parseInt(evt.target.value));
+              localStorage.setItem("sfxVolume", sfxVolume.toString());
             }}
           />
           <span className="ml-2">{sfxVolume}%</span>
