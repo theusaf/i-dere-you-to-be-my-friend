@@ -12,9 +12,26 @@ export class SoundManager {
   static sounds: Record<string, SoundPlayer> = {};
   static muted = false;
 
+  static setMusicVolume(volume: number) {
+    for (const sound of Object.values(SoundManager.sounds)) {
+      if (sound.isMusic) {
+        sound.setVolume(volume);
+      }
+    }
+  }
+
+  static setSfxVolume(volume: number) {
+    for (const sound of Object.values(SoundManager.sounds)) {
+      if (!sound.isMusic) {
+        sound.setVolume(volume);
+      }
+    }
+  }
+
   static playSound(sound: string, loop = false) {
     if (!SoundManager.sounds[sound]) {
-      SoundManager.sounds[sound] = new SoundPlayer(sound);
+      const isMusic = sound.startsWith("music");
+      SoundManager.sounds[sound] = new SoundPlayer(sound, isMusic);
     }
     SoundManager.sounds[sound].play(loop, SoundManager.muted);
   }
@@ -46,8 +63,14 @@ export class SoundManager {
 
 export class SoundPlayer {
   sound: HTMLAudioElement;
-  constructor(sound: string) {
+  isMusic: boolean;
+  constructor(sound: string, isMusic = false) {
     this.sound = Assets.get(sound);
+    this.isMusic = isMusic;
+  }
+
+  setVolume(volume: number) {
+    this.sound.volume = volume / 100;
   }
 
   play(loop = false, muted = false) {
