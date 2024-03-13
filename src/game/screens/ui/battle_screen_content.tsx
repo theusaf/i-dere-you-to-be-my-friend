@@ -85,7 +85,7 @@ export function BattleScreenContent({
   }, [battle]);
   useEffect(() => {
     // very cursed method
-    if (popupRef.current !== popup && popupRef !== null) {
+    if (popupRef.current !== popup && popupRef.current !== null) {
       setPopup(popupRef.current);
       setTimeout(() => {
         popupRef.current = null;
@@ -95,7 +95,6 @@ export function BattleScreenContent({
 
   const showUI = state.state === BattleScreenState.battle;
 
-  console.log(popup);
   return (
     <>
       {showUI && popup && (
