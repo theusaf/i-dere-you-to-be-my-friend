@@ -3,7 +3,6 @@ import { getSaveList, isSaveCompatible, load } from "../../../util/saves";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
 import { RawGameDataContent } from "../../../util/game_data";
-import { TextActionButton } from "../../../../engine/components/action_button";
 import { ConfirmationButton } from "../../../../engine/components/confirmation_button";
 
 export function SavesPage({
