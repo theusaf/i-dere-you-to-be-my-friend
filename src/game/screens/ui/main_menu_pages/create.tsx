@@ -96,9 +96,45 @@ export function CreateSavePage({
     headId.current = chance.pickone([1, 2, 3, 4]);
     bodyId.current = chance.pickone([1, 2, 3, 4]);
     legsId.current = chance.pickone([1, 3, 4]);
-    screen.sprite?.updateHeadTexture(`${headId.current}`, currentMainColor);
-    screen.sprite?.updateBodyTexture(`${bodyId.current}`, currentMainColor);
-    screen.sprite?.updateLegTexture(`${legsId.current}`, currentMainColor);
+    screen.sprite?.updateHeadTexture(
+      `${headId.current}`,
+      chance.pickone([
+        CreateMainColors.red,
+        CreateMainColors.blue,
+        CreateMainColors.green,
+        CreateMainColors.orange,
+        CreateMainColors.pink,
+        CreateMainColors.brown,
+        CreateMainColors.white,
+        CreateMainColors.dark,
+      ]),
+    );
+    screen.sprite?.updateBodyTexture(
+      `${bodyId.current}`,
+      chance.pickone([
+        CreateMainColors.red,
+        CreateMainColors.blue,
+        CreateMainColors.green,
+        CreateMainColors.orange,
+        CreateMainColors.pink,
+        CreateMainColors.brown,
+        CreateMainColors.white,
+        CreateMainColors.dark,
+      ]),
+    );
+    screen.sprite?.updateLegTexture(
+      `${legsId.current}`,
+      chance.pickone([
+        CreateMainColors.red,
+        CreateMainColors.blue,
+        CreateMainColors.green,
+        CreateMainColors.orange,
+        CreateMainColors.pink,
+        CreateMainColors.brown,
+        CreateMainColors.white,
+        CreateMainColors.dark,
+      ]),
+    );
   };
 
   const onSubmit = () => {
