@@ -29,6 +29,7 @@ import { BagPagePhone } from "./map_screen_pages/bag";
 import { DoctorPagePhone } from "./map_screen_pages/doctor";
 import { SavePagePhone } from "./map_screen_pages/save";
 import { SoundManager } from "../../util/sounds";
+import { HiddenBossDialog } from "./map_screen_pages/npcs/ura_bosu";
 
 interface MapScreenContentProps {
   state: MapScreen;
@@ -299,6 +300,8 @@ function NPCDialog({
   if (!npc) return <></>;
   if (npc.id === "doctor") {
     return <DoctorDialog screen={screen} setNpcDialog={setNpcDialog} />;
+  } else if (npc.id === "ura_bosu") {
+    return <HiddenBossDialog screen={screen} setNpcDialog={setNpcDialog} />;
   }
   return <></>;
 }

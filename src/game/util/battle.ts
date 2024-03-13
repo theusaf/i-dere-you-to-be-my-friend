@@ -992,8 +992,15 @@ export class Battle extends EventTarget implements BattleData {
       character.isActive = true;
       gameManager.gameData.friends.push(character);
     }
+    let team = gameManager.gameData.activeFriends;
+    // TODO: not hardcode this?
+    if (against === "ura_bosu") {
+      team = gameManager.gameData.friends.filter(
+        (friend) => friend.hp > 0 && !friend.isDead,
+      );
+    }
     return new Battle({
-      playerTeam: gameManager.gameData.activeFriends,
+      playerTeam: team,
       opponentLeader: enemyLeader,
       opponentTeam: enemyTeam,
       rewardTableId: rewardTable,
