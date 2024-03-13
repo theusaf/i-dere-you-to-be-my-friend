@@ -29,6 +29,7 @@ import {
 } from "../../engine/character_sprite";
 import { Character } from "../util/character";
 import { constrain } from "../util/math";
+import { SoundManager } from "../util/sounds";
 
 export enum MapScreenEvents {
   /**
@@ -205,6 +206,9 @@ export class MapScreen extends GameScreen {
     this.inBuilding = MapBuildingPosition.outside;
     window.addEventListener("keydown", (e) => this.onKeyDown(e.code));
     window.addEventListener("keyup", (e) => this.onKeyUp(e.code));
+
+    SoundManager.stopAll();
+    SoundManager.playSound("music/friendlyworld", true);
   }
 
   onKeyDown(key: string): void {

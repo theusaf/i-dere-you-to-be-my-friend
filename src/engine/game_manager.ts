@@ -4,6 +4,7 @@ import { GameData } from "../game/util/game_data";
 import { CutsceneAction, CutsceneActionType } from "../game/util/map_types";
 import { sleep } from "../game/util/sleep";
 import { MapScreen, MapScreenEvents } from "../game/screens/map_screen";
+import { SoundManager } from "../game/util/sounds";
 
 /**
  * Manages game screens.
@@ -74,6 +75,11 @@ export class GameManager {
         }
         case CutsceneActionType.contract: {
           this.currentScreen.notify(MapScreenEvents.contract, data);
+          break;
+        }
+        case CutsceneActionType.music: {
+          SoundManager.stopAll();
+          SoundManager.playSound(`music/${data}`, true);
           break;
         }
       }

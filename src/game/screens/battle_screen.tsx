@@ -7,6 +7,7 @@ import { GameAnimation, easeMethod } from "../util/animation";
 import { BattleScreenContent } from "./ui/battle_screen_content";
 import { CharacterSprite } from "../../engine/character_sprite";
 import { BattleEvents } from "../util/battle";
+import { SoundManager } from "../util/sounds";
 
 export const enum BattleScreenState {
   loadingIn,
@@ -148,6 +149,10 @@ export class BattleScreen extends GameScreen {
         }
       }
     });
+
+    setTimeout(() => {
+      SoundManager.playSound("music/battle1", true);
+    }, 2000);
   }
 
   update(delta: number): void {

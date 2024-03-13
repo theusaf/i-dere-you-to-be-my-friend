@@ -84,6 +84,7 @@ export enum CutsceneActionType {
   dialog = "text",
   battle = "enter_battle",
   contract = "contract",
+  music = "music",
 }
 
 type BlankScreenCutsceneAction = [CutsceneActionType.blankScreen, boolean];
@@ -100,13 +101,15 @@ type AnimateCutsceneAction = [
 type DialogCutsceneAction = [CutsceneActionType.dialog, string];
 type BattleCutsceneAction = [CutsceneActionType.battle, MapSpecialActionBattle];
 type ContractCutsceneAction = [CutsceneActionType.contract, string];
+type MusicCutsceneAction = [CutsceneActionType.music, string];
 
 export type CutsceneAction =
   | BlankScreenCutsceneAction
   | AnimateCutsceneAction
   | DialogCutsceneAction
   | BattleCutsceneAction
-  | ContractCutsceneAction;
+  | ContractCutsceneAction
+  | MusicCutsceneAction;
 
 export interface NPCData {
   position: [number, number];

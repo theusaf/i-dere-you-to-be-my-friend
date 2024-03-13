@@ -28,6 +28,7 @@ import { DoctorDialog } from "./map_screen_pages/npcs/doctor";
 import { BagPagePhone } from "./map_screen_pages/bag";
 import { DoctorPagePhone } from "./map_screen_pages/doctor";
 import { SavePagePhone } from "./map_screen_pages/save";
+import { SoundManager } from "../../util/sounds";
 
 interface MapScreenContentProps {
   state: MapScreen;
@@ -65,6 +66,8 @@ export function MapScreenContent({
       setPhoneVisible(false);
       setBattleData(data.detail);
       setBattleStartState(EnterBattleAnimationState.running);
+      SoundManager.stopAll();
+      SoundManager.playSound("sfx/battlestart");
     }) as EventListener;
     const dialogListener = ((event: CustomEvent<string>) => {
       setDialog(

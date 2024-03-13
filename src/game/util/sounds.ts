@@ -12,11 +12,20 @@ export class SoundManager {
   static sounds: Record<string, SoundPlayer> = {};
 
   static playSound(sound: string, loop = false) {
+    if (!SoundManager.sounds[sound]) {
+      SoundManager.sounds[sound] = new SoundPlayer(sound);
+    }
     SoundManager.sounds[sound].play(loop);
   }
 
   static stopSound(sound: string) {
     SoundManager.sounds[sound].stop();
+  }
+
+  static stopAll() {
+    for (const sound of Object.values(SoundManager.sounds)) {
+      sound.stop();
+    }
   }
 }
 

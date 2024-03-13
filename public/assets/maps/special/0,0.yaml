@@ -3,7 +3,7 @@ cutscenes:
     actions:
       # TODO: Make slightly less cringy
       - [blank_screen, true]
-      # - [music TODO]
+      - [music, intro]
       - - text
         - How can this be?
       - - text
