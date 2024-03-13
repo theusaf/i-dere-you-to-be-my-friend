@@ -162,6 +162,27 @@ export const assetList: AssetsManifest = {
         },
       ],
     },
+    {
+      name: "sounds",
+      assets: [
+        {
+          src: "./assets/sounds/sfx/battlestart.wav",
+          alias: "sfx/battlestart",
+        },
+        {
+          src: "./assets/sounds/music/battle1.wav",
+          alias: "music/battle1",
+        },
+        {
+          src: "./assets/sounds/music/friendlyworld.wav",
+          alias: "music/friendlyworld",
+        },
+        {
+          src: "./assets/sounds/music/intro.wav",
+          alias: "music/intro",
+        },
+      ],
+    },
   ],
 };
 
