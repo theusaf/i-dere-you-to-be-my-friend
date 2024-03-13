@@ -396,13 +396,55 @@ export class MapScreen extends GameScreen {
     }
   }
 
+  updateCutscenes(chunkX: number, chunkY: number): void {
+    const chunkData = Assets.get<MapSpecialData | null>(
+      `map/special/${chunkX},${chunkY}`,
+    );
+    if (!chunkData) return;
+    for (const cutsceneId in chunkData.cutscenes ?? {}) {
+      if (this.gameManager.gameData.cutscenes.has(cutsceneId)) continue;
+      if (this.chunkX !== chunkX || this.chunkY !== chunkY) continue;
+      const cutscene = chunkData.cutscenes![cutsceneId];
+      // check conditions
+      if (cutscene.conditions) {
+        let met = true;
+        for (const conditionType in cutscene.conditions) {
+          const { from, to } = cutscene.conditions;
+          console.log(from, to);
+          switch (conditionType) {
+            case "from":
+              if (this.characterChunkX < from![0]) {
+                met = false;
+              }
+              if (this.characterChunkY < from![1]) {
+                met = false;
+              }
+              break;
+            case "to":
+              if (this.characterChunkX > to![0]) {
+                met = false;
+              }
+              if (this.characterChunkY > to![1]) {
+                met = false;
+              }
+              break;
+          }
+        }
+        if (!met) continue;
+      }
+
+      this.gameManager.applyCutsceneData(cutscene.actions, cutsceneId);
+      break;
+    }
+  }
+
   updateSpecialsChunk(chunkX: number, chunkY: number): void {
     const chunkData = Assets.get<MapSpecialData | null>(
       `map/special/${chunkX},${chunkY}`,
     );
     if (!chunkData) return;
 
-    const { boxes, cutscenes, npcs } = chunkData;
+    const { boxes, npcs } = chunkData;
     for (const box of boxes ?? []) {
       const { from, to, type } = box;
       if (from === null || to === null) continue;
@@ -446,13 +488,6 @@ export class MapScreen extends GameScreen {
           }
         }
       }
-    }
-    for (const cutsceneId in cutscenes ?? {}) {
-      if (this.gameManager.gameData.cutscenes.has(cutsceneId)) continue;
-      if (this.chunkX !== chunkX || this.chunkY !== chunkY) continue;
-      const cutscene = cutscenes![cutsceneId];
-      this.gameManager.applyCutsceneData(cutscene.actions, cutsceneId);
-      break;
     }
     for (const npcId in npcs ?? {}) {
       this.addNPC(
@@ -1094,6 +1129,7 @@ export class MapScreen extends GameScreen {
     // checks pass, move character
     this.characterWorldX = x;
     this.characterWorldY = y;
+    this.updateCutscenes(this.chunkX, this.chunkY);
   }
 
   handleCollisions(x: number, y: number): boolean {

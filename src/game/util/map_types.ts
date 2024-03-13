@@ -134,9 +134,13 @@ export interface NPCData {
   };
 }
 
+export interface CutsceneConditions {
+  from?: [number, number];
+  to?: [number, number];
+}
 export interface Cutscene {
   actions: CutsceneAction[];
-  conditions: [];
+  conditions: CutsceneConditions;
 }
 
 export interface MapSpecialData {

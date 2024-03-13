@@ -9,3 +9,21 @@ npcs:
   ura_bosu:
     type: special
     position: [101, 15]
+
+cutscenes:
+  friend_competition:
+    actions:
+      - - text
+        - Wait... Are you §friend.name§? What are you doing here?
+      - - text
+        - Huh? Who are you? Are you also trying to approach me?
+      - - text
+        - Actually, I've always wanted to be your friend.
+      - - text
+        - >-
+          "Friend"... I don't know what that means anymore. This world makes no sense!
+      - - text
+        - Stay away from me! I don't want to be "friends" with anyone else!
+    conditions:
+      from: [91, 10]
+      to: [111, 21]
