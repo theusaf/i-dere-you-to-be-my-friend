@@ -53,16 +53,6 @@ export function BattleScreenContent({
     }
   };
 
-  if (battle === null) return <></>;
-  // handle other updates dependent on log timing
-  if (logIndex >= battle.logs.length) {
-    const callbacks = [...afterLogRenderCallbacks.current];
-    callbacks.forEach((cb) => {
-      afterLogRenderCallbacks.current.delete(cb);
-      cb();
-    });
-  }
-
   useEffect(() => {
     registerAfterLogRenderCallback(() => {
       if (battle.activeOpponent) return;
@@ -91,7 +81,17 @@ export function BattleScreenContent({
         popupRef.current = null;
       }, 250);
     }
-  }, [popupRef.current, popup]);
+  }, [popup]);
+
+  if (battle === null) return <></>;
+  // handle other updates dependent on log timing
+  if (logIndex >= battle.logs.length) {
+    const callbacks = [...afterLogRenderCallbacks.current];
+    callbacks.forEach((cb) => {
+      afterLogRenderCallbacks.current.delete(cb);
+      cb();
+    });
+  }
 
   const showUI = state.state === BattleScreenState.battle;
 
