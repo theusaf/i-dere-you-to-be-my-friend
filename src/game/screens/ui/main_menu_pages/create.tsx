@@ -107,9 +107,9 @@ export function CreateSavePage({
     character.name = currentName;
     character.gender = currentGender;
     character.colors = {
-      head: currentMainColor,
-      body: currentMainColor,
-      legs: currentMainColor,
+      head: screen.sprite!.headColor,
+      body: screen.sprite!.bodyColor,
+      legs: screen.sprite!.legColor,
       skin: currentSkinColor,
     };
     character.styles = {
