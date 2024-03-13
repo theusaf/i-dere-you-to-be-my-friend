@@ -8,16 +8,26 @@ import {
   utils,
 } from "pixi.js";
 
-export class SoundPlayer {
-  sound: HTMLAudioElement;
-  loop: boolean;
-  constructor(sound: string, loop = false) {
-    this.sound = Assets.get(sound);
-    this.loop = loop;
+export class SoundManager {
+  static sounds: Record<string, SoundPlayer> = {};
+
+  static playSound(sound: string, loop = false) {
+    SoundManager.sounds[sound].play(loop);
   }
 
-  play() {
-    this.sound.loop = this.loop;
+  static stopSound(sound: string) {
+    SoundManager.sounds[sound].stop();
+  }
+}
+
+export class SoundPlayer {
+  sound: HTMLAudioElement;
+  constructor(sound: string) {
+    this.sound = Assets.get(sound);
+  }
+
+  play(loop = false) {
+    this.sound.loop = loop;
     this.sound.play();
   }
 
