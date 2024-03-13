@@ -15,7 +15,7 @@ import { AnimatedTextController } from "../../../engine/components/animated_text
 import { GameManager } from "../../../engine/game_manager";
 import { MapScreen } from "../map_screen";
 import { ConfirmationButton } from "../../../engine/components/confirmation_button";
-import { Character } from "../../util/character";
+import { Character, getGenderedString } from "../../util/character";
 import { Battle, BattleEvents } from "../../util/battle";
 import { MoveData, getMovesets } from "../../util/moves";
 import { RichTextSpan } from "../../../engine/components/rich_text_span";
@@ -24,6 +24,7 @@ import { NumberSpan } from "../../../engine/components/numer_span";
 import { chance } from "../../util/chance";
 import { FriendContract } from "../../../engine/components/contract";
 import { MoveButton } from "../../../engine/components/move_button";
+import { GameData } from "../../util/game_data";
 
 export interface BattleScreenContentProps {
   state: BattleScreen;
@@ -34,6 +35,7 @@ export function BattleScreenContent({
 }: BattleScreenContentProps): JSX.Element {
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
   const [logIndex, setLogIndex] = useState(0);
+  const popupRef = useRef<string | null>(null);
   const [popup, setPopup] = useState(state.gameManager.gameData.battle?.popup);
   const { gameManager } = state;
   const battle = gameManager.gameData.battle!;
@@ -51,6 +53,7 @@ export function BattleScreenContent({
     }
   };
 
+  if (battle === null) return <></>;
   // handle other updates dependent on log timing
   if (logIndex >= battle.logs.length) {
     const callbacks = [...afterLogRenderCallbacks.current];
@@ -80,12 +83,30 @@ export function BattleScreenContent({
       battle.removeEventListener(BattleEvents.change, listener);
     };
   }, [battle]);
+  useEffect(() => {
+    // very cursed method
+    if (popupRef.current !== popup && popupRef !== null) {
+      setPopup(popupRef.current);
+      setTimeout(() => {
+        popupRef.current = null;
+      }, 250);
+    }
+  }, [popupRef.current, popup]);
 
   const showUI = state.state === BattleScreenState.battle;
 
+  console.log(popup);
   return (
     <>
-      {showUI && popup && <Popup popup={popup} onDone={() => setPopup("")} />}
+      {showUI && popup && (
+        <Popup
+          popup={popup}
+          onDone={() => setPopup("")}
+          registerCallback={registerAfterLogRenderCallback}
+          gameData={gameManager.gameData}
+          onBattleEnd={onBattleEnd}
+        />
+      )}
       <div className="grid grid-rows-5 h-full text-white">
         <EnemyView
           show={showUI}
@@ -101,66 +122,154 @@ export function BattleScreenContent({
           }}
           callbackRegister={registerAfterLogRenderCallback}
           onBattleEnd={onBattleEnd}
+          onBossWin={() => {
+            registerAfterLogRenderCallback(() => {
+              popupRef.current = "end";
+            });
+          }}
         />
       </div>
     </>
   );
 }
 
-function Popup({ onDone }: { popup: string; onDone: () => void }): JSX.Element {
-  // TODO: Currently hardcoded to tutorial content. If more popups are added, this should be changed
-  return (
-    <div className="fixed top-0 left-0 w-full h-full z-30 bg-black bg-opacity-60">
-      <div className="max-w-5xl fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-600 p-4 rounded text-white max-h-full overflow-y-auto pointer-events-auto">
-        <h2 className="text-2xl">Tutorial</h2>
-        <p>
-          Hi! Welcome to I Dere You to be My Friend! This tutorial will go over
-          some of the sections on this screen and about this game.
-        </p>
-        <h3 className="text-xl mt-2">Fight</h3>
-        <p>
-          In the fight section, you will see various moves that your friend can
-          carry out. These have limited use until you refresh them or lose, so
-          be careful!
-        </p>
-        <p>
-          Each character and move has various personality traits, which affect
-          how much damage is dealt by moves. The weaknesses and resistances are
-          a bit convoluted, and even I don't memorize them. Just choose what you
-          think works best!
-        </p>
-        <h3 className="text-xl mt-2">Friends</h3>
-        <p>
-          This section lists all of your current <strong>active</strong>{" "}
-          friends. You can have up to 8 at a time. To change out your active
-          friends, use the party application on your phone in the map.
-        </p>
-        <p>
-          You can use this section to switch out your current friend with
-          another one. However, this will give the opponent an opportunity to
-          attack!
-        </p>
-        <h3 className="text-xl mt-2">Actions & Items</h3>
-        <p>This section lists two actions and items (when implemented).</p>
-        <p>
-          The <strong>rizz</strong> action is the main way you gain new friends.
-          During combat, you instead daringly ask the opponent to be your
-          friend. Generally, the higher the level and the higher the health, the
-          lower the chance of success. Some battles may not allow you to rizz.
-        </p>
-        <h3 className="text-xl mt-2">Conclusion</h3>
-        <p>
-          That's about it for the basics! There are some other secrets that you
-          may encounter, but otherwise, have fun!
-        </p>
-        <div className="flex flex-col items-center text-center">
-          <TextActionButton className="w-36" onClick={onDone}>
-            Got it!
-          </TextActionButton>
+function Popup({
+  onDone,
+  popup,
+  registerCallback,
+  gameData,
+  onBattleEnd,
+}: {
+  popup: string;
+  onDone: () => void;
+  registerCallback: (cb: () => void) => void;
+  gameData: GameData;
+  onBattleEnd: () => void;
+}): JSX.Element {
+  const [contract, setContract] = useState(false);
+  // TODO: Currently hardcoded to specific content. If more popups are added, this should be changed
+  if (popup === "end") {
+    return (
+      <>
+        {contract && (
+          <FriendContract
+            initialName={gameData.specialNPCs.ura_bosu.name}
+            contractee={gameData.you.name}
+            onContractSigned={(name) => {
+              const opponent = gameData.specialNPCs.ura_bosu;
+              const newFriend = opponent.clone();
+              newFriend.name = name;
+              gameData.addCharacter(newFriend);
+              gameData.battle?.playerTeam.push(newFriend);
+              gameData.battle?.addLog(
+                `${newFriend.name} has become your friend!`,
+              );
+              gameData.battle?.addLog(
+                "I guess the real friends were the treasures we made along the way.",
+              );
+              setContract(false);
+              registerCallback(() => {
+                onBattleEnd();
+              });
+              gameData.battle?.triggerChange();
+            }}
+          />
+        )}
+        {!contract && (
+          <div className="fixed top-0 left-0 w-full h-full z-30 bg-black bg-opacity-60">
+            <div className="max-w-5xl fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-600 p-4 rounded text-white max-h-full overflow-y-auto pointer-events-auto">
+              <h3 className="text-xl">
+                You have become the champion! What do you say?
+              </h3>
+              <div className="flex gap-2">
+                <ConfirmationButton
+                  onClick={() => setContract(true)}
+                  className="cursor-pointer"
+                >
+                  I Dare You to be My Friend!
+                </ConfirmationButton>
+                <ConfirmationButton
+                  className="cursor-pointer"
+                  onClick={() => {
+                    gameData.battle?.addLog("...");
+                    gameData.battle?.addLog("Really?");
+                    gameData.battle?.addLog(
+                      "<Your new friend looks at you with a smile>",
+                    );
+                    gameData.battle?.addLog(
+                      "<Congrats on winning! Unfortunately, this version of the game doesn't reward you for making the friendly choice... Here's 1000 gold in compensation, although that's mostly useless.>",
+                    );
+                    registerCallback(() => {
+                      gameData.gold += 1000;
+                      gameData.specialNPCs.ura_bosu.isDead = true;
+                      onBattleEnd();
+                    });
+                    gameData.battle?.triggerChange();
+                  }}
+                >
+                  I just want to be real friends.
+                </ConfirmationButton>
+              </div>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  } else {
+    return (
+      <div className="fixed top-0 left-0 w-full h-full z-30 bg-black bg-opacity-60">
+        <div className="max-w-5xl fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-600 p-4 rounded text-white max-h-full overflow-y-auto pointer-events-auto">
+          <h2 className="text-2xl">Tutorial</h2>
+          <p>
+            Hi! Welcome to I Dere You to be My Friend! This tutorial will go
+            over some of the sections on this screen and about this game.
+          </p>
+          <h3 className="text-xl mt-2">Fight</h3>
+          <p>
+            In the fight section, you will see various moves that your friend
+            can carry out. These have limited use until you refresh them or
+            lose, so be careful!
+          </p>
+          <p>
+            Each character and move has various personality traits, which affect
+            how much damage is dealt by moves. The weaknesses and resistances
+            are a bit convoluted, and even I don't memorize them. Just choose
+            what you think works best!
+          </p>
+          <h3 className="text-xl mt-2">Friends</h3>
+          <p>
+            This section lists all of your current <strong>active</strong>{" "}
+            friends. You can have up to 8 at a time. To change out your active
+            friends, use the party application on your phone in the map.
+          </p>
+          <p>
+            You can use this section to switch out your current friend with
+            another one. However, this will give the opponent an opportunity to
+            attack!
+          </p>
+          <h3 className="text-xl mt-2">Actions & Items</h3>
+          <p>This section lists two actions and items (when implemented).</p>
+          <p>
+            The <strong>rizz</strong> action is the main way you gain new
+            friends. During combat, you instead daringly ask the opponent to be
+            your friend. Generally, the higher the level and the higher the
+            health, the lower the chance of success. Some battles may not allow
+            you to rizz.
+          </p>
+          <h3 className="text-xl mt-2">Conclusion</h3>
+          <p>
+            That's about it for the basics! There are some other secrets that
+            you may encounter, but otherwise, have fun!
+          </p>
+          <div className="flex flex-col items-center text-center">
+            <TextActionButton className="w-36" onClick={onDone}>
+              Got it!
+            </TextActionButton>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  }
 }
 
 interface ToggleableUIProps {
@@ -191,7 +300,7 @@ function EnemyView({ show, activeEnemy, battle }: EnemyViewProps) {
           <NumberSpan>
             {
               battle.opponentTeam.filter((character) => {
-                return character.hp > 0;
+                return character.hp > 0 && !character.isDead;
               }).length
             }
             /{battle.opponentTeam.length}
@@ -236,7 +345,10 @@ function UserView({
   onLogsRendered,
   callbackRegister,
   onBattleEnd,
-}: UserViewProps): JSX.Element {
+  onBossWin,
+}: UserViewProps & {
+  onBossWin: () => void;
+}): JSX.Element {
   const [displayContract, setDisplayContract] = useState(false);
   const battle = gameManager.gameData.battle!;
   const checkForBattleEnd = (
@@ -280,9 +392,37 @@ function UserView({
       }
     }
     if (isEndOfBattle) {
-      callbackRegister(() => {
-        gameManager.gameData.save().finally(onBattleEnd);
-      });
+      // TODO: use a custom battle reward table
+      const { opponentLeader } = battle;
+      if (opponentLeader.id === "ura_bosu") {
+        if (opponentLeader.isDead) {
+          battle.addLog(".....");
+          battle.addLog("Uh, I guess, congrats! You beat the game?");
+          callbackRegister(() => {
+            gameManager.gameData.save().finally(onBattleEnd);
+          });
+        } else {
+          battle.addLog(".....");
+          battle.addLog(`<You approach ${opponentLeader.name}...>`);
+          battle.addLog(
+            `<${getGenderedString({
+              gender: opponentLeader.gender,
+              name: opponentLeader.name,
+              type: "pronoun",
+            })} looks at you with fear in ${getGenderedString({
+              gender: opponentLeader.gender,
+              name: opponentLeader.name,
+              type: "possesive",
+            })} eyes>`,
+          );
+          battle.addLog("<What do you say?>");
+          onBossWin();
+        }
+      } else {
+        callbackRegister(() => {
+          gameManager.gameData.save().finally(onBattleEnd);
+        });
+      }
     }
     battle.triggerChange();
   };
