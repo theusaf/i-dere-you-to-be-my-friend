@@ -10,12 +10,13 @@ import {
 
 export class SoundManager {
   static sounds: Record<string, SoundPlayer> = {};
+  static muted = false;
 
   static playSound(sound: string, loop = false) {
     if (!SoundManager.sounds[sound]) {
       SoundManager.sounds[sound] = new SoundPlayer(sound);
     }
-    SoundManager.sounds[sound].play(loop);
+    SoundManager.sounds[sound].play(loop, SoundManager.muted);
   }
 
   static stopSound(sound: string) {
@@ -27,6 +28,20 @@ export class SoundManager {
       sound.stop();
     }
   }
+
+  static muteAll() {
+    SoundManager.muted = true;
+    for (const sound of Object.values(SoundManager.sounds)) {
+      sound.mute();
+    }
+  }
+
+  static unmuteAll() {
+    SoundManager.muted = false;
+    for (const sound of Object.values(SoundManager.sounds)) {
+      sound.unmute();
+    }
+  }
 }
 
 export class SoundPlayer {
@@ -35,14 +50,23 @@ export class SoundPlayer {
     this.sound = Assets.get(sound);
   }
 
-  play(loop = false) {
+  play(loop = false, muted = false) {
     this.sound.loop = loop;
+    this.sound.muted = muted;
     this.sound.play();
   }
 
   stop() {
     this.sound.pause();
     this.sound.currentTime = 0;
+  }
+
+  mute() {
+    this.sound.muted = true;
+  }
+
+  unmute() {
+    this.sound.muted = false;
   }
 }
 
