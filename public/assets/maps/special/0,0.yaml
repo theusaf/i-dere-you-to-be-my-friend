@@ -72,8 +72,6 @@ cutscenes:
       - - text
         - ... I really hope I made the right choice...
 
-    conditions: []
-
 npcs:
   intro:
     type: special

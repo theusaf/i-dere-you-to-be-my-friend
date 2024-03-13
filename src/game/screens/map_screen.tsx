@@ -410,7 +410,6 @@ export class MapScreen extends GameScreen {
         let met = true;
         for (const conditionType in cutscene.conditions) {
           const { from, to } = cutscene.conditions;
-          console.log(from, to);
           switch (conditionType) {
             case "from":
               if (this.characterChunkX < from![0]) {
@@ -499,6 +498,7 @@ export class MapScreen extends GameScreen {
         chunkY,
       );
     }
+    this.updateCutscenes(chunkX, chunkY);
   }
 
   addNPC(

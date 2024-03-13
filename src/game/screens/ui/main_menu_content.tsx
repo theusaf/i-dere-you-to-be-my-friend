@@ -12,6 +12,7 @@ import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { CreateSavePage } from "./main_menu_pages/create";
 import { MainMenuScreen } from "../main_menu_screen";
 import { MainMenuPageState } from "../../util/enums";
+import { SoundManager } from "../../util/sounds";
 
 export function MainMenuLogo() {
   return (
@@ -37,6 +38,7 @@ export function MainMenuContent({
 }) {
   const [page, setPage] = useState<MainMenuPageState>(MainMenuPageState.index);
   setScreenState(page);
+  SoundManager.stopAll();
 
   const onContinue = async () => {
     const latestSave = await getLatestSave<RawGameDataContent>();

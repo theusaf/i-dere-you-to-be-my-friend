@@ -219,8 +219,8 @@ export function MapScreenContent({
         }`}
       ></div>
       {dialog && (
-        <div className="absolute h-full w-full top-0 left-0 z-50 pointer-events-auto flex flex-col">
-          <div className="text-white text-2xl flex-1 px-20 py-10 flex flex-row content-center items-center">
+        <div className="absolute h-full w-full top-0 left-0 z-50 pointer-events-auto grid grid-rows-4">
+          <div className="text-white text-2xl flex-1 flex flex-row content-center items-center bg-slate-700 row-span-1 row-start-4">
             <AnimatedTextController
               key={dialog}
               className="text-center flex-1 grid content-center"
