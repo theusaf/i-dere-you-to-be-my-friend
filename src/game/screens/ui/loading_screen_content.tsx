@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { LoadingScreen } from "../loading_screen";
 import { Unselectable } from "../../../engine/components/unselectable";
 import { MainMenuScreen } from "../main_menu_screen";
+import { version } from "../../../../package.json";
 
 export function LoadingScreenContent({
   data,
@@ -44,6 +45,9 @@ export function LoadingScreenContent({
       <div className="absolute bottom-0 left-0 p-2 text-white">
         Copyright 2024 <a href="https://theusaf.org">theusaf</a>,
         <a href="https://好きな.みんな">好きな.みんな Games</a>
+      </div>
+      <div className="absolute bottom-0 right-0 p-2 text-white">
+        v. {version}
       </div>
     </div>
   );
